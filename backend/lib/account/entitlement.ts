@@ -24,12 +24,17 @@ export type ActiveSubscription = {
 export type TokenConfig = {
   daily_token_limit: { free?: number; trial?: number; subscriber?: number };
   diary_llm_min_tokens: number | null;
+  // 런칭 무료 기간(2026-09-01T04:00+09:00까지 전원 무료) — app_config로 조정. null=OFF.
+  free_launch_until: string | null;
+  free_launch_token_limit: number | null;
 };
 
 /** app_config 미설정 시 임의 기본값(TBD) — moly-backend app/config.py와 동일 값. */
 export const DEFAULT_TOKEN_CONFIG: TokenConfig = {
   daily_token_limit: { free: 20_000, trial: 100_000, subscriber: 100_000 },
   diary_llm_min_tokens: 2_000,
+  free_launch_until: "2026-09-01T04:00:00+09:00",
+  free_launch_token_limit: 50_000,
 };
 
 /** app_config rows(key→value)에서 유효 설정 해석 — 값이 있으면 우선, 없으면 기본값. */
@@ -38,6 +43,8 @@ export function effectiveTokenConfig(
 ): TokenConfig {
   const limits = configValues["daily_token_limit"];
   const diary = configValues["diary_llm_min_tokens"];
+  const launchUntil = configValues["free_launch_until"];
+  const launchLimit = configValues["free_launch_token_limit"];
   return {
     daily_token_limit:
       limits !== null && typeof limits === "object" && !Array.isArray(limits)
@@ -47,7 +54,22 @@ export function effectiveTokenConfig(
       typeof diary === "number"
         ? diary
         : DEFAULT_TOKEN_CONFIG.diary_llm_min_tokens,
+    free_launch_until:
+      typeof launchUntil === "string"
+        ? launchUntil
+        : DEFAULT_TOKEN_CONFIG.free_launch_until,
+    free_launch_token_limit:
+      typeof launchLimit === "number"
+        ? launchLimit
+        : DEFAULT_TOKEN_CONFIG.free_launch_token_limit,
   };
+}
+
+/** 런칭 종료 시각 파싱 — 실패/미설정 = null(런칭 OFF, fail-safe). JS Date는 오프셋 aware. */
+function parseLaunchDate(value: string | null): Date | null {
+  if (!value) return null;
+  const dt = new Date(value);
+  return Number.isNaN(dt.getTime()) ? null : dt;
 }
 
 function limitFor(plan: string, limits: TokenConfig["daily_token_limit"]): number | null {
@@ -86,11 +108,21 @@ export function deriveEntitlement(
   let trialEndsAt: string | null;
   let subscriberThemeUnlocked: boolean;
 
+  // 런칭 무료 기간: 구독 없이 전원 무료(구독급 표시 + 런칭 토큰 한도). 실제 구독자는 항상 우선.
+  const launchUntil = parseLaunchDate(config.free_launch_until);
+  const inLaunch = activeSub === null && launchUntil !== null && now < launchUntil;
+
   if (activeSub !== null) {
     plan = activeSub.plan;
     isSubscriber = true;
     trialEndsAt = null;
     subscriberThemeUnlocked = true;
+  } else if (inLaunch) {
+    // plan은 클라 호환 위해 'trial' 재사용. trial_ends_at=런칭 종료로 "무료 ~까지" 표시.
+    plan = "trial";
+    isSubscriber = false;
+    trialEndsAt = config.free_launch_until;
+    subscriberThemeUnlocked = false;
   } else if (
     profile.trial_ends_at !== null &&
     now < new Date(profile.trial_ends_at)
@@ -106,7 +138,12 @@ export function deriveEntitlement(
     subscriberThemeUnlocked = false;
   }
 
-  const limit = limitFor(plan, config.daily_token_limit);
+  // 런칭 중엔 런칭 전용 한도(구독 100k와 독립). 값 없으면 trial 수준으로 fail-safe.
+  const limit = inLaunch
+    ? typeof config.free_launch_token_limit === "number"
+      ? config.free_launch_token_limit
+      : limitFor("trial", config.daily_token_limit)
+    : limitFor(plan, config.daily_token_limit);
   const tokensRemaining = limit !== null ? Math.max(0, limit - tokensUsed) : null;
 
   return {

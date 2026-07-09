@@ -6,7 +6,8 @@ import {
 } from "../entitlement";
 
 const NOW = new Date("2026-07-09T12:00:00Z");
-const CONFIG = DEFAULT_TOKEN_CONFIG;
+// 티어 판정 테스트는 런칭 무료 OFF 기준(런칭은 아래 별도 describe에서 검증).
+const CONFIG = { ...DEFAULT_TOKEN_CONFIG, free_launch_until: null };
 
 describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
   it("유효 구독이 있으면 구독 플랜(체험 기간 남아 있어도 구독 우선)", () => {
@@ -95,9 +96,47 @@ describe("effectiveTokenConfig — app_config 우선, 없으면 기본값", () =
       { trial_ends_at: "2099-01-01T00:00:00Z" },
       null,
       0,
-      c,
+      { ...c, free_launch_until: null }, // 런칭 OFF로 trial 한도 폴백만 검증
       NOW,
     );
     expect(e.daily_token_limit).toBe(99);
+  });
+});
+
+describe("런칭 무료 기간 — free_launch_until 스위치", () => {
+  const LAUNCH = {
+    ...DEFAULT_TOKEN_CONFIG,
+    free_launch_until: "2026-09-01T04:00:00+09:00",
+    free_launch_token_limit: 50_000,
+  };
+
+  it("종료일 이전 + 구독/체험 없음 = 런칭 무료(구독급 표시 + 런칭 한도)", () => {
+    const e = deriveEntitlement({ trial_ends_at: null }, null, 10_000, LAUNCH, NOW);
+    expect(e.plan).toBe("trial");
+    expect(e.is_subscriber).toBe(false);
+    expect(e.daily_token_limit).toBe(50_000); // 런칭 한도(trial 100k 아님)
+    expect(e.tokens_remaining).toBe(40_000);
+    expect(e.trial_ends_at).toBe("2026-09-01T04:00:00+09:00");
+  });
+
+  it("런칭 중이어도 실제 구독자는 subscriber 우선", () => {
+    const e = deriveEntitlement({ trial_ends_at: null }, { plan: "monthly" }, 0, LAUNCH, NOW);
+    expect(e.plan).toBe("monthly");
+    expect(e.is_subscriber).toBe(true);
+    expect(e.daily_token_limit).toBe(DEFAULT_TOKEN_CONFIG.daily_token_limit.subscriber);
+  });
+
+  it("종료일 지나면 정상 등급으로 복귀", () => {
+    const after = new Date("2026-09-02T00:00:00Z");
+    const e = deriveEntitlement({ trial_ends_at: null }, null, 500, LAUNCH, after);
+    expect(e.plan).toBe("free");
+    expect(e.daily_token_limit).toBe(DEFAULT_TOKEN_CONFIG.daily_token_limit.free);
+  });
+
+  it("잘못된 날짜 = OFF(정상 등급, fail-safe)", () => {
+    const bad = { ...LAUNCH, free_launch_until: "not-a-date" };
+    const e = deriveEntitlement({ trial_ends_at: null }, null, 500, bad, NOW);
+    expect(e.plan).toBe("free");
+    expect(e.daily_token_limit).toBe(DEFAULT_TOKEN_CONFIG.daily_token_limit.free);
   });
 });
