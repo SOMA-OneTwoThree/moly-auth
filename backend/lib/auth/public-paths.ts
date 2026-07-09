@@ -1,10 +1,8 @@
 /**
- * Single source of truth for publicly accessible API paths.
- *
- * Only the health check is public. Everything else under /api is token-locked
- * (Bearer). Shared by the middleware gate so the allowlist never drifts.
+ * 공개 경로 허용목록의 단일 출처. 헬스체크만 공개 — 나머지 전부 Bearer 보호.
+ * 미들웨어 게이트가 공유한다(목록 표류 방지).
  */
-export const PUBLIC_PREFIXES = ["/api/health"] as const;
+export const PUBLIC_PREFIXES = ["/health"] as const;
 
 export function isPublicPath(pathname: string): boolean {
   return PUBLIC_PREFIXES.some(

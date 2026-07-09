@@ -1,25 +1,18 @@
 import type { NextRequest } from "next/server";
-import type { SupabaseClient, User } from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { createSupabaseTokenClient } from "@/lib/supabase/token";
 
-export type AuthContext = {
-  /** The authenticated user. `user.id` is the canonical identity (auth.uid()). */
-  user: User;
-  /** A user-scoped Supabase client (RLS runs as this user). */
-  supabase: SupabaseClient;
-};
-
 /**
- * Resolve the authenticated user from an `Authorization: Bearer <token>` header.
- * All clients (web/app/voice) send the Supabase access token this way.
+ * `Authorization: Bearer <token>`에서 인증된 유저를 확정한다.
+ * 모든 클라이언트(iOS·web)가 Supabase access token을 이 형태로 보낸다.
  *
- * `getUser(token)` always hits the Supabase Auth server, so the returned user is
- * authoritative — the JWT is never trusted locally. Returns `null` when there is
- * no Bearer header or the token is invalid.
+ * `getUser(token)`은 항상 Supabase Auth 서버에 검증한다 — JWT를 로컬에서
+ * 신뢰하지 않는다. 헤더 없음/무효 토큰이면 null.
+ *
+ * 익명(is_anonymous) 토큰은 거부한다 — 제품은 소셜 로그인 전용이고,
+ * 익명 유저는 profiles 대상이 아니다(moly-backend allow_anonymous_auth=False와 동일 정책).
  */
-export async function requireUser(
-  req: NextRequest,
-): Promise<AuthContext | null> {
+export async function requireUser(req: NextRequest): Promise<User | null> {
   const authz = req.headers.get("authorization");
   if (!authz?.startsWith("Bearer ")) return null;
 
@@ -29,6 +22,7 @@ export async function requireUser(
   const supabase = createSupabaseTokenClient(token);
   const { data, error } = await supabase.auth.getUser(token);
   if (error || !data.user) return null;
+  if (data.user.is_anonymous) return null;
 
-  return { user: data.user, supabase };
+  return data.user;
 }
