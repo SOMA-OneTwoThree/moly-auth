@@ -1,28 +1,24 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { requireUser, type AuthContext } from "./require-user";
+import type { User } from "@supabase/supabase-js";
+import { requireUser } from "./require-user";
+import { unauthorized } from "@/lib/http/responses";
 
 type AuthedHandler = (
   req: NextRequest,
-  ctx: AuthContext,
+  user: User,
 ) => Promise<NextResponse> | NextResponse;
 
 /**
- * Wrap a protected Route Handler. This is the security AUTHORITY for the route:
- * it runs the authoritative `getUser` validation (via `requireUser`) and returns
- * 401 when there is no valid user, otherwise hands the handler a verified
- * `{ user, supabase }`.
+ * 보호 라우트 래퍼 — 이 함수가 라우트의 보안 권위(security authority)다.
+ * `requireUser`(getUser 권위 검증)를 통과한 검증된 `user`만 핸들러에 넘긴다.
  *
- * The middleware gate is only an early, network-free rejection optimization —
- * forgetting to wrap a route here would leave it unprotected, so every
- * non-public route MUST use `withAuth`. CORS is applied centrally in the
- * middleware, not here.
+ * 미들웨어의 Bearer 게이트는 네트워크 없는 조기 차단일 뿐 보안 경계가 아니다 —
+ * 모든 비공개 라우트는 반드시 withAuth로 감싼다. CORS는 미들웨어가 중앙 적용.
  */
 export function withAuth(handler: AuthedHandler) {
   return async (req: NextRequest): Promise<NextResponse> => {
-    const ctx = await requireUser(req);
-    if (!ctx) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
-    return handler(req, ctx);
+    const user = await requireUser(req);
+    if (!user) return unauthorized();
+    return handler(req, user);
   };
 }

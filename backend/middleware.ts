@@ -1,19 +1,18 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { applyCors } from "@/lib/cors";
 import { isPublicPath } from "@/lib/auth/public-paths";
+import { unauthorized } from "@/lib/http/responses";
 
 /**
- * Runs on every /api request:
- *  1. CORS preflight (OPTIONS) + CORS headers on every response (single source).
- *  2. A coarse, fail-closed gate: private paths must carry a Bearer header.
+ * 모든 API 요청에서 실행:
+ *  1. CORS 프리플라이트(OPTIONS) + 모든 응답에 CORS 헤더(단일 적용 지점).
+ *  2. 조기 차단 게이트: 비공개 경로는 Bearer 헤더가 있어야 통과.
  *
- * The gate is an early, network-free rejection — NOT the security boundary. A
- * request with a bogus Bearer passes here and is rejected by
- * `withAuth`/`requireUser` in the handler (the real authority, which validates
- * the token against the Supabase Auth server via `getUser`).
+ * 게이트는 네트워크 없는 빠른 거절일 뿐 보안 경계가 아니다 — 가짜 토큰도 여기는
+ * 통과하고, 핸들러의 `withAuth`/`requireUser`(getUser 권위 검증)가 최종 거절한다.
  *
- * Public paths (health) never reach the gate. All clients (web/app/voice)
- * authenticate with `Authorization: Bearer <access_token>`.
+ * 경로는 API_SPEC과 동일하게 /api 프리픽스 없이 노출한다(iOS가 /me, /onboarding
+ * 형태로 호출). 새 라우트를 추가하면 아래 matcher에도 추가할 것.
  */
 export function middleware(req: NextRequest) {
   if (req.method === "OPTIONS") {
@@ -26,15 +25,12 @@ export function middleware(req: NextRequest) {
 
   const hasBearer = req.headers.get("authorization")?.startsWith("Bearer ");
   if (!hasBearer) {
-    return applyCors(
-      req,
-      NextResponse.json({ error: "unauthorized" }, { status: 401 }),
-    );
+    return applyCors(req, unauthorized());
   }
 
   return applyCors(req, NextResponse.next());
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/health", "/me/:path*", "/me", "/onboarding", "/auth/:path*"],
 };

@@ -1,172 +1,104 @@
-# Backend 아키텍처
+# Backend 아키텍처 — Moly 계정(auth) 서버
 
-Molly의 **제어 플레인(control plane)**. 인증·프로필·온보딩을 담당하는 순수 API 서버다. UI는 없으며, 실시간 오디오는 다루지 않는다(③ moly-voice 몫).
+Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프로필·알림 설정·푸시 토큰·로그아웃·회원탈퇴를 담당하는 순수 API 서버다. UI 없음.
 
-> 이 문서가 backend 구조의 **단일 출처(Single Source of Truth)**다. 루트 `README.md`는 진입점 요약만 두고, 엔드포인트·env·마이그레이션의 상세는 항상 이 문서에 기록한다.
->
-> **문서 갱신 규칙**
-> - 엔드포인트 추가/변경 → 이 문서의 [엔드포인트](#엔드포인트) 표 + 공개 경로면 `lib/auth/public-paths.ts` 갱신. (README는 건드릴 필요 없음)
-> - env 키 추가 → [환경 변수](#환경-변수) 표 갱신.
-> - 스키마 변경 → 새 마이그레이션 파일 + [데이터 모델](#데이터-모델--마이그레이션) 갱신.
+> **역할 경계 (2026-07-09 확정)** — 계정 API는 이 서버가, 나머지 도메인 API(대화·일기·경제·상점·루틴·구독·워커)는 `moly-backend`(FastAPI, EC2 `https://voice.moly.asia`)가 서빙한다. iOS는 base URL 2개를 사용한다.
+> **API 계약의 단일 출처**는 `moly-backend/docs/API_SPEC.md` 2장(계정) — 응답 형식·에러 봉투·상태코드는 거기 정의를 그대로 따른다.
 
 ---
 
-## 1. 개요 / 역할
+## 1. 인증 모델
 
-- **순수 API 서버.** 모든 클라이언트(웹·앱·voice)가 Supabase access token을 `Authorization: Bearer <token>`로 보낸다. **Bearer 전용** — 쿠키 세션 없음.
-- **로그인(토큰 발급)은 백엔드가 하지 않는다.** 프론트가 Supabase SDK로 직접 처리하고, 백엔드는 받은 토큰을 `supabase.auth.getUser(token)`로 **검증만** 한다.
-- **canonical 유저 식별자** = `auth.users.id`(JWT `sub`, uuid). 모든 보호 경로가 이 값만 신원으로 사용한다.
-- 헬스체크만 공개, 나머지는 전부 토큰 보호.
+- **로그인(토큰 발급)은 서버가 하지 않는다.** iOS가 Supabase SDK로 소셜 로그인(Apple/Kakao/Google)을 수행하고, 서버는 `Authorization: Bearer <Supabase access token>`을 **검증만** 한다. Bearer 전용 — 쿠키 세션 없음.
+- 검증 = `supabase.auth.getUser(token)` (항상 Supabase Auth 서버에 확인 — JWT 로컬 신뢰 없음). **익명(is_anonymous) 토큰은 거부**(제품은 소셜 전용).
+- canonical 유저 식별자 = `auth.users.id`(JWT `sub`, uuid). 모든 DB 작업은 이 값으로만 스코프.
 
-## 2. 기술 스택
+### 회원가입 → profiles (auth.users → public.profiles)
+
+1. **주 경로: DB 트리거** — `on_auth_user_created`(`handle_new_user`, 원본: `moly-backend/db/seed_and_triggers.sql`)가 가입 시 `profiles(id, trial_ends_at=가입+48h)`를 자동 생성. 프로덕션 DB 적용 확인됨(2026-07-09).
+2. **보조 경로: self-heal** — `GET /me`·`POST /onboarding`이 profiles가 없으면 트리거와 같은 규칙으로 생성(`lib/account/service.ts`의 `ensureProfile`, 멱등). 트리거 이전 가입자·트리거 유실에도 계정이 막히지 않는다.
+3. `nickname`이 NULL이면 온보딩 미완료 → 클라가 온보딩 화면으로 라우팅. `POST /onboarding`은 1회만(재호출 409 `ALREADY_ONBOARDED`).
+
+## 2. 요청 수명주기 (2계층)
+
+1. **`middleware.ts`** — OPTIONS 프리플라이트 204, 모든 응답에 CORS(단일 적용 지점), 비공개 경로 Bearer 부재 시 즉시 401. **조기 차단일 뿐 보안 경계 아님.**
+2. **`withAuth`** (`lib/auth/with-auth.ts`) — **실제 보안 권위.** `requireUser`(getUser 검증) 통과한 `user`만 핸들러에 전달. 모든 비공개 라우트는 반드시 이걸로 감싼다.
+3. **`handle`** (`lib/http/api-exception.ts`) — 공통 에러 경계. `ApiException`은 표준 봉투로, 나머지는 서버 로그에만 남기고 500으로 마스킹(내부 메시지 비노출).
+
+에러 봉투(API_SPEC 1장): `{ "error": { "code", "message", "details" } }` — 401 `UNAUTHORIZED` / 422 `VALIDATION` / 409 `ALREADY_ONBOARDED` / 500 `INTERNAL`.
+
+## 3. 데이터 접근 규칙
+
+**모든 DB 작업 = admin(service_role) 클라이언트** (`lib/supabase/admin.ts`) — RLS 우회.
+- 이유: 쓰기 정책이 없는 RLS 체계(ERD §8, 클라 직접 쓰기 전면 금지)에서 서버는 service_role이 표준이고, moly-backend도 동일(service_role DSN).
+- 🔒 따라서 **모든 쿼리는 반드시 검증된 `user.id`로만 스코프**(`eq("id", user.id)` 등). 외부 입력 id를 넘기면 IDOR — `lib/supabase/admin.ts` 경고 참조.
+- 토큰 클라이언트(`lib/supabase/token.ts`)는 `requireUser`의 getUser 검증에만 사용.
+
+**스키마 소유권**: DDL은 `moly-backend/db/schema.sql`이 단일 출처 — **이 레포는 마이그레이션을 갖지 않는다**(구 `supabase/migrations/` 삭제됨). 접근 테이블: `profiles`, `subscriptions`, `user_daily_stats`, `app_config`, `user_equipment`, `user_notification_settings`, `user_devices`, `memories`(mem0).
+
+## 4. 엔드포인트 (API_SPEC 2장)
+
+| 메서드 | 경로 | 용도 / 주요 응답 |
+|---|---|---|
+| GET | `/health` | 공개 헬스체크(유일한 무인증) |
+| GET | `/me` | 부팅 집계: profile·entitlement·wallet·equipment. profiles 없으면 self-heal 생성 |
+| POST | `/onboarding` | 닉네임(1~10자)·타임존(IANA)·언어(ISO 639-1) 저장 → `{profile, entitlement}`. 재호출 409 |
+| PATCH | `/me` | 보낸 필드만 변경 → `{profile}` |
+| GET/PATCH | `/me/notifications` | 알림 2종(morning_diary·evening_chat) on/off. 행 없으면 기본 on |
+| POST | `/me/push-token` | APNs 토큰 upsert(UNIQUE — 기기 이전 시 재귀속) → 204 |
+| POST | `/auth/logout` | 해당 push_token 행만 삭제(멀티 기기 안전) → 204. 세션 종료는 클라 signOut |
+| DELETE | `/me` | 탈퇴: `auth.admin.deleteUser`(전 테이블 CASCADE) + mem0 행 정리(실패해도 204 — 최종적 정리) → 204 |
+
+경로는 `/api` 프리픽스 없음(iOS가 `/me` 형태로 호출). 새 라우트 추가 시: `withAuth(handle(...))` 래핑 + `middleware.ts` matcher + (공개면) `lib/auth/public-paths.ts` + 이 표 갱신.
+
+## 5. entitlement(티어) 판정 — 이중화 주의
+
+`lib/account/entitlement.ts` = moly-backend `app/services/entitlement.py`의 포팅(ERD §6.1 공식: 유효 구독 > trial(가입+48h) > free). **공식과 기본값이 두 서버에 이중화**돼 있다.
+
+- **동기화 장치 = DB `app_config`**: `daily_token_limit`(jsonb `{free,trial,subscriber}`)·`diary_llm_min_tokens` 행이 있으면 **두 서버 모두 그 값을 우선** 사용 — 하드코딩 기본값은 폴백일 뿐. 정책 수치는 app_config에 넣는 것이 원칙.
+- 판정 공식 자체를 바꿀 땐 두 레포를 같이 수정: `entitlement.ts` ↔ `entitlement.py`.
+
+## 6. 기술 스택 / 구조
 
 | 항목 | 값 |
 |---|---|
-| 프레임워크 | Next.js 15 (App Router) — **API Route Handler 전용**, 실 UI 없음 |
-| 언어 | TypeScript (`strict`), `moduleResolution: bundler` |
-| 데이터 SDK | `@supabase/supabase-js` (유일한 비프레임워크 의존성) |
-| 런타임 | Node.js (admin 클라이언트를 쓰는 라우트는 `export const runtime = "nodejs"` 고정) |
-| 경로 별칭 | `@/*` → `./*` (`@/lib/...`, `@/types/...`) |
-| 스크립트 | `dev` / `build` / `start` / `lint` / `typecheck`. 테스트 프레임워크 없음 |
-
-## 3. 디렉터리 구조
+| 프레임워크 | Next.js 15 (App Router, Route Handler 전용) · TypeScript strict |
+| SDK | `@supabase/supabase-js` (유일한 비프레임워크 의존성) |
+| 테스트 | vitest — 순수 로직(entitlement·activity_date·검증) 단위 테스트. `npm test` |
+| 배포 | Vercel — `https://moly-server.vercel.app` |
 
 ```
 backend/
-├── middleware.ts              # /api/* 진입: CORS + Bearer 조기 차단(보안경계 아님)
+├── middleware.ts               # CORS + Bearer 조기 차단(보안경계 아님)
 ├── app/
-│   ├── layout.tsx             # App Router 요건 충족용(실 UI 아님)
-│   └── api/
-│       ├── health/route.ts            # GET  공개
-│       ├── me/route.ts                # GET(RLS 읽기) / DELETE(admin)
-│       ├── me/nickname/route.ts       # PATCH(admin)
-│       └── onboarding/complete/route.ts # POST(admin, 멱등)
-├── lib/
-│   ├── cors.ts                # CORS 헤더 중앙 적용(echo origin, 절대 '*' 아님)
-│   ├── auth/
-│   │   ├── public-paths.ts    # 공개 허용목록(/api/health 만)
-│   │   ├── require-user.ts     # Bearer → getUser 검증 → { user, supabase }
-│   │   └── with-auth.ts        # withAuth(): 보호 라우트 래퍼(보안 권위)
-│   ├── profile/nickname.ts    # normalizeNickname() 검증(단일 출처)
-│   └── supabase/
-│       ├── admin.ts            # service_role 클라이언트(RLS 우회)
-│       └── token.ts            # anon + Bearer 클라이언트(RLS 적용)
-├── types/profile.ts           # Profile 타입 + PROFILE_COLUMNS
-└── supabase/migrations/       # 0001 ~ 0004 SQL
+│   ├── health/route.ts         # 공개
+│   ├── me/route.ts             # GET·PATCH·DELETE
+│   ├── me/notifications/route.ts
+│   ├── me/push-token/route.ts
+│   ├── onboarding/route.ts
+│   └── auth/logout/route.ts
+└── lib/
+    ├── auth/                   # public-paths · require-user(getUser+익명거부) · with-auth
+    ├── http/                   # responses(에러 봉투) · api-exception(handle) · body(파싱·unknown 필드 거부)
+    ├── account/                # validation · time(activity_date) · entitlement · service(DB 접근 전부)
+    ├── supabase/               # admin(service_role) · token(anon+Bearer)
+    └── cors.ts
 ```
 
-## 4. 요청 수명주기 (2계층 인증)
+`lib/account/time.ts`: 앱 기준일 = (유저 로컬 − 4시간)의 날짜(04:00 경계) — moly-backend `time_utils.py`와 동일.
 
-```mermaid
-sequenceDiagram
-    participant C as Client (web/app/voice)
-    participant M as middleware.ts
-    participant W as withAuth / requireUser
-    participant A as Supabase Auth
-    participant DB as Postgres (RLS / service_role)
-
-    C->>M: 요청 + Authorization: Bearer <token>
-    Note over M: OPTIONS면 204 + CORS<br/>공개경로면 통과<br/>Bearer 없으면 401(조기차단)
-    M->>W: 통과
-    W->>A: supabase.auth.getUser(token)
-    A-->>W: user (또는 invalid)
-    Note over W: 검증 실패 → 401
-    W->>DB: handler(req, { user, supabase })
-    Note over DB: 사용자 읽기(GET /api/me) = 토큰 클라이언트(RLS)<br/>쓰기 + 존재확인 읽기 = admin 클라이언트(service_role)
-    DB-->>C: JSON 응답 (+ CORS via middleware)
-```
-
-- **1계층 — `middleware.ts`** (`matcher: ["/api/:path*"]`): ⓐ OPTIONS 프리플라이트 204, ⓑ **모든 응답에 CORS 단일 적용**(브라우저는 중복 `Access-Control-Allow-Origin`을 거부하므로 한 곳에서만), ⓒ 비공개 경로에 `Bearer ` 헤더가 없으면 즉시 401. **네트워크 없는 조기 차단일 뿐, 보안 경계가 아니다** — 가짜 토큰도 여기는 통과한다.
-- **2계층 — `withAuth` / `requireUser`** (`lib/auth/`): **실제 보안 권위.** `requireUser`가 토큰을 추출해 토큰 클라이언트를 만들고 `supabase.auth.getUser(token)`로 **항상 Supabase Auth 서버에 검증**한다(JWT를 로컬에서 신뢰하지 않음). 성공 시 `{ user, supabase }`를 핸들러에 넘기고, 실패 시 401.
-  - ⚠️ 모든 비공개 라우트는 **반드시 `withAuth`로 감싼다.** 깜빡하면 그 라우트는 무방비가 된다(미들웨어는 보호가 아님).
-
-## 5. ★ 데이터 접근 규칙 (가장 중요)
-
-profiles의 RLS 정책은 `0004` 이후 **SELECT(본인)만** 존재하고 INSERT/UPDATE/DELETE 정책이 없다. 따라서:
-
-| 작업 | 사용하는 클라이언트 | 이유 |
-|---|---|---|
-| 사용자 대면 읽기 (`GET /api/me`) | **토큰 클라이언트 (RLS)** | 최소 권한. `profiles_select_own`으로 본인 row만 |
-| 모든 쓰기 (INSERT/UPDATE/DELETE) | **admin 클라이언트 (service_role)** | RLS에 쓰기 정책이 없어 anon/authenticated 역할로는 불가 |
-| 쓰기에 수반되는 존재확인 읽기 | **admin 클라이언트** | 예: `onboarding/complete`의 멱등성 체크는 admin으로 읽는다 |
-
-> **"읽기는 무조건 RLS"가 아니다.** 사용자 대면 단건 조회(`GET /api/me`)만 RLS를 거치고, 쓰기 경로에 딸린 존재확인 읽기는 admin을 쓴다.
-
-> 🔒 **쓰기 보안은 DB(RLS)가 아니라 앱 코드의 규율에 전적으로 의존한다.** admin 클라이언트는 RLS를 우회하므로, 모든 쓰기는 반드시 **검증된 `user.id`로만**(`eq("id", user.id)` / `insert({ id: user.id })`) 수행해야 한다. 외부 입력 id를 admin에 넘기면 **IDOR 취약점**이 된다(`lib/supabase/admin.ts`의 경고 참조).
-
-### Supabase 클라이언트 2종
-
-| | `lib/supabase/admin.ts` | `lib/supabase/token.ts` |
-|---|---|---|
-| 키 | `SUPABASE_SERVICE_ROLE_KEY` | `SUPABASE_ANON_KEY` |
-| RLS | **우회** | **적용** (`Authorization: Bearer`로 `auth.uid()` 작동) |
-| env 검증 | 있음(누락 시 throw) | 없음(non-null 단언) |
-| 용도 | 쓰기 / 존재확인 / 회원탈퇴 | `requireUser`의 토큰 검증, `GET /api/me` 읽기 |
-
-## 6. 엔드포인트
-
-| 메서드 | 경로 | 공개 | 클라이언트 | 용도 / 주요 응답 |
-|---|---|---|---|---|
-| GET | `/api/health` | ✅ | — | 헬스체크 `{ status: "ok", ts }` |
-| GET | `/api/me` | 🔒 | 토큰(RLS) | 본인 profile 조회. `200 {profile}` / `200 {profile:null}`(온보딩 전) |
-| DELETE | `/api/me` | 🔒 | admin | 회원탈퇴(`auth.admin.deleteUser`). CASCADE로 도메인 데이터 삭제. `200 {success:true}` |
-| PATCH | `/api/me/nickname` | 🔒 | admin | 닉네임 변경. `200 {profile}` / `400` / `404`(온보딩 전) |
-| POST | `/api/onboarding/complete` | 🔒 | admin | 온보딩 완료(profile INSERT). `201 {profile}` / `409 {error:"Already onboarded", profile}`(멱등) / `400` |
-
-**라우트 공통 패턴**: `withAuth`로 래핑 → (쓰기면) `try { body = await req.json() } catch { 400 }` → `normalizeNickname()` → `400` → admin 작업 + `eq/insert id = user.id`.
-
-## 7. 데이터 모델 / 마이그레이션
-
-Supabase 대시보드 **SQL Editor**에서 `0001 → 0002 → 0003 → 0004` 순서로 실행한다. (`0002`는 `postgres` 권한으로 실행돼야 트리거가 동작했음 — 단, `0004`가 이를 되돌린다.)
-
-| 파일 | 내용 |
-|---|---|
-| `0001_init.sql` | `profiles`(id, display_name, locale, created_at), `conversations`, `messages` 생성 + 인덱스 + RLS(`FOR ALL` 본인 정책) |
-| `0002_handle_new_user.sql` | 가입 시 profile 자동생성 트리거. **→ `0004`가 되돌림** |
-| `0003_pgvector.sql` | `create extension vector` — mem0 메모리용 |
-| `0004_profiles_nickname.sql` | **온보딩 모델로 전환**: 자동생성 트리거 제거, `display_name→nickname`, `locale` 제거, `updated_at` 추가, `nickname NOT NULL` + `profiles_nickname_len`(트림 1~20자) 체크, `set_updated_at` 트리거, profiles 정책을 **SELECT 전용**(`profiles_select_own`)으로 교체 |
-
-**`0004` 적용 후 유효 스키마:**
-- `profiles`(id uuid PK→auth.users, nickname, created_at, updated_at) — RLS: SELECT(본인)만. 쓰기는 service_role.
-- `conversations`, `messages` — 스키마/인덱스/RLS는 존재하나 **현재 API에서 사용하지 않음**(회원탈퇴 시 CASCADE 대상으로만 의미).
-- mem0가 자동 생성하는 벡터 테이블(pgvector).
-
-> ⚠️ 현재 동작을 알려면 `0001`→`0004`를 순서대로 읽어야 한다(`0002`는 `0004`가 되돌리고, `0004`가 `0001`의 profiles 정책을 재작성하므로 파일명만 봐서는 최종 상태를 알 수 없다).
-
-## 8. 컨벤션 (앞으로 따를 것)
-
-- **닉네임 규칙은 3곳이 동기화돼야 한다**(단일 규칙, 세 군데 표현): `lib/profile/nickname.ts`의 `normalizeNickname` ↔ DB 체크 제약 `profiles_nickname_len` ↔ `types/profile.ts`의 `Profile`. 규칙 변경 시 셋 다 수정.
-- **profile 조회 컬럼은 `PROFILE_COLUMNS`**(`types/profile.ts`)를 재사용한다(컬럼 셋 단일 출처).
-- 공개 경로는 `lib/auth/public-paths.ts` 한 곳에만 추가한다(미들웨어가 공유).
-
-### ★ 런북 — 새 보호 엔드포인트 추가하는 법
-
-1. `app/api/<경로>/route.ts` 생성.
-2. admin 클라이언트를 쓰면 `export const runtime = "nodejs"` 추가.
-3. 핸들러를 **`withAuth(async (req, { user, supabase }) => …)`** 로 감싼다.
-4. **읽기**는 토큰 클라이언트(`supabase`), **쓰기**는 `createSupabaseAdminClient()`를 쓰고 **반드시 `eq("id", user.id)` / `insert({ id: user.id })`**.
-5. 본문이 있으면 `req.json()` try/catch(400) + `normalizeNickname` 등으로 검증.
-6. 공개 경로면 `lib/auth/public-paths.ts`에 추가.
-7. 이 문서의 [엔드포인트](#엔드포인트) 표 갱신. (CORS·미들웨어 차단은 자동.)
-
-## 9. 환경 변수
+## 7. 환경 변수 (Vercel)
 
 | 키 | 설명 |
 |---|---|
-| `SUPABASE_URL` | Supabase 프로젝트 URL |
-| `SUPABASE_ANON_KEY` | 공개(anon/publishable) 키 — 토큰 클라이언트용 |
-| `SUPABASE_SERVICE_ROLE_KEY` | service_role(secret) 키 — admin 클라이언트용. **절대 클라이언트 노출 금지** |
-| `CORS_ALLOWED_ORIGINS` | 허용 origin(쉼표 구분). **정확한 origin만**(trailing slash·경로 금지) |
+| `SUPABASE_URL` | 프로덕션 Supabase 프로젝트 URL (moly-backend와 **같은 프로젝트**여야 함) |
+| `SUPABASE_ANON_KEY` | 공개 키 — getUser 검증용 토큰 클라이언트 |
+| `SUPABASE_SERVICE_ROLE_KEY` | service_role — admin 클라이언트. **클라이언트 노출 절대 금지** |
+| `CORS_ALLOWED_ORIGINS` | 허용 origin(쉼표 구분, 정확한 origin만). 네이티브 앱은 Origin 미전송이라 무관 |
 
-## 10. 개선 백로그
+## 8. 런북
 
-### 처리 완료
-- ✅ **라우트 간 중복 로직 제거**: `req.json()` try/catch → `normalizeNickname` → 400 분기를 `lib/http/nickname-body.ts`의 `parseNicknameBody`로 추출(nickname/onboarding 공용). (admin 클라이언트 생성은 이미 `createSupabaseAdminClient()` 팩토리로 단일화돼 있어 별도 래퍼 미추출.)
-- ✅ **에러 응답 형식 통일 + 내부 메시지 비노출**: `lib/http/responses.ts`의 `errorResponse`(의도된 4xx)·`internalError`(일반화 500) 도입. DELETE/PATCH/POST가 노출하던 `{error: error.message}`를 `{error:"Internal server error"}`로 마스킹하고, 원인은 `console.error`로 서버 로그에만 남긴다. `GET /api/me`도 같은 문자열로 정규화.
-
-### 향후 리팩토링 후보 (동작 보존 위해 미적용)
-- admin 쓰기 라우트는 `requireUser`가 만든 **토큰 클라이언트를 인증 검증에만 쓰고 데이터 작업엔 쓰지 않는다**(매 요청 토큰 클라이언트 1회 생성 비용). 인증 전용 경로 분리 여지.
-- **주석 언어 혼재**: 인프라/인증/CORS는 영어, 도메인/라우트/마이그레이션은 한국어.
-- `token.ts`는 env를 non-null 단언으로만 사용(검증 없음) — `admin.ts`처럼 명시 검증 가능.
-- **검증 라이브러리 부재**: 본문 파싱이 `as { nickname?: unknown }` 캐스트에 의존. zod 등 스키마 도입 여지.
-- **테스트 없음**(`lint`/`typecheck`만).
+- **검증 3종**: `npm run typecheck` · `npm run lint` · `npm test` (+ `npm run build`)
+- **탈퇴했는데 mem0 잔존 의심**: Vercel 함수 로그에서 `[mem0 cleanup failed]` 검색 → 해당 user_id의 `memories` 행을 SQL로 수동 정리
+- **모든 계정 요청 401**: Vercel env의 `SUPABASE_URL`/`SUPABASE_ANON_KEY`가 프로덕션 프로젝트인지 확인
+- **profiles 안 생김 의심**: 트리거 확인 쿼리(`pg_trigger`에서 `on_auth_user_created`) — 없어도 self-heal이 커버하지만 트리거 복구 필요(`moly-backend/db/seed_and_triggers.sql` §1)
