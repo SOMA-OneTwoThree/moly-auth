@@ -136,7 +136,12 @@ async function loadTokenConfig(admin: SupabaseClient): Promise<TokenConfig> {
   const { data, error } = await admin
     .from("app_config")
     .select("key, value")
-    .in("key", ["daily_token_limit", "diary_llm_min_tokens"]);
+    .in("key", [
+      "daily_token_limit",
+      "diary_llm_min_tokens",
+      "free_launch_until",
+      "free_launch_token_limit",
+    ]);
   if (error) {
     console.error("[app_config select]", error);
     throw internal("설정 조회에 실패했어요.");
