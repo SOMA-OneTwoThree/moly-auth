@@ -6,8 +6,16 @@
 /** ISO 639-1(+선택 지역). 문자·하이픈만 — LLM 시스템 프롬프트에 삽입되므로 주입 문자 차단. */
 const LANGUAGE_RE = /^[a-zA-Z]{2}(-[a-zA-Z]{2,4})?$/;
 
+/** 제어·서식 문자(개행 포함) — 닉네임도 LLM 프롬프트에 삽입되므로 차단. */
+const CONTROL_CHARS_RE = /[\p{Cc}\p{Cf}]/u;
+
 export function isValidNickname(v: unknown): v is string {
-  return typeof v === "string" && v.length >= 1 && v.length <= 10;
+  return (
+    typeof v === "string" &&
+    v.length >= 1 &&
+    v.length <= 10 &&
+    !CONTROL_CHARS_RE.test(v)
+  );
 }
 
 export function isValidLanguage(v: unknown): v is string {

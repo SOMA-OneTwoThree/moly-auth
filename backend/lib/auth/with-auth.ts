@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { User } from "@supabase/supabase-js";
 import { requireUser } from "./require-user";
-import { unauthorized } from "@/lib/http/responses";
+import { internalError, unauthorized } from "@/lib/http/responses";
 
 type AuthedHandler = (
   req: NextRequest,
@@ -17,7 +17,15 @@ type AuthedHandler = (
  */
 export function withAuth(handler: AuthedHandler) {
   return async (req: NextRequest): Promise<NextResponse> => {
-    const user = await requireUser(req);
+    let user: User | null;
+    try {
+      user = await requireUser(req);
+    } catch (e) {
+      // getUser가 throw하는 경우(Auth 일시 장애 등)에도 표준 에러 봉투 유지
+      // — 무효 토큰(401)과 구분해 500으로 응답한다.
+      console.error("[auth verify failed]", e);
+      return internalError();
+    }
     if (!user) return unauthorized();
     return handler(req, user);
   };

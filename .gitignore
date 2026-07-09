@@ -1,5 +1,5 @@
-.env
-.env*.local
+# 모든 env 변형(.env.production 등 포함) — 시크릿 커밋 방지
+.env*
 .DS_Store
 node_modules/
 .next/

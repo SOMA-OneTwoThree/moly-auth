@@ -14,6 +14,13 @@ describe("계정 필드 검증 — moly-backend 스키마와 동일 규칙", () 
     expect(isValidNickname(42)).toBe(false);
   });
 
+  it("닉네임 제어·서식 문자 거부(프롬프트 주입 하드닝)", () => {
+    expect(isValidNickname("지\n우")).toBe(false); // 개행(제어)
+    expect(isValidNickname("지\u0000우")).toBe(false); // NUL(제어)
+    expect(isValidNickname("지\u200E우")).toBe(false); // LRM(서식)
+    expect(isValidNickname("몰리 친구")).toBe(true); // 일반 공백은 허용
+  });
+
   it("언어 ISO 639-1(+선택 지역) — 주입 문자 차단", () => {
     expect(isValidLanguage("ko")).toBe(true);
     expect(isValidLanguage("en-US")).toBe(true);

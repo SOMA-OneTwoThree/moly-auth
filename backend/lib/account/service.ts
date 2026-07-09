@@ -309,7 +309,10 @@ export async function registerPushToken(
   token: string,
   platform: string,
 ): Promise<void> {
-  // push_token UNIQUE — 다른 계정에 붙어있던 토큰이면 이 유저로 재귀속(기기 이전).
+  // push_token UNIQUE — 다른 계정에 붙어있던 토큰이면 이 유저로 재귀속(기기 이전:
+  // 같은 기기에서 계정 전환 시 필수. moly-backend 원 구현과 동일 의미론).
+  // 트레이드오프: 타인의 APNs 토큰 값을 알면 재귀속 가능하나, 토큰은 고엔트로피
+  // 비밀값이라 허용(보안 리뷰 2026-07-09 — 유출 경로가 생기면 재검토).
   const { error } = await admin.from("user_devices").upsert(
     {
       user_id: userId,
@@ -346,7 +349,9 @@ export async function logoutDevice(
 
 /**
  * 회원탈퇴(US-106): auth.users 삭제 → 전 테이블 CASCADE.
- * mem0 기억은 FK 밖이라 별도 정리(ERD §7) — 실패해도 탈퇴는 완료(최종적 정리 대상).
+ * mem0 기억은 FK 밖이라 별도 정리(ERD §7) — 실패해도 탈퇴는 완료.
+ * 자동 재시도는 없다(서버리스): 실패는 로그(`[mem0 cleanup failed]`)로 남고
+ * 런북(ARCHITECTURE §8)에 따라 수동/배치 정리한다.
  */
 export async function deleteAccount(
   admin: SupabaseClient,
@@ -375,7 +380,7 @@ async function deleteMemories(
       .filter("metadata->>user_id", "eq", userId);
     if (error) throw error;
   } catch (e) {
-    // 탈퇴 자체는 완료 — mem0 정리 실패만 로그(백그라운드/수동 정리 대상).
+    // 탈퇴 자체는 완료 — mem0 정리 실패만 로그(런북 따라 수동 정리 대상).
     console.warn("[mem0 cleanup failed]", userId, e);
   }
 }

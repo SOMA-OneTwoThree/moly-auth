@@ -28,7 +28,7 @@ export const GET = withAuth(
 /** PATCH /me — 닉네임·언어·타임존 변경(보낸 필드만). */
 export const PATCH = withAuth(
   handle(async (req, user) => {
-    const body = await parseJsonObject(req);
+    const body = await parseJsonObject(req, { allowEmpty: true });
     rejectUnknownFields(body, ["nickname", "language", "timezone"]);
 
     const input: PatchMeInput = {};

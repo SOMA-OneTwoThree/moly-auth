@@ -1,13 +1,19 @@
 import type { NextRequest } from "next/server";
 import { ApiException } from "./api-exception";
 
-/** JSON 본문 파싱 — 깨진 JSON/비객체는 400 BAD_REQUEST. */
+/**
+ * JSON 본문 파싱 — 깨진 JSON/비객체는 400 BAD_REQUEST.
+ * allowEmpty: PATCH처럼 "보낸 필드만 반영" 의미론에서 빈 본문 = {} 로 취급.
+ */
 export async function parseJsonObject(
   req: NextRequest,
+  { allowEmpty = false }: { allowEmpty?: boolean } = {},
 ): Promise<Record<string, unknown>> {
+  const text = await req.text();
+  if (allowEmpty && text.trim() === "") return {};
   let body: unknown;
   try {
-    body = await req.json();
+    body = JSON.parse(text);
   } catch {
     throw new ApiException("BAD_REQUEST", 400, "요청 본문이 올바른 JSON이 아니에요.");
   }

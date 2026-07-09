@@ -22,7 +22,7 @@ export const GET = withAuth(
 /** PATCH /me/notifications — 보낸 항목만 반영. */
 export const PATCH = withAuth(
   handle(async (req, user) => {
-    const body = await parseJsonObject(req);
+    const body = await parseJsonObject(req, { allowEmpty: true });
     rejectUnknownFields(body, ["morning_diary", "evening_chat"]);
 
     const input: NotificationsPatchInput = {};
