@@ -40,7 +40,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
     expect(e.daily_token_limit).toBe(CONFIG.daily_token_limit.trial);
   });
 
-  it("구독 없음 + 체험 만료 = free (배너 광고 노출)", () => {
+  it("구독 없음 + 체험 만료 = free", () => {
     const e = deriveEntitlement(
       { trial_ends_at: "2026-07-09T00:00:00Z" },
       null,
@@ -49,7 +49,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
       NOW,
     );
     expect(e.plan).toBe("free");
-    expect(e.ads_removed).toBe(false);
+    expect(e.ads_removed).toBe(true); // 배너 광고 미출시 — 전 등급 항상 true(2026-07-09)
     expect(e.daily_token_limit).toBe(CONFIG.daily_token_limit.free);
   });
 
