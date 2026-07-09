@@ -113,7 +113,9 @@ export function deriveEntitlement(
     plan,
     is_subscriber: isSubscriber,
     trial_ends_at: trialEndsAt,
-    ads_removed: plan !== "free", // free만 배너 노출
+    // 배너 광고 미출시 결정(2026-07-09, 프론트 요청) — 항상 true.
+    // 광고 도입 시 `plan !== "free"`로 복원(free만 노출).
+    ads_removed: true,
     subscriber_theme_unlocked: subscriberThemeUnlocked, // 구독만(체험 제외)
     daily_token_limit: limit,
     tokens_used: tokensUsed,
