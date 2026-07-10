@@ -1,144 +1,134 @@
-"use client";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import styles from "./page.module.css";
+import cappyIcon from "@/images/cappy-icon.png";
+import cappySitting from "@/images/cappy-sitting.png";
+import cappyGrass from "@/images/cappy-grass.png";
 
-import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabaseClient";
-import { apiFetch } from "@/lib/api";
+export const dynamic = "force-static";
+
+export const metadata: Metadata = {
+  title: "BeCappy — 캐피와 나누는 따뜻한 대화",
+  description:
+    "카피바라 친구 캐피에게 오늘의 고민을 털어놓고, 대화할수록 조금씩 친해지는 마음 돌봄 앱 BeCappy.",
+};
+
+const SUPPORT_EMAIL = "nonoeul123@gmail.com";
+
+const FEATURES: { emoji: string; title: string; desc: string }[] = [
+  {
+    emoji: "💬",
+    title: "편하게 털어놓기",
+    desc: "판단하지 않고 들어주는 캐피에게 오늘 있었던 일과 마음속 고민을 편하게 이야기해 보세요.",
+  },
+  {
+    emoji: "🎙️",
+    title: "목소리로 나누는 대화",
+    desc: "타이핑이 귀찮은 날엔 말로 걸어보세요. 캐피는 목소리로 나누는 대화도 잘 들어줘요.",
+  },
+  {
+    emoji: "🌱",
+    title: "매일 조금씩 친해지기",
+    desc: "대화를 나눌수록 캐피와의 우정이 깊어져요. 느긋한 카피바라의 속도로, 서두르지 않고요.",
+  },
+];
 
 export default function Home() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [meResult, setMeResult] = useState<string>("");
-  const [meError, setMeError] = useState<string>("");
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-    });
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  async function signIn() {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${location.origin}/auth/callback` },
-    });
-  }
-
-  async function signOut() {
-    await supabase.auth.signOut();
-    setMeResult("");
-    setMeError("");
-  }
-
-  async function callMe() {
-    setMeResult("");
-    setMeError("");
-    try {
-      const res = await apiFetch("/api/me");
-      if (res === null) {
-        setMeError("세션 없음 — 먼저 로그인하세요.");
-        return;
-      }
-      const body = await res.json();
-      if (!res.ok) {
-        setMeError(`HTTP ${res.status}: ${JSON.stringify(body)}`);
-        return;
-      }
-      setMeResult(JSON.stringify(body, null, 2));
-    } catch (e) {
-      setMeError(`요청 실패(CORS/네트워크 확인): ${String(e)}`);
-    }
-  }
-
   return (
-    <main style={{ maxWidth: 640, margin: "0 auto", padding: "48px 20px" }}>
-      <h1 style={{ fontSize: 22, marginBottom: 4 }}>moly — 인증 체인 확인</h1>
-      <p style={{ color: "#9aa0a6", marginTop: 0, fontSize: 14 }}>
-        구글 로그인 → access_token 발급(프론트) → Bearer 로 백엔드{" "}
-        <code>/api/me</code> 호출 → 본인 신원 반환까지 확인.
-      </p>
+    <div className={styles.page}>
+      <header className={styles.nav}>
+        <div className={styles.brand}>
+          <Image
+            src={cappyIcon}
+            alt="BeCappy 앱 아이콘"
+            width={36}
+            height={36}
+            className={styles.brandIcon}
+            priority
+          />
+          <span className={styles.brandName}>BeCappy</span>
+        </div>
+        <Link href="/support" className={styles.navLink}>
+          고객 지원
+        </Link>
+      </header>
 
-      {loading ? (
-        <p>불러오는 중…</p>
-      ) : session ? (
-        <section style={{ display: "grid", gap: 12, marginTop: 24 }}>
-          <div style={cardStyle}>
-            <div style={{ fontSize: 13, color: "#9aa0a6" }}>로그인됨</div>
-            <div style={{ fontSize: 16 }}>{session.user.email}</div>
-            <div style={{ fontSize: 12, color: "#6b7177", wordBreak: "break-all" }}>
-              user.id: {session.user.id}
+      <main>
+        <section className={styles.hero}>
+          <div className={styles.heroText}>
+            <h1 className={styles.title}>
+              마음이 지친 날,
+              <br />
+              캐피에게 털어놓으세요
+            </h1>
+            <p className={styles.lead}>
+              BeCappy는 카피바라 친구 <strong>캐피</strong>와 대화하며 고민을
+              나누고, 조금씩 친해지는 마음 돌봄 앱이에요.
+            </p>
+            <div className={styles.ctaRow}>
+              <span className={styles.storeBadge}>
+                🍎 App Store 곧 출시
+              </span>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button style={primaryBtn} onClick={callMe}>
-              /api/me 호출
-            </button>
-            <button style={ghostBtn} onClick={signOut}>
-              로그아웃
-            </button>
+          <div className={styles.heroArt}>
+            <Image
+              src={cappySitting}
+              alt="앉아서 기다리고 있는 캐피"
+              className={styles.heroImage}
+              priority
+            />
           </div>
-          {meResult && (
-            <pre style={preStyle}>{meResult}</pre>
-          )}
-          {meError && (
-            <pre style={{ ...preStyle, color: "var(--danger)" }}>{meError}</pre>
-          )}
         </section>
-      ) : (
-        <section style={{ marginTop: 24 }}>
-          <button style={googleBtn} onClick={signIn}>
-            Google로 로그인
-          </button>
+
+        <section className={styles.features} aria-label="주요 기능">
+          {FEATURES.map((f) => (
+            <article key={f.title} className={styles.featureCard}>
+              <span className={styles.featureEmoji} aria-hidden>
+                {f.emoji}
+              </span>
+              <h2 className={styles.featureTitle}>{f.title}</h2>
+              <p className={styles.featureDesc}>{f.desc}</p>
+            </article>
+          ))}
         </section>
-      )}
-    </main>
+
+        <section className={styles.closing}>
+          <Image
+            src={cappyGrass}
+            alt="풀을 먹으며 쉬고 있는 캐피"
+            className={styles.closingImage}
+          />
+          <h2 className={styles.closingTitle}>캐피는 언제나 여기 있어요</h2>
+          <p className={styles.closingDesc}>
+            바쁜 하루 끝, 아무에게도 하지 못한 이야기가 있다면
+            <br />
+            느긋한 카피바라 캐피가 기다리고 있을게요.
+          </p>
+        </section>
+      </main>
+
+      <footer className={styles.footer}>
+        <nav className={styles.footerLinks}>
+          <Link href="/support" className={styles.footerLink}>
+            고객 지원
+          </Link>
+          <span className={styles.footerDivider} aria-hidden>
+            ·
+          </span>
+          <Link href="/policy" className={styles.footerLink}>
+            개인정보처리방침
+          </Link>
+          <span className={styles.footerDivider} aria-hidden>
+            ·
+          </span>
+          <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.footerLink}>
+            {SUPPORT_EMAIL}
+          </a>
+        </nav>
+        <p className={styles.copyright}>© 2026 BeCappy</p>
+      </footer>
+    </div>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  background: "var(--surface)",
-  border: "1px solid var(--border)",
-  borderRadius: 10,
-  padding: 16,
-  display: "grid",
-  gap: 4,
-};
-// 앱 포인트색 버튼(/api/me 호출 등). 구글 로그인 버튼은 googleBtn(브랜드색)을 쓴다.
-const primaryBtn: React.CSSProperties = {
-  background: "var(--accent)",
-  color: "#fff",
-  border: "none",
-  borderRadius: 8,
-  padding: "10px 16px",
-  fontSize: 14,
-  cursor: "pointer",
-};
-// 구글 로그인 전용 — 구글 브랜드 색을 유지한다.
-const googleBtn: React.CSSProperties = {
-  ...primaryBtn,
-  background: "var(--google)",
-};
-const ghostBtn: React.CSSProperties = {
-  background: "transparent",
-  color: "var(--text)",
-  border: "1px solid #3a3f47",
-  borderRadius: 8,
-  padding: "10px 16px",
-  fontSize: 14,
-  cursor: "pointer",
-};
-const preStyle: React.CSSProperties = {
-  background: "var(--surface-inset)",
-  border: "1px solid var(--border)",
-  borderRadius: 8,
-  padding: 14,
-  fontSize: 13,
-  overflowX: "auto",
-  whiteSpace: "pre-wrap",
-  wordBreak: "break-all",
-};
