@@ -8,3 +8,5 @@ next-env.d.ts
 .branches/
 .temp/
 .omc/
+# 루트 기획 문서(API_SPEC·ERD)만 제외 — frontend/docs(policy.md)는 추적 유지
+/docs/
