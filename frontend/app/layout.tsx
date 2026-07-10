@@ -2,8 +2,9 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata = {
-  title: "moly — 로그인 확인",
-  description: "Supabase 구글 로그인 + 백엔드 인증 체인 확인용 최소 프론트",
+  title: "BeCappy",
+  description:
+    "카피바라 친구 캐피와 대화하며 고민을 나누고 친해지는 마음 돌봄 앱 BeCappy.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
