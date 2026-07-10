@@ -8,8 +8,8 @@ import styles from "./policy.module.css";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "개인정보 처리방침 및 이용약관 | 몰리(moly)",
-  description: "몰리(moly) 서비스의 개인정보 처리방침과 이용약관입니다.",
+  title: "개인정보 처리방침 및 이용약관 | BeCappy",
+  description: "BeCappy 서비스의 개인정보 처리방침과 이용약관입니다.",
 };
 
 const TERMS_HEADING = "# 이용약관";
