@@ -26,49 +26,94 @@
   color: var(--text-muted);
 }
 
-/* 연락처 카드 */
-.card {
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 8px 20px;
+/* 문의 채널 카드 */
+.channels {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   margin-bottom: 44px;
 }
 
-.row {
+.channelCard {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 0;
+  gap: 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
-.label {
-  font-size: 14px;
+.channelCard:hover {
+  border-color: var(--border-soft);
+  transform: translateY(-1px);
+}
+
+.kakaoCard {
+  background: #fee500;
+  border-color: #fee500;
+  color: #191919;
+}
+
+.kakaoCard:hover {
+  border-color: #f5dc00;
+}
+
+.channelIcon {
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.emailIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--surface-inset);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.channelBody {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.channelName {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.kakaoCard .channelName {
+  color: #191919;
+}
+
+.channelDesc {
+  font-size: 13px;
+  color: var(--text-subtle);
+  word-break: break-all;
+}
+
+.kakaoCard .channelDesc {
+  color: rgba(25, 25, 25, 0.72);
+}
+
+.channelArrow {
+  margin-left: auto;
+  font-size: 22px;
   color: var(--text-subtle);
   flex-shrink: 0;
 }
 
-.value {
-  font-size: 15px;
-  color: var(--text);
-}
-
-.email {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.email:hover {
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.divider {
-  height: 1px;
-  background: var(--border);
+.kakaoCard .channelArrow {
+  color: rgba(25, 25, 25, 0.55);
 }
 
 /* 자주 묻는 질문 */
