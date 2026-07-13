@@ -169,16 +169,19 @@ async function loadEquipment(
   admin: SupabaseClient,
   userId: string,
 ): Promise<Record<string, string>> {
+  // 스키마 리팩토링(moly-backend docs/DB_REFACTOR.md): user_equipment → user_items 통합.
+  // 장착 = equipped_slot NOT NULL 행(슬롯당 1행은 부분 UNIQUE가 보장).
   const { data, error } = await admin
-    .from("user_equipment")
-    .select("slot, shop_item_id")
-    .eq("user_id", userId);
+    .from("user_items")
+    .select("equipped_slot, product_id")
+    .eq("user_id", userId)
+    .not("equipped_slot", "is", null);
   if (error) {
-    console.error("[user_equipment select]", error);
+    console.error("[user_items equipped select]", error);
     throw internal("장착 상태 조회에 실패했어요.");
   }
   const bySlot: Record<string, string> = {};
-  for (const row of data ?? []) bySlot[row.slot] = row.shop_item_id;
+  for (const row of data ?? []) bySlot[row.equipped_slot] = row.product_id;
   return bySlot;
 }
 
