@@ -17,7 +17,6 @@ import {
   type TokenConfig,
 } from "./entitlement";
 
-const TRIAL_HOURS = 48; // 체험 = 가입 +48h(절대 시각) — handle_new_user 트리거와 동일 규칙
 const NOTIF_TYPES = ["morning_diary", "evening_chat"] as const; // 알림 2종 고정
 const MEMORY_TABLE = "memories"; // mem0 collection (moly-backend settings.memory_collection)
 
@@ -38,8 +37,9 @@ function internal(message: string): ApiException {
  * auth.users → public.profiles 보장(self-heal).
  *
  * 주 경로는 DB 가입 트리거(on_auth_user_created)지만, 트리거 이전 가입자·트리거
- * 유실 같은 경우에도 계정이 막히지 않도록 조회 시 없으면 트리거와 같은 규칙
- * (trial_ends_at = 가입시각 +48h)으로 생성한다. 멱등(ON CONFLICT 무시).
+ * 유실 같은 경우에도 계정이 막히지 않도록, 조회 시 없으면 트리거와 같은
+ * DB bootstrap_user RPC로 프로필·기본 꾸미기 3종·theme_default 장착·기본 루틴을
+ * 한 트랜잭션에서 생성한다. 부분 초기화된 계정은 허용하지 않는다.
  */
 export async function ensureProfile(
   admin: SupabaseClient,
@@ -48,17 +48,12 @@ export async function ensureProfile(
   const found = await loadProfile(admin, user.id);
   if (found) return found;
 
-  const trialEndsAt = new Date(
-    new Date(user.created_at).getTime() + TRIAL_HOURS * 3600 * 1000,
-  ).toISOString();
-  const { error } = await admin
-    .from("profiles")
-    .upsert(
-      { id: user.id, trial_ends_at: trialEndsAt },
-      { onConflict: "id", ignoreDuplicates: true },
-    );
+  const { error } = await admin.rpc("bootstrap_user", {
+    p_user_id: user.id,
+    p_created_at: user.created_at,
+  });
   if (error) {
-    console.error("[profiles self-heal insert]", error);
+    console.error("[bootstrap_user self-heal]", error);
     throw internal("프로필 생성에 실패했어요. 잠시 후 다시 시도해 주세요.");
   }
 
@@ -165,15 +160,23 @@ async function buildEntitlement(
   return deriveEntitlement(profile, sub, tokensUsed, config, now);
 }
 
-async function loadEquipment(
+type EquipmentProduct = { public_id: string; is_active: boolean };
+type EquipmentRow = {
+  equipped_slot: string;
+  products: EquipmentProduct | EquipmentProduct[] | null;
+};
+
+export async function loadEquipment(
   admin: SupabaseClient,
   userId: string,
 ): Promise<Record<string, string>> {
   // 스키마 리팩토링(moly-backend docs/DB_REFACTOR.md): user_equipment → user_items 통합.
   // 장착 = equipped_slot NOT NULL 행(슬롯당 1행은 부분 UNIQUE가 보장).
+  // is_active는 쿼리로 거르지 않는다 — 비활성 상품이 장착돼 있으면 슬롯을 조용히 빠뜨리는 대신
+  // moly-backend GET /inventory/equipment와 똑같이 실패해야 두 응답이 갈리지 않는다(핸드오프 §6).
   const { data, error } = await admin
     .from("user_items")
-    .select("equipped_slot, product_id")
+    .select("equipped_slot, products!inner(public_id, is_active)")
     .eq("user_id", userId)
     .not("equipped_slot", "is", null);
   if (error) {
@@ -181,7 +184,16 @@ async function loadEquipment(
     throw internal("장착 상태 조회에 실패했어요.");
   }
   const bySlot: Record<string, string> = {};
-  for (const row of data ?? []) bySlot[row.equipped_slot] = row.product_id;
+  for (const row of (data ?? []) as EquipmentRow[]) {
+    const product = Array.isArray(row.products) ? row.products[0] : row.products;
+    if (!product?.public_id || !product.is_active) {
+      throw internal("장착 상품이 활성 카탈로그에 없습니다.");
+    }
+    bySlot[row.equipped_slot] = product.public_id;
+  }
+  if (!bySlot.theme) {
+    throw internal("기본 테마 장착 상태가 없습니다.");
+  }
   return bySlot;
 }
 
@@ -199,7 +211,7 @@ export async function getMe(admin: SupabaseClient, user: User) {
     entitlement,
     wallet: { balance: profile.hay_balance },
     equipment: {
-      background_id: equipment["background"] ?? null,
+      theme_id: equipment["theme"],
       head_id: equipment["head"] ?? null,
       neck_id: equipment["neck"] ?? null,
       body_id: equipment["body"] ?? null,
