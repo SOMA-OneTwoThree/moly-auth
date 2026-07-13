@@ -174,9 +174,11 @@ export async function loadEquipment(
   // 장착 = equipped_slot NOT NULL 행(슬롯당 1행은 부분 UNIQUE가 보장).
   // is_active는 쿼리로 거르지 않는다 — 비활성 상품이 장착돼 있으면 슬롯을 조용히 빠뜨리는 대신
   // moly-backend GET /inventory/equipment와 똑같이 실패해야 두 응답이 갈리지 않는다(핸드오프 §6).
+  // FK를 반드시 이름으로 지목한다: user_items → products 관계가 product_id_fkey와
+  // 복합 product_slot_fk 둘이라, 이름 없이 임베드하면 PostgREST가 PGRST201로 거부한다.
   const { data, error } = await admin
     .from("user_items")
-    .select("equipped_slot, products!inner(public_id, is_active)")
+    .select("equipped_slot, products!user_items_product_id_fkey(public_id, is_active)")
     .eq("user_id", userId)
     .not("equipped_slot", "is", null);
   if (error) {

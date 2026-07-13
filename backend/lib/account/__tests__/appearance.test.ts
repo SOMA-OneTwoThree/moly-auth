@@ -2,6 +2,8 @@ import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import { ensureProfile, loadEquipment } from "../service";
 
+const selects: string[] = [];
+
 function equipmentAdmin(rows: unknown[]): SupabaseClient {
   const filter = {
     eq: vi.fn(),
@@ -10,7 +12,10 @@ function equipmentAdmin(rows: unknown[]): SupabaseClient {
   filter.eq.mockReturnValue(filter);
   return {
     from: vi.fn(() => ({
-      select: vi.fn(() => filter),
+      select: vi.fn((columns: string) => {
+        selects.push(columns);
+        return filter;
+      }),
     })),
   } as unknown as SupabaseClient;
 }
@@ -33,6 +38,17 @@ describe("appearance v2 account aggregation", () => {
       code: "INTERNAL",
       status: 500,
     });
+  });
+
+  it("products 임베드는 FK를 이름으로 지목한다", async () => {
+    // user_items → products 관계가 product_id_fkey와 복합 product_slot_fk 둘이라,
+    // 이름 없이 임베드하면 PostgREST가 PGRST201로 거부하고 /me 전체가 500이 된다.
+    selects.length = 0;
+    await loadEquipment(equipmentAdmin([
+      { equipped_slot: "theme", products: { public_id: "theme_default", is_active: true } },
+    ]), "user-1");
+
+    expect(selects[0]).toContain("products!user_items_product_id_fkey");
   });
 
   it("비활성 상품이 장착돼 있으면 슬롯을 빠뜨리지 않고 실패한다", async () => {
