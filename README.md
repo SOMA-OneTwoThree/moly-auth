@@ -11,7 +11,9 @@ moly-auth/
 > **상세 문서 (단일 출처)**
 > - 🔧 backend: [`backend/docs/ARCHITECTURE.md`](backend/docs/ARCHITECTURE.md) — 인증 모델·엔드포인트·데이터 접근 규칙·env·런북
 > - 🖥️ frontend: [`frontend/docs/ARCHITECTURE.md`](frontend/docs/ARCHITECTURE.md) — 라우트·공개 페이지
-> - 📜 API 계약: `moly-backend/docs/API_SPEC.md` 2장(계정) — 요청/응답 형식의 원본
+
+계정 API의 현재 계약 기준은 `backend/app/**/route.ts`, `backend/lib/account`와 공통 HTTP
+처리 코드다. 공유 DB의 canonical DDL은 `moly-backend/db/`가 소유한다.
 
 ## 역할 경계 (2026-07-09 확정)
 
