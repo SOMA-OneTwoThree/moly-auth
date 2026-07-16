@@ -3,7 +3,7 @@
 Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프로필·알림 설정·푸시 토큰·로그아웃·회원탈퇴를 담당하는 순수 API 서버다. UI 없음.
 
 > **역할 경계 (2026-07-09 확정)** — 계정 API는 이 서버가, 나머지 도메인 API(대화·일기·경제·상점·루틴·구독·워커)는 `moly-backend`(FastAPI, EC2 `https://voice.moly.asia`)가 서빙한다. iOS는 base URL 2개를 사용한다.
-> **API 계약의 단일 출처**는 `moly-backend/docs/API_SPEC.md` 2장(계정) — 응답 형식·에러 봉투·상태코드는 거기 정의를 그대로 따른다.
+> **현재 API 계약의 기준**은 `app/**/route.ts`, `lib/account`와 `lib/http`의 실제 구현이다. 공유 DB의 canonical DDL은 `moly-backend/db/`가 소유한다.
 
 ---
 
@@ -25,7 +25,7 @@ Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프�
 2. **`withAuth`** (`lib/auth/with-auth.ts`) — **실제 보안 권위.** `requireUser`(getUser 검증) 통과한 `user`만 핸들러에 전달. 모든 비공개 라우트는 반드시 이걸로 감싼다.
 3. **`handle`** (`lib/http/api-exception.ts`) — 공통 에러 경계. `ApiException`은 표준 봉투로, 나머지는 서버 로그에만 남기고 500으로 마스킹(내부 메시지 비노출).
 
-에러 봉투(API_SPEC 1장): `{ "error": { "code", "message", "details" } }` — 401 `UNAUTHORIZED` / 422 `VALIDATION` / 409 `ALREADY_ONBOARDED` / 500 `INTERNAL`.
+에러 봉투: `{ "error": { "code", "message", "details" } }` — 401 `UNAUTHORIZED` / 422 `VALIDATION` / 409 `ALREADY_ONBOARDED` / 500 `INTERNAL`.
 
 ## 3. 데이터 접근 규칙
 
@@ -34,9 +34,9 @@ Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프�
 - 🔒 따라서 **모든 쿼리는 반드시 검증된 `user.id`로만 스코프**(`eq("id", user.id)` 등). 외부 입력 id를 넘기면 IDOR — `lib/supabase/admin.ts` 경고 참조.
 - 토큰 클라이언트(`lib/supabase/token.ts`)는 `requireUser`의 getUser 검증에만 사용.
 
-**스키마 소유권**: DDL은 `moly-backend/db/schema.sql`이 단일 출처 — **이 레포는 마이그레이션을 갖지 않는다**(구 `supabase/migrations/` 삭제됨). 접근 테이블: `profiles`, `subscriptions`, `user_daily_stats`, `app_config`, `user_equipment`, `user_notification_settings`, `user_devices`, `memories`(mem0).
+**스키마 소유권**: DDL은 `moly-backend/db/schema.sql`이 단일 출처 — **이 레포는 마이그레이션을 갖지 않는다**(구 `supabase/migrations/` 삭제됨). 접근 테이블: `profiles`, `subscriptions`, `user_daily_stats`, `app_config`, `user_items`(장착 조회 시 `products`를 명시적 FK로 embed), `user_notification_settings`, `user_devices`, `memories`(mem0).
 
-## 4. 엔드포인트 (API_SPEC 2장)
+## 4. 엔드포인트
 
 | 메서드 | 경로 | 용도 / 주요 응답 |
 |---|---|---|

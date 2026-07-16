@@ -86,6 +86,7 @@ describe("effectiveTokenConfig — app_config 우선, 없으면 기본값", () =
     const c = effectiveTokenConfig({ daily_token_limit: "broken" });
     expect(c.daily_token_limit).toEqual(DEFAULT_TOKEN_CONFIG.daily_token_limit);
     expect(c.diary_llm_min_tokens).toBe(DEFAULT_TOKEN_CONFIG.diary_llm_min_tokens);
+    expect(c.free_launch_token_limit).toBe(30_000);
   });
 
   it("trial 한도 미지정 시 subscriber 한도로 폴백(ERD §6.1)", () => {
@@ -107,15 +108,15 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
   const LAUNCH = {
     ...DEFAULT_TOKEN_CONFIG,
     free_launch_until: "2026-09-01T04:00:00+09:00",
-    free_launch_token_limit: 50_000,
+    free_launch_token_limit: 30_000,
   };
 
   it("종료일 이전 + 구독/체험 없음 = 런칭 무료(구독급 표시 + 런칭 한도)", () => {
     const e = deriveEntitlement({ trial_ends_at: null }, null, 10_000, LAUNCH, NOW);
     expect(e.plan).toBe("trial");
     expect(e.is_subscriber).toBe(false);
-    expect(e.daily_token_limit).toBe(50_000); // 런칭 한도(trial 100k 아님)
-    expect(e.tokens_remaining).toBe(40_000);
+    expect(e.daily_token_limit).toBe(30_000); // moly-backend와 같은 런칭 한도
+    expect(e.tokens_remaining).toBe(20_000);
     expect(e.trial_ends_at).toBe("2026-09-01T04:00:00+09:00");
   });
 

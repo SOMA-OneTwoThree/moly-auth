@@ -34,7 +34,7 @@ export const DEFAULT_TOKEN_CONFIG: TokenConfig = {
   daily_token_limit: { free: 20_000, trial: 100_000, subscriber: 100_000 },
   diary_llm_min_tokens: 2_000,
   free_launch_until: "2026-09-01T04:00:00+09:00",
-  free_launch_token_limit: 50_000,
+  free_launch_token_limit: 30_000,
 };
 
 /** app_config rows(key→value)에서 유효 설정 해석 — 값이 있으면 우선, 없으면 기본값. */
