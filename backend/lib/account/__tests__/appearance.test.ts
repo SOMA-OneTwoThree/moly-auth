@@ -1,6 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
-import { ensureProfile, loadEquipment } from "../service";
+import { ensureProfile, legacyEquipmentBlock, loadEquipment } from "../service";
 
 const selects: string[] = [];
 
@@ -21,6 +21,19 @@ function equipmentAdmin(rows: unknown[]): SupabaseClient {
 }
 
 describe("appearance v2 account aggregation", () => {
+  it.each([
+    ["hat 우선", { theme: "theme_default", hat: "head_mandarin", glasses: "head_sunglasses" }, "head_mandarin"],
+    ["glasses fallback", { theme: "theme_default", glasses: "head_sunglasses" }, "head_sunglasses"],
+    ["legacy head fallback", { theme: "theme_default", head: "head_suncream" }, "head_suncream"],
+  ])("레거시 /me equipment는 %s 프로젝션을 사용한다", (_label, equipment, headId) => {
+    expect(legacyEquipmentBlock(equipment)).toEqual({
+      theme_id: "theme_default",
+      head_id: headId,
+      neck_id: null,
+      body_id: null,
+    });
+  });
+
   it("장착 상품 UUID 대신 products.public_id를 반환한다", async () => {
     const equipment = await loadEquipment(equipmentAdmin([
       { equipped_slot: "theme", products: { public_id: "theme_default", is_active: true } },

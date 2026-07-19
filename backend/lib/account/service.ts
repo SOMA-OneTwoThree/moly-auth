@@ -199,6 +199,15 @@ export async function loadEquipment(
   return bySlot;
 }
 
+export function legacyEquipmentBlock(equipment: Record<string, string>) {
+  return {
+    theme_id: equipment["theme"],
+    head_id: equipment["hat"] ?? equipment["glasses"] ?? equipment["head"] ?? null,
+    neck_id: equipment["neck"] ?? null,
+    body_id: equipment["body"] ?? null,
+  };
+}
+
 // ── GET /me · POST /onboarding · PATCH /me ──────────────────────────
 
 export async function getMe(admin: SupabaseClient, user: User) {
@@ -212,12 +221,7 @@ export async function getMe(admin: SupabaseClient, user: User) {
     profile: profileBlock(profile),
     entitlement,
     wallet: { balance: profile.hay_balance },
-    equipment: {
-      theme_id: equipment["theme"],
-      head_id: equipment["head"] ?? null,
-      neck_id: equipment["neck"] ?? null,
-      body_id: equipment["body"] ?? null,
-    },
+    equipment: legacyEquipmentBlock(equipment),
   };
 }
 
