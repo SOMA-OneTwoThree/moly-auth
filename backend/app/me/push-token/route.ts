@@ -7,7 +7,9 @@ import { registerPushToken } from "@/lib/account/service";
 
 export const runtime = "nodejs";
 
-/** POST /me/push-token — APNs 토큰 등록(토큰 UNIQUE upsert, 기기 이전 시 재귀속) → 204. */
+/** POST /me/push-token — FCM 토큰 등록(토큰 UNIQUE upsert, 기기 이전 시 재귀속) → 204. */
+const ALLOWED_PLATFORMS = ["ios", "android"];
+
 export const POST = withAuth(
   handle(async (req, user) => {
     const body = await parseJsonObject(req);
@@ -19,9 +21,9 @@ export const POST = withAuth(
         field: "token",
       });
     }
-    // platform은 현재 ios만(DB CHECK와 동기) — 생략 시 ios.
+    // platform은 ios | android(DB CHECK와 동기) — 생략 시 ios(기존 iOS 클라 하위호환).
     const platform = body.platform === undefined ? "ios" : body.platform;
-    if (platform !== "ios") {
+    if (typeof platform !== "string" || !ALLOWED_PLATFORMS.includes(platform)) {
       throw new ApiException("VALIDATION", 422, "지원하지 않는 플랫폼이에요.", {
         field: "platform",
       });
