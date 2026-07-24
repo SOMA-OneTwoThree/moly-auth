@@ -5,9 +5,9 @@ import { parseJsonObject, rejectUnknownFields } from "@/lib/http/body";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { onboard } from "@/lib/account/service";
 import {
-  isValidLanguage,
   isValidNickname,
   isValidTimezone,
+  normalizeLanguage,
 } from "@/lib/account/validation";
 
 export const runtime = "nodejs";
@@ -31,7 +31,8 @@ export const POST = withAuth(
         field: "timezone",
       });
     }
-    if (!isValidLanguage(body.language)) {
+    const language = normalizeLanguage(body.language);
+    if (language === null) {
       throw new ApiException("VALIDATION", 422, "유효하지 않은 언어 코드예요.", {
         field: "language",
       });
@@ -41,7 +42,7 @@ export const POST = withAuth(
     const result = await onboard(admin, user, {
       nickname: body.nickname,
       timezone: body.timezone,
-      language: body.language,
+      language, // BCP 47 정규화된 값 저장(온보딩·프로필 변경 동일 결과)
     });
     return NextResponse.json(result);
   }),

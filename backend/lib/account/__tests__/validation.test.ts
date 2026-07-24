@@ -3,6 +3,7 @@ import {
   isValidLanguage,
   isValidNickname,
   isValidTimezone,
+  normalizeLanguage,
 } from "../validation";
 
 describe("계정 필드 검증 — moly-backend 스키마와 동일 규칙", () => {
@@ -21,12 +22,26 @@ describe("계정 필드 검증 — moly-backend 스키마와 동일 규칙", () 
     expect(isValidNickname("몰리 친구")).toBe(true); // 일반 공백은 허용
   });
 
-  it("언어 ISO 639-1(+선택 지역) — 주입 문자 차단", () => {
+  it("언어 BCP 47 태그 허용 — ko·en-US·zh-Hant-TW·es-419·kok, 주입/문장 차단", () => {
     expect(isValidLanguage("ko")).toBe(true);
     expect(isValidLanguage("en-US")).toBe(true);
+    expect(isValidLanguage("zh-Hant-TW")).toBe(true); // 다중 서브태그
+    expect(isValidLanguage("es-419")).toBe(true); // 숫자 지역
+    expect(isValidLanguage("kok")).toBe(true); // 3자 언어
     expect(isValidLanguage("k")).toBe(false);
     expect(isValidLanguage("ko;drop")).toBe(false);
     expect(isValidLanguage("koreankorean")).toBe(false);
+    expect(isValidLanguage("this is en")).toBe(false); // 문장(공백)
+    expect(isValidLanguage("ko\n")).toBe(false); // 제어문자
+    expect(isValidLanguage("")).toBe(false);
+    expect(isValidLanguage(42)).toBe(false);
+  });
+
+  it("언어 태그 정규화 — 대소문자 canonical(온보딩·프로필 변경 동일 결과)", () => {
+    expect(normalizeLanguage("en-us")).toBe("en-US");
+    expect(normalizeLanguage("ZH-HANT-TW")).toBe("zh-Hant-TW");
+    expect(normalizeLanguage("ko")).toBe("ko"); // 기존 값 하위호환
+    expect(normalizeLanguage("bogus tag")).toBeNull();
   });
 
   it("IANA 타임존만 허용", () => {

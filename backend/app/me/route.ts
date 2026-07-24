@@ -10,9 +10,9 @@ import {
   type PatchMeInput,
 } from "@/lib/account/service";
 import {
-  isValidLanguage,
   isValidNickname,
   isValidTimezone,
+  normalizeLanguage,
 } from "@/lib/account/validation";
 
 export const runtime = "nodejs";
@@ -41,12 +41,13 @@ export const PATCH = withAuth(
       input.nickname = body.nickname;
     }
     if (body.language !== undefined) {
-      if (!isValidLanguage(body.language)) {
+      const language = normalizeLanguage(body.language);
+      if (language === null) {
         throw new ApiException("VALIDATION", 422, "유효하지 않은 언어 코드예요.", {
           field: "language",
         });
       }
-      input.language = body.language;
+      input.language = language; // BCP 47 정규화된 값 저장(온보딩과 동일 결과)
     }
     if (body.timezone !== undefined) {
       if (!isValidTimezone(body.timezone)) {
