@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   isValidLanguage,
   isValidNickname,
+  isValidPlatform,
   isValidTimezone,
   normalizeLanguage,
 } from "../validation";
@@ -42,6 +43,14 @@ describe("계정 필드 검증 — moly-backend 스키마와 동일 규칙", () 
     expect(normalizeLanguage("ZH-HANT-TW")).toBe("zh-Hant-TW");
     expect(normalizeLanguage("ko")).toBe("ko"); // 기존 값 하위호환
     expect(normalizeLanguage("bogus tag")).toBeNull();
+  });
+
+  it("푸시 플랫폼 allowlist — ios·android만 허용", () => {
+    expect(isValidPlatform("ios")).toBe(true);
+    expect(isValidPlatform("android")).toBe(true);
+    expect(isValidPlatform("web")).toBe(false);
+    expect(isValidPlatform(undefined)).toBe(false);
+    expect(isValidPlatform(42)).toBe(false);
   });
 
   it("IANA 타임존만 허용", () => {

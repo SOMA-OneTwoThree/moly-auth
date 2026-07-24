@@ -15,11 +15,20 @@ export function isValidNickname(v: unknown): v is string {
   );
 }
 
+/** 지원 푸시 플랫폼 — DB user_devices.platform CHECK와 동기(moly-backend). */
+export const ALLOWED_PLATFORMS = ["ios", "android"] as const;
+
+/** 푸시 토큰 플랫폼 검증. 생략 시 ios 폴백은 호출측이 처리. */
+export function isValidPlatform(v: unknown): v is (typeof ALLOWED_PLATFORMS)[number] {
+  return typeof v === "string" && (ALLOWED_PLATFORMS as readonly string[]).includes(v);
+}
+
 /**
  * BCP 47 언어 태그 검증 + 정규화 — 유효하면 canonical(대소문자 정규화) 태그, 아니면 null.
  * ko·en·en-US·zh-Hant-TW·es-419·kok 등 표준 태그 허용. Intl.getCanonicalLocales가 구조 검증까지
  * 하므로 빈값·공백·구분자·제어문자·문장은 throw→null. 출력은 canonical BCP 47([a-zA-Z0-9-])이라
  * LLM 시스템 프롬프트에 삽입해도 주입 안전. 저장은 정규화된 값으로(온보딩·프로필 변경 동일 결과).
+ * 참고: moly-backend i18n.resolve()가 이 값을 base 언어로 콘텐츠 분기(ko-KR→ko, SOMA-346).
  */
 export function normalizeLanguage(v: unknown): string | null {
   if (typeof v !== "string" || v.length === 0 || v.length > 35) return null;
