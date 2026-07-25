@@ -337,7 +337,7 @@ export async function registerPushToken(
 ): Promise<void> {
   // push_token UNIQUE — 다른 계정에 붙어있던 토큰이면 이 유저로 재귀속(기기 이전:
   // 같은 기기에서 계정 전환 시 필수. moly-backend 원 구현과 동일 의미론).
-  // 트레이드오프: 타인의 APNs 토큰 값을 알면 재귀속 가능하나, 토큰은 고엔트로피
+  // 트레이드오프: 타인의 FCM 토큰 값을 알면 재귀속 가능하나, 토큰은 고엔트로피
   // 비밀값이라 허용(보안 리뷰 2026-07-09 — 유출 경로가 생기면 재검토).
   const { error } = await admin.from("user_devices").upsert(
     {
