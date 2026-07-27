@@ -1,420 +1,427 @@
-# 개인정보 처리방침
+# Privacy Policy
 
-**서비스명:** BeCappy(비캐피)
-**시행일:** 2026년 6월 27일
-**최종 개정일:** 2026년 7월 16일
+**Service:** BeCappy
+**Effective Date:** June 27, 2026
+**Last Revised:** July 28, 2026
 
-Rho changjun(이하 "운영자")은 정보주체의 자유와 권리 보호를 위해 「개인정보 보호법」 및 관계 법령이 정한 바를 준수하여, 적법하게 개인정보를 처리하고 안전하게 관리하고 있습니다. 이에 「개인정보 보호법」 제30조에 따라 정보주체에게 개인정보 처리에 관한 절차 및 기준을 안내하고, 이와 관련한 고충을 신속하고 원활하게 처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리방침을 수립·공개합니다.
-
----
-
-## 제1조 (개인정보의 처리 목적)
-
-운영자는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하고 있는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.
-
-1. **회원 가입 및 관리**
-    - Apple, Google, Kakao 소셜 로그인을 통한 회원 식별 및 본인 확인
-    - 회원자격 유지·관리, 서비스 부정이용 방지
-2. **서비스 제공**
-    - AI 캐릭터 "캐피"와의 대화 서비스 제공(AI 응답 생성)
-    - 대화 내용을 바탕으로 한 일기 콘텐츠 생성 및 발행
-    - 자연스러운 대화 맥락 유지를 위한 기억 정보의 생성·관리
-    - 루틴(습관) 관리 기능 제공
-    - 재화(건초) 및 꾸미기 아이템의 지급·구매·보유·장착 관리
-3. **유료 서비스 제공 및 결제 관리**
-    - 인앱 결제 상태의 확인·관리, 구매내역 관리, 환불 대응
-4. **광고 보상 제공**
-    - 리워드 광고 시청 확인 및 보상(건초) 지급
-5. **알림 서비스 제공**
-    - 일기 발행·안부 인사 등 푸시 알림 발송
-6. **고객 문의 응대**
-    - 회원의 문의사항 확인 및 답변
-7. **광고 성과 측정 및 마케팅**
-    - 앱 이벤트(회원 가입 완료, 최초 대화, 구매 등)를 기반으로 한 광고 전환·성과 측정 및 마케팅 최적화(Meta 등 광고 플랫폼 활용)
+Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
 
 ---
 
-## 제2조 (처리하는 개인정보의 항목)
+## Article 1 (Purposes of Processing Personal Information)
 
-운영자는 다음의 개인정보 항목을 처리하고 있습니다.
+The Operator processes personal information for the following purposes. Personal information being processed will not be used for any purpose other than the following, and if the purpose of use changes, the Operator will take necessary measures such as obtaining separate consent under Article 18 of the Personal Information Protection Act.
 
-### 1. 회원 가입 시 수집 항목
+1. **Membership registration and management**
+    - Identifying and verifying members through Apple, Google, and Kakao social sign-in
+    - Maintaining and managing membership status, preventing fraudulent use of the Service
+2. **Service provision**
+    - Providing conversations with the AI character "Cappy" (generating AI responses)
+    - Creating and publishing diary content based on conversations
+    - Creating and managing memory information to maintain natural conversational context
+    - Providing routine (habit) management features
+    - Granting, purchasing, holding, and equipping in-app currency (Hay) and decoration items
+3. **Paid services and payment management**
+    - Verifying and managing in-app purchase status, managing purchase history, handling refunds
+4. **Advertising rewards**
+    - Verifying rewarded-ad views and granting rewards (Hay)
+5. **Notification services**
+    - Sending push notifications such as diary publication and check-in greetings
+6. **Customer support**
+    - Reviewing and responding to member inquiries
+7. **Ad performance measurement and marketing**
+    - Measuring ad conversion and performance and optimizing marketing based on app events (sign-up completion, first conversation, purchases, etc.) using advertising platforms such as Meta
 
-| 구분 | 수집 항목 | 수집 방법 |
+---
+
+## Article 2 (Personal Information Items Processed)
+
+The Operator processes the following personal information items.
+
+### 1. Items collected at sign-up
+
+| Type | Items | Collection Method |
 | --- | --- | --- |
-| 필수 | 이메일 주소, 소셜 로그인 식별자(Apple/Google/Kakao) | 소셜 로그인 |
-| 필수 | 닉네임 | 이용자 직접 입력 |
-| 필수 | 시간대(타임존), 콘텐츠 언어 설정 | 기기 정보 기반 자동 설정(변경 가능) |
+| Required | Email address, social sign-in identifier (Apple/Google/Kakao) | Social sign-in |
+| Required | Nickname | Entered directly by the user |
+| Required | Time zone, content language setting | Automatically set based on device information (changeable) |
 
-> Apple 로그인의 경우 이용자가 이메일 숨기기를 선택하면 Apple이 제공하는 임의의 릴레이 이메일 주소가 수집됩니다.
+> For Sign in with Apple, if the user chooses to hide their email, a random relay email address provided by Apple is collected.
 
-### 2. 서비스 이용 과정에서 저장되는 정보
+### 2. Information stored while using the Service
 
-| 구분 | 항목 | 처리 방식 |
+| Type | Items | Processing |
 | --- | --- | --- |
-| 저장 | **대화 내용**(이용자 메시지·캐피 응답) | 대화 이력 제공을 위해 서버에 저장되며, 회원 탈퇴 시 삭제 |
-| 저장 | **일기 콘텐츠** | 대화 내용을 바탕으로 생성되어 저장되며, 회원 탈퇴 시 삭제 |
-| 저장 | **캐피의 기억 정보** | 이용자가 대화 중 공유한 정보(관심사, 근황, 성향, 이름 등)를 대화 맥락 유지를 위해 요약된 형태로 저장 |
-| 저장 | 루틴 정보(이름, 요일·횟수, 완료 기록), 알림 설정 | 기능 제공을 위해 저장 |
-| 저장 | 재화(건초) 잔액·거래 내역, 아이템 보유·장착 정보 | 재화·아이템 관리를 위해 저장 |
-| 저장 | 인앱 결제 내역(상품 식별자, 거래 식별자, 구매 일시 등) | 결제 상태 관리를 위해 저장. **신용카드 번호 등 결제수단 정보는 Apple이 처리하며 운영자는 수집하지 않음** |
-| 저장 | 푸시 알림용 기기 토큰(APNs) | 알림 발송을 위해 저장, 로그아웃·탈퇴 시 무효화 |
+| Stored | **Conversation content** (user messages and Cappy's responses) | Stored on the server to provide conversation history; deleted upon account deletion |
+| Stored | **Diary content** | Generated from conversations and stored; deleted upon account deletion |
+| Stored | **Cappy's memory information** | Information shared by the user during conversations (interests, recent updates, preferences, names, etc.) stored in summarized form to maintain conversational context |
+| Stored | Routine information (name, days/frequency, completion records), notification settings | Stored to provide features |
+| Stored | Hay balance and transaction history, item ownership and equipment information | Stored to manage currency and items |
+| Stored | In-app purchase history (product identifier, transaction identifier, purchase date, etc.) | Stored to manage purchase status. **Payment method details such as credit card numbers are processed by Apple (App Store) or Google (Google Play) and are not collected by the Operator** |
+| Stored | Push notification device token (FCM registration token; on iOS, notifications are relayed through APNs) | Stored to send notifications; invalidated upon logout or account deletion |
 
-> ⚠️ 이용자께서 대화 중 입력하신 내용은 서버에 저장되며, 일부 개인적 정보가 캐피의 기억 정보로 저장되어 향후 대화의 맥락 정보로 활용될 수 있습니다. 따라서 주민등록번호, 신용카드번호, 비밀번호 등 민감한 개인정보를 대화 중에 입력하지 않도록 유의해 주십시오.
+> ⚠️ Content you enter during conversations is stored on the server, and some personal details may be stored as Cappy's memory information and used as context for future conversations. Please avoid entering sensitive personal information such as resident registration numbers, credit card numbers, or passwords during conversations.
 
-### 3. 서비스 이용 과정에서 자동으로 생성·수집되는 정보
+### 3. Information automatically generated or collected while using the Service
 
-- 서비스 이용 기록, 접속 로그, 기기 정보(OS 버전, 앱 버전), IP 주소
-- Firebase Installation ID, 앱 사용 이벤트 로그(Firebase를 통해 수집)
-- 리워드 광고 시청 확인을 위한 광고 트랜잭션 식별자
-- 기기 광고 식별자(IDFA 등), 앱 이벤트 로그(회원 가입 완료, 최초 대화, 구매 등), 구매·제품 상호작용 정보(구매 상품 식별자, 금액 등) — 광고 성과 측정을 위해 Meta SDK를 통해 수집
+- Service usage records, access logs, device information (OS version, app version), IP address
+- Firebase Installation ID, app usage event logs (collected via Firebase)
+- Ad transaction identifiers used to verify rewarded-ad views
+- Device advertising identifiers (IDFA on iOS, Google Advertising ID on Android), app event logs (sign-up completion, first conversation, purchases, etc.), and purchase/product interaction information (purchased product identifier, amount, etc.) — collected via the Meta SDK for ad performance measurement
 
 ---
 
-## 제3조 (개인정보의 처리 및 보유 기간)
+## Article 3 (Processing and Retention Period of Personal Information)
 
-1. 운영자는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다.
-2. 각각의 개인정보 처리 및 보유 기간은 다음과 같습니다.
+1. The Operator processes and retains personal information within the retention and use period prescribed by law or the retention and use period consented to by the data subject at the time of collection.
+2. The processing and retention periods for each item are as follows.
 
-| 항목 | 보유 기간 |
+| Item | Retention Period |
 | --- | --- |
-| 회원 가입 정보(이메일, 소셜 식별자, 닉네임, 타임존·언어) | 회원 탈퇴 시까지 |
-| 대화 내용, 일기, 캐피의 기억 정보 | 회원 탈퇴 시까지 |
-| 루틴·알림 설정, 재화·아이템 정보 | 회원 탈퇴 시까지 |
-| 계약 또는 청약철회 등에 관한 기록, 대금결제 및 재화 공급에 관한 기록 | 5년(「전자상거래 등에서의 소비자보호에 관한 법률」) |
-| 소비자의 불만 또는 분쟁처리에 관한 기록 | 3년(「전자상거래 등에서의 소비자보호에 관한 법률」) |
-| 접속 로그, 서비스 이용 기록 | 수집일로부터 3개월(「통신비밀보호법」) |
-| 광고 성과 측정 정보(기기 광고 식별자, 앱 이벤트, 구매·제품 상호작용 정보) | 수탁사(Meta 등) 정책에 따른 기간 동안 보관 후 파기 |
+| Sign-up information (email, social identifier, nickname, time zone/language) | Until account deletion |
+| Conversation content, diaries, Cappy's memory information | Until account deletion |
+| Routine/notification settings, currency/item information | Until account deletion |
+| Records on contracts or withdrawal of offers, records on payment and supply of goods | 5 years (Act on Consumer Protection in Electronic Commerce of the Republic of Korea) |
+| Records on consumer complaints or dispute resolution | 3 years (Act on Consumer Protection in Electronic Commerce of the Republic of Korea) |
+| Access logs, service usage records | 3 months from collection (Protection of Communications Secrets Act of the Republic of Korea) |
+| Ad performance measurement information (device advertising identifiers, app events, purchase/product interaction information) | Retained and then destroyed in accordance with the processor's (e.g., Meta) policies |
 
-3. 회원 탈퇴 시 위 정보는 지체 없이 파기되며(캐피의 기억 정보 포함), 관계 법령에 따라 보존해야 하는 경우 해당 법령에서 정한 기간 동안 다른 개인정보와 분리하여 보관 후 파기합니다.
-
----
-
-## 제4조 (개인정보의 제3자 제공)
-
-운영자는 정보주체의 개인정보를 제1조(개인정보의 처리 목적)에서 명시한 범위 내에서만 처리하며, 정보주체의 동의, 법률의 특별한 규정 등 「개인정보 보호법」 제17조 및 제18조에 해당하는 경우에만 개인정보를 제3자에게 제공합니다.
-
-현재 운영자는 이용자의 개인정보를 제3자에게 제공하지 않습니다.
+3. Upon account deletion, the above information is destroyed without delay (including Cappy's memory information). Where retention is required by applicable laws, the information is stored separately from other personal information for the period prescribed by such laws and then destroyed.
 
 ---
 
-## 제5조 (개인정보 처리의 위탁)
+## Article 4 (Provision of Personal Information to Third Parties)
 
-운영자는 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리 업무를 위탁하고 있습니다.
+The Operator processes personal information only within the scope specified in Article 1 (Purposes of Processing Personal Information), and provides personal information to third parties only where it falls under Articles 17 and 18 of the Personal Information Protection Act, such as with the data subject's consent or under special legal provisions.
 
-| 수탁업체 | 위탁업무 내용 | 소재지 |
+The Operator does not currently provide users' personal information to third parties.
+
+---
+
+## Article 5 (Entrustment of Personal Information Processing)
+
+The Operator entrusts the following personal information processing tasks to provide the Service smoothly.
+
+| Processor | Entrusted Tasks | Location |
 | --- | --- | --- |
-| Supabase, Inc. | 회원 인증 및 데이터베이스 운영 | 미국 |
-| Vercel Inc. | 계정 서버 호스팅 | 미국 |
-| Amazon Web Services, Inc. (AWS) | 서비스 서버 인프라 운영 및 데이터 처리 | 미국 |
-| Anthropic, PBC | AI 대화 응답 및 일기 콘텐츠 생성 | 미국 |
-| OpenAI, L.L.C. | 대화 기억 정보의 요약·처리 | 미국 |
-| RevenueCat, Inc. | 인앱 결제 상태 관리 | 미국 |
-| Apple Inc. | Apple 로그인 인증, 푸시 알림(APNs) 발송, 인앱 결제 처리 | 미국 |
-| Google LLC | Google 로그인 인증, Firebase 기반 앱 설정·서비스 이용 분석, 광고(AdMob) 게재 | 미국 |
-| Meta Platforms, Inc. | 앱 이벤트(가입 완료·최초 대화·구매) 기반 광고 성과 측정 및 마케팅 최적화 | 미국 |
-| 주식회사 카카오 | 카카오 로그인 인증 | 대한민국 |
+| Supabase, Inc. | Member authentication and database operation | USA |
+| Vercel Inc. | Account server hosting | USA |
+| Amazon Web Services, Inc. (AWS) | Service server infrastructure operation and data processing | USA |
+| Anthropic, PBC | AI conversation responses and diary content generation | USA |
+| OpenAI, L.L.C. | Summarization and processing of conversation memory information | USA |
+| RevenueCat, Inc. | In-app purchase status management | USA |
+| Apple Inc. | Sign in with Apple authentication, push notification delivery (APNs), App Store in-app purchase processing | USA |
+| Google LLC | Google sign-in authentication, Firebase-based app configuration and service usage analytics, push notification delivery (Firebase Cloud Messaging, FCM), ad serving (AdMob), Google Play in-app purchase and refund processing | USA |
+| Meta Platforms, Inc. | Ad performance measurement and marketing optimization based on app events (sign-up completion, first conversation, purchases) | USA |
+| Kakao Corp. | Kakao sign-in authentication | Republic of Korea |
 
-운영자는 위탁계약 체결 시 「개인정보 보호법」 제26조에 따라 위탁업무 수행목적 외 개인정보 처리금지, 기술적·관리적 보호조치, 재위탁 제한, 수탁자에 대한 관리·감독 등을 명시하고, 수탁자가 개인정보를 안전하게 처리하는지를 감독하고 있습니다.
+When concluding entrustment contracts, the Operator specifies, in accordance with Article 26 of the Personal Information Protection Act, the prohibition of processing personal information for purposes other than the entrusted tasks, technical and managerial protective measures, restrictions on re-entrustment, and management and supervision of the processor, and supervises whether the processor handles personal information safely.
 
-위탁업무의 내용이나 수탁자가 변경될 경우에는 지체 없이 본 개인정보 처리방침을 통하여 공개하도록 하겠습니다.
+If the content of the entrusted tasks or the processor changes, the Operator will disclose it through this Privacy Policy without delay.
 
 ---
 
-## 제6조 (개인정보의 국외 이전)
+## Article 6 (Cross-Border Transfer of Personal Information)
 
-운영자는 서비스 제공을 위해 다음과 같이 개인정보를 국외로 이전하고 있습니다.
+The Operator transfers personal information abroad as follows to provide the Service.
 
-| 이전받는 자 | 이전 국가 | 이전 항목 | 이전 일시 및 방법 | 이용 목적 | 보유 기간 |
+| Recipient | Country | Items Transferred | Time and Method of Transfer | Purpose of Use | Retention Period |
 | --- | --- | --- | --- | --- | --- |
-| Supabase | 미국 | 회원 가입 정보 | 가입·이용 시점에 네트워크를 통한 전송 | 회원 인증 및 데이터베이스 운영 | 회원 탈퇴 시까지 |
-| Vercel | 미국 | 계정 관련 요청 데이터 | 서비스 이용 시점에 네트워크를 통한 전송 | 계정 서버 호스팅 | 처리 목적 달성 시까지 |
-| Amazon Web Services | 미국 | 대화·일기·기억 정보 등 서비스 데이터 | 서비스 이용 시점에 네트워크를 통한 전송 | 서버 인프라 운영 | 위 제3조 참조 |
-| Anthropic | 미국 | 대화 텍스트 및 관련 맥락 정보 | 대화·일기 생성 시 실시간 전송 | AI 응답 및 일기 생성 | 수탁사 정책에 따라 최대 30일 보관 후 파기 |
-| OpenAI | 미국 | 대화 텍스트 요약을 위한 정보 | 기억 정보 처리 시 실시간 전송 | 기억 정보 요약·처리 | 수탁사 정책에 따라 최대 30일 보관 후 파기 |
-| RevenueCat | 미국 | 회원 식별자, 결제 상태 정보 | 결제 시점에 네트워크를 통한 전송 | 인앱 결제 상태 관리 | 회원 탈퇴 시까지 |
-| Apple | 미국 | 푸시 알림용 기기 토큰, 결제 처리 정보 | 알림 발송·결제 시점에 네트워크를 통한 전송 | 푸시 알림 발송, 인앱 결제 처리 | 처리 목적 달성 시까지 |
-| Google | 미국 | 기기 정보, 앱 사용 이벤트 로그 | 서비스 이용 시점에 네트워크를 통한 전송 | 앱 설정·이용 분석, 광고 게재 | 처리 목적 달성 시까지 |
-| Meta Platforms | 미국 | 기기 광고 식별자(IDFA 등), 앱 이벤트(가입 완료·최초 대화·구매), 구매·제품 상호작용 정보 | 앱 이벤트 발생 시점에 네트워크를 통한 전송 | 광고 성과 측정 및 마케팅 최적화 | 수탁사 정책에 따른 기간 동안 보관 후 파기 |
+| Supabase | USA | Sign-up information | Transmitted over the network at sign-up and during use | Member authentication and database operation | Until account deletion |
+| Vercel | USA | Account-related request data | Transmitted over the network during use | Account server hosting | Until the purpose of processing is achieved |
+| Amazon Web Services | USA | Service data such as conversations, diaries, and memory information | Transmitted over the network during use | Server infrastructure operation | See Article 3 above |
+| Anthropic | USA | Conversation text and related context | Transmitted in real time when generating conversations/diaries | AI responses and diary generation | Retained up to 30 days under the processor's policy, then destroyed |
+| OpenAI | USA | Information for summarizing conversation text | Transmitted in real time when processing memory information | Memory summarization and processing | Retained up to 30 days under the processor's policy, then destroyed |
+| RevenueCat | USA | Member identifier, purchase status information | Transmitted over the network at the time of purchase | In-app purchase status management | Until account deletion |
+| Apple | USA | Push notification delivery information, payment processing information | Transmitted over the network when sending notifications and at the time of purchase | Push notification delivery (APNs), App Store in-app purchase processing | Until the purpose of processing is achieved |
+| Google | USA | Device information, app usage event logs, push notification device token (FCM), payment processing information | Transmitted over the network during use, when sending notifications, and at the time of purchase | App configuration and usage analytics, push notification delivery (FCM), ad serving, Google Play in-app purchase and refund processing | Until the purpose of processing is achieved |
+| Meta Platforms | USA | Device advertising identifiers (IDFA/Google Advertising ID), app events (sign-up completion, first conversation, purchases), purchase/product interaction information | Transmitted over the network when app events occur | Ad performance measurement and marketing optimization | Retained and then destroyed in accordance with the processor's policies |
 
-이용자는 회원 가입 시 본 개인정보 처리방침에 동의함으로써 위와 같은 개인정보 국외 이전에 동의한 것으로 간주됩니다. 동의를 거부할 권리가 있으나, 거부 시 서비스 이용이 제한됩니다.
-
----
-
-## 제7조 (만 14세 미만 아동의 개인정보 처리)
-
-운영자는 만 14세 미만 아동의 개인정보를 수집하지 않으며, 만 14세 미만 아동은 서비스에 가입할 수 없습니다. 만 14세 미만 아동의 개인정보가 수집된 사실이 확인되는 경우 지체 없이 해당 정보를 파기합니다.
+By agreeing to this Privacy Policy at sign-up, users are deemed to have consented to the cross-border transfer of personal information described above. Users have the right to refuse consent; however, refusal may restrict use of the Service.
 
 ---
 
-## 제8조 (정보주체의 권리·의무 및 행사방법)
+## Article 7 (Processing of Personal Information of Children Under 14)
 
-1. 정보주체는 운영자에 대해 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할 수 있습니다.
-    - 개인정보 열람 요구
-    - 오류 등이 있을 경우 정정 요구
-    - 삭제 요구
-    - 처리 정지 요구
-2. 제1항에 따른 권리 행사는 운영자에 대해 서면, 전자우편 등을 통하여 하실 수 있으며, 운영자는 이에 대해 지체 없이 조치하겠습니다.
-3. 정보주체가 개인정보의 오류 등에 대한 정정 또는 삭제를 요구한 경우에는 운영자는 정정 또는 삭제를 완료할 때까지 당해 개인정보를 이용하거나 제공하지 않습니다.
-4. 제1항에 따른 권리 행사는 정보주체의 법정대리인이나 위임을 받은 자 등 대리인을 통하여 하실 수 있습니다. 이 경우 위임장을 제출하셔야 합니다.
-5. 이용자는 앱 내 "회원 탈퇴" 기능을 통해 언제든지 직접 모든 개인정보의 삭제를 요청할 수 있으며, 캐피의 기억 정보에 대한 열람 또는 삭제를 운영자에게 요청할 수 있습니다.
+The Operator does not collect personal information from children under the age of 14, and children under 14 may not sign up for the Service. If it is confirmed that personal information of a child under 14 has been collected, the Operator will destroy the information without delay.
 
 ---
 
-## 제9조 (개인정보의 파기절차 및 파기방법)
+## Article 8 (Rights and Obligations of Data Subjects and How to Exercise Them)
 
-1. 운영자는 개인정보 보유기간의 경과, 처리목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체 없이 해당 개인정보를 파기합니다.
-2. 파기의 절차 및 방법은 다음과 같습니다.
-    - **파기절차:** 이용자가 회원탈퇴를 요청하거나 보유 기간이 경과한 개인정보는 데이터베이스 및 기억 정보 저장소에서 지체 없이 삭제 처리됩니다.
-    - **파기방법:** 전자적 파일 형태의 정보는 기록을 재생할 수 없는 기술적 방법을 사용하여 영구 삭제합니다.
-
----
-
-## 제10조 (개인정보의 안전성 확보 조치)
-
-운영자는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.
-
-1. **관리적 조치:** 개인정보 취급 최소화, 정기적 자체 점검
-2. **기술적 조치:** 개인정보 전송 구간 암호화(TLS), 접근권한 관리, 비인가 접근 차단
-3. **물리적 조치:** 클라우드 인프라(AWS 등)의 물리적 보안 정책 준수
+1. Data subjects may exercise the following personal information protection rights against the Operator at any time.
+    - Request to access their personal information
+    - Request to correct errors
+    - Request to delete
+    - Request to suspend processing
+2. The rights under Paragraph 1 may be exercised against the Operator in writing, by email, or by similar means, and the Operator will act on such requests without delay.
+3. If a data subject requests correction or deletion of errors in their personal information, the Operator will not use or provide the personal information in question until the correction or deletion is completed.
+4. The rights under Paragraph 1 may be exercised through an agent, such as the data subject's legal representative or an authorized person. In such cases, a power of attorney must be submitted.
+5. Users may request deletion of all of their personal information at any time directly through the in-app "Delete Account" feature, and may also request deletion via the [Account Deletion Request page](/account-deletion) even without accessing the app. Users may request the Operator to access or delete Cappy's memory information.
 
 ---
 
-## 제11조 (자동 수집 장치의 설치·운영 및 거부에 관한 사항)
+## Article 9 (Destruction Procedures and Methods)
 
-1. 본 서비스는 모바일 애플리케이션으로, 쿠키를 사용하지 않습니다.
-2. 서비스 내 광고(리워드 광고 등) 게재 및 광고 성과 측정을 위해 기기의 광고 식별자(IDFA)가 사용될 수 있습니다. 광고 식별자를 활용한 추적(Meta 등 광고 플랫폼으로의 앱 이벤트 전송 포함)은 iOS의 앱 추적 투명성(ATT) 정책에 따라 이용자가 허용한 경우에만 이루어지며, 이용자는 iOS 설정 > 개인정보 보호 및 보안 > 추적에서 언제든지 이를 거부하거나 변경할 수 있습니다.
-
----
-
-## 제12조 (개인정보 보호책임자)
-
-운영자는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.
-
-- **개인정보 보호책임자**
-    - 성명: Rho changjun
-    - 연락처(이메일): nonoeul123@gmail.com
-
-정보주체는 운영자의 서비스를 이용하시면서 발생한 모든 개인정보 보호 관련 문의, 불만처리, 피해구제 등에 관한 사항을 개인정보 보호책임자에게 문의하실 수 있습니다. 운영자는 정보주체의 문의에 대해 지체 없이 답변 및 처리해드릴 것입니다.
+1. The Operator destroys personal information without delay when it becomes unnecessary, such as upon expiration of the retention period or achievement of the processing purpose.
+2. The destruction procedures and methods are as follows.
+    - **Procedure:** Personal information for which a user has requested account deletion or whose retention period has expired is deleted without delay from the database and memory information storage.
+    - **Method:** Information in electronic file form is permanently deleted using technical methods that make the records unrecoverable.
 
 ---
 
-## 제13조 (권익침해 구제방법)
+## Article 10 (Measures to Ensure the Safety of Personal Information)
 
-정보주체는 개인정보침해로 인한 구제를 받기 위하여 개인정보분쟁조정위원회, 한국인터넷진흥원 개인정보침해신고센터 등에 분쟁해결이나 상담 등을 신청할 수 있습니다. 이 밖에 기타 개인정보침해의 신고, 상담에 대하여는 아래의 기관에 문의하시기 바랍니다.
+The Operator takes the following measures to ensure the safety of personal information.
 
-- **개인정보분쟁조정위원회:** (국번없이) 1833-6972 (www.kopico.go.kr)
-- **개인정보침해신고센터:** (국번없이) 118 (privacy.kisa.or.kr)
-- **대검찰청:** (국번없이) 1301 (www.spo.go.kr)
-- **경찰청:** (국번없이) 182 (ecrm.cyber.go.kr)
-
----
-
-## 제14조 (개인정보 처리방침의 변경)
-
-1. 이 개인정보 처리방침은 시행일로부터 적용되며, 법령 및 방침에 따른 변경내용의 추가, 삭제 및 정정이 있는 경우에는 변경사항의 시행 7일 전부터 앱 내 공지사항을 통하여 고지할 것입니다.
-2. 다만, 이용자 권리의 중요한 변경이 있을 경우에는 최소 30일 전에 고지합니다.
+1. **Managerial measures:** Minimizing personal information handling, regular self-inspection
+2. **Technical measures:** Encryption of personal information in transit (TLS), access authorization management, blocking of unauthorized access
+3. **Physical measures:** Compliance with the physical security policies of cloud infrastructure providers (AWS, etc.)
 
 ---
 
-**부칙**
+## Article 11 (Automatic Collection Devices and How to Refuse Them)
 
-1. 본 방침은 2026년 6월 27일 제정되었습니다.
-2. 개정된 본 방침은 2026년 7월 13일부터 시행됩니다.
-3. 광고 성과 측정(Meta 등)에 관한 사항을 반영한 개정 방침은 2026년 7월 16일부터 시행됩니다.
-
-# 이용약관
-
-**서비스명:** BeCappy(비캐피)
-**시행일:** 2026년 6월 27일
-**최종 개정일:** 2026년 7월 13일
+1. The Service is a mobile application and does not use cookies.
+2. The device advertising identifier — IDFA on iOS and Google Advertising ID on Android — may be used to serve ads (such as rewarded ads) within the Service and to measure ad performance.
+    - **iOS:** Tracking using the advertising identifier (including sending app events to advertising platforms such as Meta) is performed only with the user's permission under Apple's App Tracking Transparency (ATT) framework, which applies to iOS only. Users may refuse or change this at any time in iOS Settings > Privacy & Security > Tracking.
+    - **Android:** Users may opt out of ads personalization or delete/reset their Advertising ID at any time in Android Settings > Google > Ads (or Settings > Privacy > Ads, depending on the device).
 
 ---
 
-## 제1조 (목적)
+## Article 12 (Personal Information Protection Officer)
 
-이 약관은 Rho changjun(이하 "운영자")이 제공하는 모바일 애플리케이션 "BeCappy(비캐피)"(이하 "서비스")의 이용과 관련하여 운영자와 이용자 간의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
+The Operator designates a Personal Information Protection Officer as follows, who is responsible for overseeing personal information processing and handling data subjects' complaints and remedies related to personal information processing.
 
----
+- **Personal Information Protection Officer**
+    - Name: Rho changjun
+    - Contact (email): nonoeul123@gmail.com
 
-## 제2조 (정의)
-
-이 약관에서 사용하는 용어의 정의는 다음과 같습니다.
-
-1. **서비스**: 운영자가 제공하는 AI 캐릭터와의 대화 기반 모바일 애플리케이션 "BeCappy" 및 관련 제반 서비스를 의미합니다.
-2. **이용자**: 이 약관에 따라 운영자가 제공하는 서비스를 이용하는 회원을 의미합니다.
-3. **회원**: 서비스에 Apple, Google 또는 Kakao 계정으로 로그인하여 이용자 정보를 등록한 자로서, 서비스를 지속적으로 이용할 수 있는 자를 의미합니다.
-4. **닉네임**: 회원의 식별과 서비스 이용을 위하여 회원이 직접 설정하여 운영자가 등록한 문자열을 의미합니다.
-5. **캐피**: 서비스 내에서 이용자와 대화하는 인공지능 기반 캐릭터를 의미합니다.
-6. **건초**: 서비스 내에서 꾸미기 아이템 구매 등에 사용할 수 있는 서비스 전용 재화를 의미하며, 결제를 통해 구매하거나(유료 건초) 출석·광고 시청·루틴 완료 등의 보상으로 무상 지급(무료 건초)됩니다.
+Data subjects may contact the Personal Information Protection Officer regarding all personal information protection inquiries, complaints, and remedies arising from use of the Service. The Operator will respond to and process such inquiries without delay.
 
 ---
 
-## 제3조 (약관의 효력 및 변경)
+## Article 13 (Remedies for Infringement of Rights)
 
-1. 이 약관은 서비스를 이용하고자 하는 모든 이용자에게 그 효력이 발생합니다.
-2. 운영자는 「약관의 규제에 관한 법률」, 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 등 관련 법령을 위배하지 않는 범위에서 이 약관을 변경할 수 있습니다. 약관을 변경할 경우 적용일자 및 변경사유를 명시하여 적용일 7일 전부터(이용자에게 불리한 변경은 30일 전부터) 앱 내 공지합니다.
-3. 이용자가 변경된 약관에 동의하지 않는 경우 회원 탈퇴를 할 수 있으며, 변경된 약관의 효력 발생일 이후에도 서비스를 계속 이용하는 경우에는 변경된 약관에 동의한 것으로 간주합니다.
+Data subjects may apply for dispute resolution or consultation with the Personal Information Dispute Mediation Committee, the Korea Internet & Security Agency (KISA) Personal Information Infringement Report Center, and other bodies to obtain remedies for personal information infringement. For other reports or consultations regarding personal information infringement, please contact the following organizations (Republic of Korea).
 
----
-
-## 제4조 (서비스의 제공 및 변경)
-
-1. 운영자는 다음과 같은 서비스를 제공합니다.
-    - AI 캐릭터 "캐피"와의 텍스트 기반 대화 기능
-    - 대화 내용을 바탕으로 한 일기 콘텐츠 발행 기능
-    - 루틴(습관) 등록·관리 기능
-    - 건초 획득(출석·리워드 광고·루틴 보상) 및 꾸미기 아이템 구매·장착 기능
-    - 건초 팩 등 유료 서비스
-    - 기타 운영자가 추가 개발하거나 다른 회사와의 제휴 계약을 통해 회원에게 제공하는 일체의 서비스
-2. 서비스는 연중무휴, 1일 24시간 제공함을 원칙으로 합니다. 다만, 시스템 점검, 통신장애, 천재지변, 제3자 서비스(AWS, Anthropic, OpenAI, Apple, Google, RevenueCat 등)의 장애 등 운영상·기술상의 사유로 서비스가 일시 중단될 수 있으며, 운영상의 목적으로 운영자가 정한 기간에는 서비스가 일시 중단될 수 있습니다. 이 경우 운영자는 사전 또는 사후에 이를 공지합니다.
-3. 대화 기능에는 일일 이용 한도가 적용될 수 있으며, 한도는 매일 정해진 시각에 초기화됩니다. 구체적인 한도는 앱 내에 표시됩니다.
+- **Personal Information Dispute Mediation Committee:** 1833-6972 (www.kopico.go.kr)
+- **Personal Information Infringement Report Center:** 118 (privacy.kisa.or.kr)
+- **Supreme Prosecutors' Office:** 1301 (www.spo.go.kr)
+- **National Police Agency:** 182 (ecrm.cyber.go.kr)
 
 ---
 
-## 제5조 (회원가입 및 이용 연령)
+## Article 14 (Changes to This Privacy Policy)
 
-1. 이용자는 운영자가 정한 가입 양식에 따라 Apple, Google 또는 Kakao 계정으로 로그인하고 닉네임을 설정한 후 이 약관 및 개인정보 처리방침에 동의한다는 의사표시를 함으로써 회원가입을 신청합니다.
-2. 만 14세 미만의 아동은 회원으로 가입할 수 없습니다.
-3. 운영자는 제1항과 같이 회원으로 가입할 것을 신청한 이용자 중 다음 각 호에 해당하지 아니하는 한 회원으로 등록합니다.
-    - 가입신청자가 이 약관에 의하여 이전에 회원자격을 상실한 적이 있는 경우
-    - 등록 내용에 허위, 기재누락, 오기가 있는 경우
-    - 기타 회원으로 등록하는 것이 운영자의 기술상 현저히 지장이 있다고 판단되는 경우
-4. 회원가입계약의 성립 시기는 운영자의 승낙이 이용자에게 도달한 시점으로 합니다.
+1. This Privacy Policy applies from the effective date. When there are additions, deletions, or corrections to this policy under applicable laws or internal policies, changes will be announced through in-app notices from 7 days before they take effect.
+2. However, significant changes to user rights will be announced at least 30 days in advance.
 
 ---
 
-## 제6조 (닉네임)
+**Addendum**
 
-1. 다음 각 호에 해당하는 닉네임은 사용할 수 없으며, 운영자는 해당 닉네임의 사용을 제한할 수 있습니다.
-    - 타인의 명예를 훼손하거나 모욕하는 내용
-    - 반사회적이거나 음란한 내용
-    - 운영자 또는 제3자의 권리를 침해하는 내용
-    - 운영자나 운영자의 운영진을 사칭하는 내용
-    - 기타 합리적인 사유로 운영자가 부적절하다고 판단하는 경우
+1. This policy was established on June 27, 2026.
+2. The revised policy takes effect on July 13, 2026.
+3. The revised policy reflecting ad performance measurement (Meta, etc.) takes effect on July 16, 2026.
+4. The revised policy reflecting the Android (Google Play) release — including FCM push notification tokens, the Google Advertising ID, Google Play billing, and publication of this policy in English — takes effect on July 28, 2026.
 
----
+# Terms of Service
 
-## 제7조 (유료 서비스 및 결제)
-
-1. 운영자는 건초 팩 등 유료 서비스를 제공하며, 상품의 종류·가격·제공 내용은 앱 내 및 App Store 상품 정보에 표시됩니다.
-2. 유료 서비스의 결제는 Apple App Store의 인앱 결제를 통해 이루어지며, 결제 조건 및 절차는 Apple의 정책을 따릅니다.
-3. **환불**: 인앱 결제의 환불(청약철회)은 Apple App Store의 환불 정책 및 관계 법령에 따라 처리되며, 이용자는 Apple의 환불 신청 절차(reportaproblem.apple.com)를 통해 신청할 수 있습니다. 운영자는 Apple을 통하지 않은 별도의 현금 환불을 제공하지 않습니다.
-4. **환불 시 재화 회수**: 건초 팩 결제가 환불되는 경우, 해당 결제로 지급된 건초는 잔여 보유량의 범위 내에서 회수될 수 있습니다.
+**Service:** BeCappy
+**Effective Date:** June 27, 2026
+**Last Revised:** July 28, 2026
 
 ---
 
-## 제8조 (건초 및 꾸미기 아이템)
+## Article 1 (Purpose)
 
-1. 건초는 서비스 내에서만 사용할 수 있는 재화로, 현금으로 환급되지 않으며 제3자에게 양도·대여·매매할 수 없습니다.
-2. 출석, 리워드 광고 시청, 루틴 완료 보상 등으로 무상 지급된 무료 건초는 환불 대상이 아닙니다.
-3. 건초로 구매한 꾸미기 아이템은 구매 즉시 제공되는 디지털 콘텐츠로, 관계 법령상 허용되는 범위에서 구매 확정 후 청약철회가 제한될 수 있습니다.
-4. 회원 탈퇴 시 잔여 건초 및 보유 아이템은 모두 소멸되며 복구·환급되지 않습니다. 탈퇴 전 유료 결제 건에 대한 환불은 제7조 제3항의 절차를 따릅니다.
-5. 리워드 광고 보상은 광고 매체사의 시청 확인(서버 검증)이 완료된 경우에 지급되며, 1일 지급 횟수에 상한이 있을 수 있습니다.
+These Terms of Service (these "Terms") set forth the rights, obligations, and responsibilities of the operator and users, and other necessary matters, regarding use of the mobile application "BeCappy" (the "Service") provided by Rho changjun (the "Operator").
 
 ---
 
-## 제9조 (회원의 의무)
+## Article 2 (Definitions)
 
-1. 회원은 다음 각 호의 행위를 하여서는 안 됩니다.
-    - 신청 또는 변경 시 허위 내용의 등록
-    - 타인의 정보 도용
-    - 운영자가 게시한 정보의 무단 변경
-    - 운영자가 정한 정보 이외의 정보(컴퓨터 프로그램 등) 송신 또는 게시
-    - 운영자 및 기타 제3자의 저작권 등 지적재산권에 대한 침해
-    - 운영자 및 기타 제3자의 명예를 손상시키거나 업무를 방해하는 행위
-    - 외설 또는 폭력적인 메시지, 기타 공서양속에 반하는 정보를 서비스에 공개 또는 게시하는 행위
-    - 서비스를 영리 목적, 광고, 정치활동 등 본래 용도 이외의 용도로 이용하는 행위
-    - 비정상적인 방법(매크로, 자동화 도구 등)으로 서비스를 이용하거나 시스템에 접근하는 행위, 광고 보상·재화의 부정 취득 행위
-    - 리버스 엔지니어링, 디컴파일, 디스어셈블 및 기타 일체의 가공 행위
-    - 기타 관계 법령에 위배되는 행위
-2. 회원은 관계법령, 이 약관의 규정, 이용안내 및 서비스와 관련하여 공지한 주의사항, 운영자가 통지하는 사항 등을 준수하여야 하며, 기타 운영자의 업무에 방해되는 행위를 하여서는 안 됩니다.
-3. 이용자는 운영자에게 캐피가 저장하고 있는 기억 정보의 열람 또는 삭제를 요청할 수 있으며, 운영자는 지체 없이 이에 응합니다.
+The terms used in these Terms are defined as follows.
+
+1. **Service**: The conversation-based mobile application "BeCappy" featuring an AI character, and all related services provided by the Operator.
+2. **User**: A member who uses the Service provided by the Operator in accordance with these Terms.
+3. **Member**: A person who has signed in to the Service with an Apple, Google, or Kakao account and registered user information, and who may use the Service on an ongoing basis.
+4. **Nickname**: A string of characters set directly by the member and registered by the Operator for member identification and use of the Service.
+5. **Cappy**: The artificial intelligence character that converses with users within the Service.
+6. **Hay**: The Service-exclusive currency that can be used for purchasing decoration items and similar purposes within the Service. It may be purchased through payment (paid Hay) or granted free of charge as rewards for attendance, ad viewing, routine completion, and the like (free Hay).
 
 ---
 
-## 제10조 (서비스 이용제한)
+## Article 3 (Effect and Amendment of the Terms)
 
-1. 운영자는 회원이 제9조의 의무를 위반한 경우 사전 통지 없이 즉시 서비스 이용을 제한하거나 회원자격을 상실시킬 수 있습니다.
-2. 본 조에 따라 서비스 이용을 제한하거나 계약을 해지하는 경우에는 운영자는 이메일을 통하여 이를 회원에게 통지합니다.
-
----
-
-## 제11조 (회원탈퇴 및 자격상실)
-
-1. 회원은 앱 내 "회원 탈퇴" 기능을 통해 언제든지 탈퇴를 요청할 수 있으며, 운영자는 즉시 회원탈퇴를 처리합니다.
-2. 회원 탈퇴 시 회원의 모든 개인정보(대화 내용, 일기, 기억 정보 포함)는 개인정보 처리방침에 따라 파기되며, 복구할 수 없습니다. 잔여 건초 및 보유 아이템도 함께 소멸됩니다.
-3. 회원이 다음 각 호의 사유에 해당하는 경우, 운영자는 회원자격을 제한 및 정지시킬 수 있습니다.
-    - 가입 신청 시에 허위 내용을 등록한 경우
-    - 다른 사람의 서비스 이용을 방해하거나 그 정보를 도용하는 등 전자상거래 질서를 위협하는 경우
-    - 서비스를 이용하여 법령 또는 이 약관이 금지하거나 공서양속에 반하는 행위를 하는 경우
+1. These Terms take effect for all users who wish to use the Service.
+2. The Operator may amend these Terms to the extent that they do not violate applicable laws, including the Act on the Regulation of Terms and Conditions and the Act on Promotion of Information and Communications Network Utilization and Information Protection of the Republic of Korea. When amending these Terms, the Operator will announce the effective date and the reason for the amendment through in-app notices from 7 days before the effective date (30 days for amendments unfavorable to users).
+3. Users who do not agree to the amended Terms may delete their account. Continued use of the Service after the effective date of the amended Terms is deemed acceptance of the amended Terms.
 
 ---
 
-## 제12조 (AI 생성 콘텐츠 및 이용상 유의사항)
+## Article 4 (Provision and Modification of the Service)
 
-1. 캐피의 대화 응답 및 일기 콘텐츠는 인공지능 기술에 의해 자동으로 생성된 결과물입니다.
-2. AI가 생성하는 내용은 항상 정확하지 않을 수 있으며, 정서적 교감과 일상 기록을 위한 참고용으로만 활용해야 합니다. 회원은 AI가 생성한 내용을 의학적·법률적·재정적 판단 등 중요한 의사결정의 근거로 사용해서는 안 됩니다.
-3. **본 서비스는 의료 행위, 심리 치료 또는 전문 심리 상담을 제공하지 않으며, 이를 대체할 수 없습니다.** 정신건강과 관련한 어려움이나 위기 상황에 있는 경우 자살예방 상담전화(109), 정신건강 위기상담전화(1577-0199) 등 전문기관의 도움을 받으시기 바랍니다.
-4. 운영자는 AI가 생성한 콘텐츠의 정확성, 완전성, 신뢰성에 대해 어떠한 보증도 하지 않으며, 회원이 이를 신뢰하여 행한 판단·행위로 인해 발생하는 결과에 대한 책임을 지지 않습니다.
-5. 운영자는 자연스러운 대화 맥락 유지를 위해 이용자가 대화 중 공유한 정보 일부를 캐피의 기억 정보로 저장할 수 있습니다. 저장되는 정보의 범위, 보유 기간, 삭제 방법에 관한 사항은 개인정보 처리방침에 따릅니다.
-
----
-
-## 제13조 (광고의 게재)
-
-1. 운영자는 서비스 내에 광고(리워드 광고 등)를 게재할 수 있습니다.
-2. 리워드 광고의 시청 여부는 이용자의 선택이며, 시청 완료 시 앱 내 재화(건초)가 보상으로 지급됩니다.
-3. 이용자가 광고를 통해 제3자와 거래하는 경우 해당 거래는 이용자와 제3자 간의 문제이며, 운영자는 이에 대해 책임을 지지 않습니다.
+1. The Operator provides the following services.
+    - Text-based conversation with the AI character "Cappy"
+    - Diary content publication based on conversation content
+    - Routine (habit) registration and management
+    - Earning Hay (attendance, rewarded ads, routine rewards) and purchasing/equipping decoration items
+    - Paid services such as Hay packs
+    - Any other services additionally developed by the Operator or provided to members through partnership agreements with other companies
+2. In principle, the Service is provided 24 hours a day, year-round. However, the Service may be temporarily suspended for operational or technical reasons such as system maintenance, communication failures, force majeure, or failures of third-party services (AWS, Anthropic, OpenAI, Apple, Google, RevenueCat, etc.), and the Service may be temporarily suspended during periods determined by the Operator for operational purposes. In such cases, the Operator will give notice in advance or afterward.
+3. Daily usage limits may apply to the conversation feature, and limits reset at a set time each day. Specific limits are displayed within the app.
 
 ---
 
-## 제14조 (저작권 및 지적재산권)
+## Article 5 (Membership Registration and Age Requirement)
 
-1. 서비스 내 운영자가 제공하는 모든 콘텐츠(캐피 캐릭터, 이미지, 디자인, 텍스트, 꾸미기 아이템 등)에 대한 저작권 및 지적재산권은 운영자에게 귀속됩니다.
-2. 회원은 서비스를 이용함으로써 얻은 정보 중 운영자에게 지적재산권이 귀속된 정보를 운영자의 사전 동의 없이 복제, 송신, 출판, 배포, 방송, 기타 방법에 의하여 영리 목적으로 이용하거나 제3자에게 이용하게 하여서는 안 됩니다.
-3. 건초로 구매한 꾸미기 아이템에 대해 회원은 서비스 내에서 이를 이용할 수 있는 권리를 부여받을 뿐, 해당 콘텐츠에 대한 소유권 또는 지적재산권을 취득하는 것은 아닙니다.
-
----
-
-## 제15조 (개인정보 보호)
-
-운영자는 관계 법령이 정하는 바에 따라 회원의 개인정보를 보호하기 위해 노력합니다. 개인정보의 보호 및 사용에 대해서는 관련 법령 및 운영자의 개인정보 처리방침이 적용됩니다.
+1. A user applies for membership by signing in with an Apple, Google, or Kakao account in accordance with the registration form set by the Operator, setting a nickname, and expressing agreement to these Terms and the Privacy Policy.
+2. Children under the age of 14 may not register as members.
+3. The Operator registers as a member any user who applies as described in Paragraph 1, unless the applicant falls under any of the following.
+    - The applicant has previously lost membership under these Terms
+    - The registration contains falsehoods, omissions, or errors
+    - Registering the applicant as a member would cause significant technical difficulty for the Operator
+4. The membership agreement is formed when the Operator's acceptance reaches the user.
 
 ---
 
-## 제16조 (운영자의 면책)
+## Article 6 (Nicknames)
 
-1. 운영자는 회원의 귀책사유로 인한 서비스 이용의 장애에 대하여 책임을 지지 않습니다.
-2. 운영자는 회원 상호 간 또는 회원과 제3자 간에 서비스를 매개로 발생한 분쟁에 대하여 개입할 의무가 없으며, 이로 인한 손해를 배상할 책임이 없습니다.
-3. 운영자는 천재지변, 제3자 서비스의 장애 등 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는 서비스 제공에 관한 책임이 면제됩니다.
-
----
-
-## 제17조 (분쟁의 해결)
-
-1. 운영자와 회원은 서비스와 관련하여 발생한 분쟁을 원만하게 해결하기 위하여 필요한 모든 노력을 하여야 합니다.
-2. 제1항의 노력에도 불구하고 분쟁이 해결되지 않을 경우 양 당사자는 「민사소송법」상의 관할법원에 소를 제기할 수 있습니다.
+1. Nicknames falling under any of the following may not be used, and the Operator may restrict their use.
+    - Content that defames or insults others
+    - Antisocial or obscene content
+    - Content that infringes the rights of the Operator or third parties
+    - Content that impersonates the Operator or its staff
+    - Any other case that the Operator reasonably determines to be inappropriate
 
 ---
 
-## 제18조 (준거법 및 관할법원)
+## Article 7 (Paid Services and Payment)
 
-1. 이 약관의 해석 및 운영자와 회원 간의 분쟁에 대하여는 대한민국의 법령을 적용합니다.
-2. 서비스 이용으로 발생한 분쟁에 대한 소송은 「민사소송법」상의 관할법원에 제기합니다.
-
----
-
-## 제19조 (문의처)
-
-서비스 이용과 관련된 문의사항은 아래 연락처로 문의하실 수 있습니다.
-
-- **운영자:** Rho changjun
-- **이메일:** nonoeul123@gmail.com
+1. The Operator provides paid services such as Hay packs, and the type, price, and content of products are displayed within the app and in the App Store or Google Play product listings.
+2. Payment for paid services is made through the in-app purchase system of the store from which the app was downloaded — the Apple App Store on iOS or Google Play on Android — and payment terms and procedures follow the policies of Apple or Google, respectively.
+3. **Refunds**: Refunds (withdrawal of offers) for in-app purchases are processed in accordance with the refund policies of the respective store and applicable laws.
+    - **Apple App Store:** Users may request a refund through Apple's refund request procedure at reportaproblem.apple.com.
+    - **Google Play:** Users may request a refund through Google Play's refund procedure — from the order history at play.google.com/store/account, via the Google Play app, or at support.google.com/googleplay — in accordance with Google Play's refund policy.
+    - The Operator does not provide separate cash refunds outside of Apple or Google.
+4. **Recovery of currency upon refund**: If a Hay pack purchase is refunded, the Hay granted for that purchase may be recovered up to the remaining balance.
 
 ---
 
-**부칙**
+## Article 8 (Hay and Decoration Items)
 
-1. 본 약관은 2026년 6월 27일 제정되었습니다.
-2. 개정된 본 약관은 2026년 7월 13일부터 시행됩니다.
+1. Hay is a currency usable only within the Service; it is not redeemable for cash and may not be transferred, lent, or sold to third parties.
+2. Free Hay granted without charge as rewards for attendance, rewarded-ad viewing, routine completion, and the like is not eligible for refunds.
+3. Decoration items purchased with Hay are digital content provided immediately upon purchase, and withdrawal of offers after purchase confirmation may be restricted to the extent permitted by applicable laws.
+4. Upon account deletion, all remaining Hay and owned items are extinguished and cannot be restored or refunded. Refunds for paid purchases made before deletion follow the procedure in Article 7, Paragraph 3.
+5. Rewarded-ad rewards are granted when the ad network's view verification (server-side validation) is complete, and a daily limit on the number of rewards may apply.
+
+---
+
+## Article 9 (Member Obligations)
+
+1. Members must not engage in any of the following.
+    - Registering false information when applying or making changes
+    - Misappropriating another person's information
+    - Altering information posted by the Operator without authorization
+    - Transmitting or posting information (such as computer programs) other than information permitted by the Operator
+    - Infringing the intellectual property rights, including copyrights, of the Operator or third parties
+    - Damaging the reputation of, or interfering with the business of, the Operator or third parties
+    - Publishing or posting obscene or violent messages or other information contrary to public order and morals
+    - Using the Service for commercial purposes, advertising, political activities, or other purposes outside its intended use
+    - Using the Service or accessing systems through abnormal means (macros, automation tools, etc.), or fraudulently obtaining ad rewards or currency
+    - Reverse engineering, decompiling, disassembling, or any other form of alteration
+    - Any other conduct that violates applicable laws
+2. Members must comply with applicable laws, these Terms, usage guides, precautions announced in connection with the Service, and matters notified by the Operator, and must not engage in any conduct that interferes with the Operator's business.
+3. Users may request the Operator to access or delete memory information stored by Cappy, and the Operator will comply without delay.
+
+---
+
+## Article 10 (Restriction of Service Use)
+
+1. If a member violates the obligations in Article 9, the Operator may immediately restrict the member's use of the Service or revoke membership without prior notice.
+2. When restricting use of the Service or terminating the agreement under this Article, the Operator will notify the member by email.
+
+---
+
+## Article 11 (Account Deletion and Loss of Membership)
+
+1. Members may request account deletion at any time through the in-app "Delete Account" feature, and the Operator will process the deletion immediately.
+2. Upon account deletion, all of the member's personal information (including conversations, diaries, and memory information) is destroyed in accordance with the Privacy Policy and cannot be recovered. Remaining Hay and owned items are extinguished as well.
+3. If a member falls under any of the following, the Operator may restrict or suspend membership.
+    - The member registered false information when applying
+    - The member threatens the order of electronic commerce, such as by interfering with another person's use of the Service or misappropriating their information
+    - The member uses the Service to engage in conduct prohibited by law or these Terms or contrary to public order and morals
+
+---
+
+## Article 12 (AI-Generated Content and Precautions)
+
+1. Cappy's conversation responses and diary content are automatically generated by artificial intelligence technology.
+2. AI-generated content may not always be accurate and should be used only as a reference for emotional companionship and daily journaling. Members must not use AI-generated content as the basis for important decisions such as medical, legal, or financial judgments.
+3. **The Service does not provide, and cannot substitute for, medical care, psychotherapy, or professional counseling.** If you are experiencing mental health difficulties or a crisis, please seek help from professional services — in the Republic of Korea, the Suicide Prevention Hotline (109) or the Mental Health Crisis Hotline (1577-0199); outside Korea, your local emergency or crisis support services.
+4. The Operator makes no warranty as to the accuracy, completeness, or reliability of AI-generated content, and is not responsible for outcomes arising from judgments or actions made by members in reliance on such content.
+5. The Operator may store some information shared by users during conversations as Cappy's memory information to maintain natural conversational context. The scope of stored information, retention period, and deletion methods are governed by the Privacy Policy.
+
+---
+
+## Article 13 (Advertising)
+
+1. The Operator may display advertisements (such as rewarded ads) within the Service.
+2. Viewing rewarded ads is at the user's option, and upon completion of viewing, in-app currency (Hay) is granted as a reward.
+3. If a user transacts with a third party through an advertisement, the transaction is a matter between the user and the third party, and the Operator is not responsible for it.
+
+---
+
+## Article 14 (Copyright and Intellectual Property)
+
+1. Copyrights and intellectual property rights in all content provided by the Operator within the Service (the Cappy character, images, designs, text, decoration items, etc.) belong to the Operator.
+2. Members must not use information obtained through the Service in which intellectual property rights belong to the Operator for commercial purposes — by reproduction, transmission, publication, distribution, broadcasting, or other methods — or allow third parties to use it, without the Operator's prior consent.
+3. For decoration items purchased with Hay, members are granted only the right to use them within the Service, and do not acquire ownership or intellectual property rights in the content.
+
+---
+
+## Article 15 (Privacy Protection)
+
+The Operator endeavors to protect members' personal information in accordance with applicable laws. The protection and use of personal information is governed by applicable laws and the Operator's Privacy Policy.
+
+---
+
+## Article 16 (Disclaimer)
+
+1. The Operator is not responsible for Service disruptions caused by reasons attributable to the member.
+2. The Operator has no obligation to intervene in disputes arising between members, or between a member and a third party, through the Service, and is not liable for damages resulting therefrom.
+3. The Operator is exempt from responsibility for providing the Service where it cannot do so due to force majeure, such as natural disasters or failures of third-party services.
+
+---
+
+## Article 17 (Dispute Resolution)
+
+1. The Operator and members shall make all efforts necessary to amicably resolve disputes arising in connection with the Service.
+2. If a dispute is not resolved despite the efforts under Paragraph 1, either party may file a lawsuit with the competent court under the Civil Procedure Act of the Republic of Korea.
+
+---
+
+## Article 18 (Governing Law and Jurisdiction)
+
+1. The laws of the Republic of Korea apply to the interpretation of these Terms and to disputes between the Operator and members.
+2. Lawsuits over disputes arising from use of the Service shall be filed with the competent court under the Civil Procedure Act of the Republic of Korea.
+
+---
+
+## Article 19 (Contact)
+
+Inquiries regarding use of the Service may be directed to the contact below.
+
+- **Operator:** Rho changjun
+- **Email:** nonoeul123@gmail.com
+
+---
+
+**Addendum**
+
+1. These Terms were established on June 27, 2026.
+2. The amended Terms take effect on July 13, 2026.
+3. The amended Terms reflecting the Android (Google Play) release — including Google Play billing and refund procedures and publication of these Terms in English — take effect on July 28, 2026.
