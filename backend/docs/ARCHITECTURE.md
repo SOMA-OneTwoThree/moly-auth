@@ -45,7 +45,7 @@ Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프�
 | POST | `/onboarding` | 닉네임(1~10자)·타임존(IANA)·언어(ISO 639-1) 저장 → `{profile, entitlement}`. 재호출 409 |
 | PATCH | `/me` | 보낸 필드만 변경 → `{profile}` |
 | GET/PATCH | `/me/notifications` | 알림 2종(morning_diary·evening_chat) on/off. 행 없으면 기본 on |
-| POST | `/me/push-token` | APNs 토큰 upsert(UNIQUE — 기기 이전 시 재귀속) → 204 |
+| POST | `/me/push-token` | FCM 푸시 토큰 upsert(`platform: ios\|android`, 생략 시 ios 하위호환. 토큰 UNIQUE — 기기 이전 시 재귀속) → 204 |
 | POST | `/auth/logout` | 해당 push_token 행만 삭제(멀티 기기 안전) → 204. 세션 종료는 클라 signOut |
 | DELETE | `/me` | 탈퇴: `auth.admin.deleteUser`(전 테이블 CASCADE) + mem0 행 정리(실패해도 204 — 최종적 정리) → 204 |
 
