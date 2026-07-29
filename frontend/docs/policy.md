@@ -2,7 +2,7 @@
 
 **Service:** BeCappy
 **Effective Date:** June 27, 2026
-**Last Revised:** July 28, 2026
+**Last Revised:** July 29, 2026
 
 Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
 
@@ -224,13 +224,13 @@ Data subjects may apply for dispute resolution or consultation with the Personal
 1. This policy was established on June 27, 2026.
 2. The revised policy takes effect on July 13, 2026.
 3. The revised policy reflecting ad performance measurement (Meta, etc.) takes effect on July 16, 2026.
-4. The revised policy reflecting the Android (Google Play) release — including FCM push notification tokens, the Google Advertising ID, Google Play billing, and publication of this policy in English — takes effect on July 28, 2026.
+4. The revised policy reflecting the Android (Google Play) release — including FCM push notification tokens, the Google Advertising ID, Google Play billing, and publication of this policy in English — takes effect on July 29, 2026.
 
 # Terms of Service
 
 **Service:** BeCappy
 **Effective Date:** June 27, 2026
-**Last Revised:** July 28, 2026
+**Last Revised:** July 29, 2026
 
 ---
 
@@ -424,4 +424,4 @@ Inquiries regarding use of the Service may be directed to the contact below.
 
 1. These Terms were established on June 27, 2026.
 2. The amended Terms take effect on July 13, 2026.
-3. The amended Terms reflecting the Android (Google Play) release — including Google Play billing and refund procedures and publication of these Terms in English — take effect on July 28, 2026.
+3. The amended Terms reflecting the Android (Google Play) release — including Google Play billing and refund procedures and publication of these Terms in English — take effect on July 29, 2026.
