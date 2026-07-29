@@ -1,35 +1,43 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import styles from "./support.module.css";
 import kakaoIcon from "@/images/kakaotalk.png";
-import EmailCopyCard from "./EmailCopyCard";
+import EmailCopyCard from "@/components/EmailCopyCard";
 
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "고객 지원 | BeCappy",
-  description: "BeCappy 서비스 이용 문의 및 자주 묻는 질문 안내 페이지입니다.",
+  title: "Support | BeCappy",
+  description: "Contact channels and frequently asked questions for the BeCappy app.",
 };
 
 const SUPPORT_EMAIL = "nonoeul123@gmail.com";
 const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_TshfX";
 
-const FAQ: { q: string; a: string }[] = [
+const FAQ: { q: string; a: ReactNode }[] = [
   {
-    q: "결제 환불은 어떻게 하나요?",
-    a: "인앱 결제(건초)의 환불은 Apple의 환불 정책에 따라 처리됩니다. reportaproblem.apple.com에서 신청하실 수 있습니다.",
+    q: "How do I get a refund?",
+    a: "Refunds for in-app purchases (Hay) are handled by the store you purchased from. On iOS, request a refund at reportaproblem.apple.com; on Android, request one from your order history at play.google.com/store/account.",
   },
   {
-    q: "회원 탈퇴는 어떻게 하나요?",
-    a: "앱 내 설정 > 회원 탈퇴에서 진행하실 수 있습니다. 탈퇴 시 대화·일기 등 모든 데이터가 삭제되며 복구할 수 없습니다.",
+    q: "How do I delete my account?",
+    a: (
+      <>
+        Go to Settings &gt; Delete Account in the app. All your data, including
+        conversations and diaries, is permanently deleted and can&apos;t be
+        recovered. If you can no longer access the app, see the{" "}
+        <a href="/account-deletion">Account Deletion page</a>.
+      </>
+    ),
   },
   {
-    q: "하루에 나눌 수 있는 대화에 제한이 있나요?",
-    a: "하루 대화 한도가 있으며, 매일 오전 4시에 초기화됩니다. 한도에 도달하면 다음 날 다시 대화할 수 있어요.",
+    q: "Is there a limit on daily conversations?",
+    a: "There is a daily conversation limit, which resets at 4 AM every day. Once you reach it, you can chat with Cappy again the next day.",
   },
   {
-    q: "건초는 어떻게 모을 수 있나요?",
-    a: "매일 출석 체크, 리워드 광고 시청, 루틴 완료 보상으로 모을 수 있고, 상점에서 구매할 수도 있습니다.",
+    q: "How do I earn Hay?",
+    a: "Check in daily, watch rewarded ads, and complete your routines — or purchase Hay from the shop.",
   },
 ];
 
@@ -37,15 +45,15 @@ export default function SupportPage() {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
-        <h1 className={styles.title}>BeCappy 고객 지원</h1>
+        <h1 className={styles.title}>BeCappy Support</h1>
         <p className={styles.lead}>
-          서비스 이용 중 문의사항이나 불편한 점이 있으시면
+          Have a question or something not working?
           <br />
-          아래 채널로 편하게 연락 주세요.
+          Reach us anytime through the channels below.
         </p>
       </header>
 
-      <section className={styles.channels} aria-label="문의 채널">
+      <section className={styles.channels} aria-label="Contact channels">
         <a
           className={`${styles.channelCard} ${styles.kakaoCard}`}
           href={KAKAO_CHANNEL_URL}
@@ -60,9 +68,9 @@ export default function SupportPage() {
             className={styles.channelIcon}
           />
           <span className={styles.channelBody}>
-            <span className={styles.channelName}>카카오톡 채널 문의</span>
+            <span className={styles.channelName}>KakaoTalk Channel</span>
             <span className={styles.channelDesc}>
-              1:1 채팅으로 가장 빠르게 답변받을 수 있어요
+              1:1 chat — the fastest way to get an answer
             </span>
           </span>
           <span className={styles.channelArrow} aria-hidden>
@@ -70,11 +78,15 @@ export default function SupportPage() {
           </span>
         </a>
 
-        <EmailCopyCard email={SUPPORT_EMAIL} />
+        <EmailCopyCard
+          email={SUPPORT_EMAIL}
+          title="Email support"
+          description={`${SUPPORT_EMAIL} · Replies within 1–3 business days`}
+        />
       </section>
 
-      <section aria-label="자주 묻는 질문">
-        <h2 className={styles.faqTitle}>자주 묻는 질문</h2>
+      <section aria-label="Frequently asked questions">
+        <h2 className={styles.faqTitle}>Frequently Asked Questions</h2>
         <ul className={styles.faqList}>
           {FAQ.map((item) => (
             <li key={item.q} className={styles.faqItem}>

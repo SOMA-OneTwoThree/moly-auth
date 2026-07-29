@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import styles from "./support.module.css";
+import styles from "./EmailCopyCard.module.css";
 
-export default function EmailCopyCard({ email }: { email: string }) {
+export default function EmailCopyCard({
+  email,
+  title,
+  description,
+}: {
+  email: string;
+  title: string;
+  description?: string;
+}) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -35,25 +43,23 @@ export default function EmailCopyCard({ email }: { email: string }) {
   return (
     <button
       type="button"
-      className={`${styles.channelCard} ${styles.copyCard}`}
+      className={styles.card}
       onClick={handleCopy}
-      title="이메일 주소 복사"
+      title="Copy email address"
     >
-      <span className={styles.emailIcon} aria-hidden>
+      <span className={styles.icon} aria-hidden>
         ✉️
       </span>
-      <span className={styles.channelBody}>
-        <span className={styles.channelName}>이메일 문의</span>
-        <span className={styles.channelDesc}>
-          {email} · 영업일 기준 1~3일 이내 답변
-        </span>
+      <span className={styles.body}>
+        <span className={styles.name}>{title}</span>
+        <span className={styles.desc}>{description ?? email}</span>
       </span>
       <span
         className={`${styles.copyBadge} ${copied ? styles.copiedBadge : ""}`}
         aria-live="polite"
       >
         {copied ? (
-          "복사됨 ✓"
+          "Copied ✓"
         ) : (
           <svg
             width="18"

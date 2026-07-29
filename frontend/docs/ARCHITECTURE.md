@@ -12,7 +12,7 @@
 
 - **인증 체인 검증 하니스**: 구글 로그인 버튼 하나로 **발급(프론트 SDK) → Bearer → 백엔드 `getUser`** 전체 체인을 눈으로 확인한다. 로그인 후 `/api/me`를 호출해 본인 신원(JSON)을 화면에 출력.
 - **출시용 공개 페이지**: `/policy`(Privacy Policy·Terms of Service), `/support`(고객 지원), `/account-deletion`(계정 삭제 요청 — Google Play "앱 외부 삭제 요청 URL" 요건). 로그인 없이 접근 가능 — App Store·Google Play/OAuth 심사 제출용.
-- **언어 정책**: 해외·국내 단일 링크 운영을 위해 `/policy`·`/account-deletion`은 **영문**, `/support`와 랜딩(`/`)은 **한국어** 유지.
+- **언어 정책**: 해외·국내 단일 링크 운영을 위해 공개 페이지(`/policy`·`/support`·`/account-deletion`)는 **영문**, 랜딩(`/`)만 **한국어** 유지.
 - 미들웨어가 없어 **새 라우트는 기본 public**이다(아래 [라우트](#3-라우트) 참조).
 
 ## 2. 기술 스택
@@ -36,8 +36,8 @@ App Router(`app/`). `pages/` 없음. **미들웨어/라우트 가드 없음** �
 | `/` | `app/page.tsx` | 클라이언트 | 인증 게이트(UX) | 인증 체인 테스터. 로그인/세션 표시/`/api/me` 호출 |
 | `/auth/callback` | `app/auth/callback/page.tsx` | 클라이언트 | 공개(전이) | OAuth 랜딩. `?code=` 자동 교환 후 `/`로 replace, 7s 타임아웃 |
 | `/policy` | `app/policy/page.tsx` | 서버(`force-static`) | **공개** | `docs/policy.md`(영문)를 분리 렌더(Privacy Policy + Terms of Service) |
-| `/support` | `app/support/page.tsx` | 서버(`force-static`) | **공개** | 고객 지원(문의 이메일·응답 시간·FAQ, 한국어) |
-| `/account-deletion` | `app/account-deletion/page.tsx` | 서버(`force-static`) | **공개** | 계정 삭제 안내(영문): 앱 내 절차 + 이메일 요청(mailto 프리필) |
+| `/support` | `app/support/page.tsx` | 서버(`force-static`) | **공개** | 고객 지원(문의 채널·FAQ, 영문) |
+| `/account-deletion` | `app/account-deletion/page.tsx` | 서버(`force-static`) | **공개** | 계정 삭제 안내(영문): 앱 내 절차 + 이메일 요청(복사 카드) |
 
 ## 4. 인증 / 데이터 흐름
 
@@ -58,8 +58,9 @@ App Router(`app/`). `pages/` 없음. **미들웨어/라우트 가드 없음** �
 
 - 모두 **서버 컴포넌트 + `export const dynamic = "force-static"`** → 빌드 타임에 정적 HTML 생성(런타임 파일 I/O 없음).
 - `/policy`: `docs/policy.md`(영문)를 읽어 `# Terms of Service` 헤딩 기준으로 **Privacy Policy / Terms of Service 두 섹션**(`#privacy` / `#terms`)으로 분리, `react-markdown + remark-gfm`로 렌더(GFM 테이블 지원). 방침 제8조에서 `/account-deletion`을 링크.
-- `/support`: 문의 이메일·응답 시간·FAQ(한국어). 콘텐츠는 컴포넌트 내 상수.
-- `/account-deletion`: 앱 내 삭제 절차 + 앱 접근 불가 시 이메일 요청(제목·본문 프리필 mailto). 콘텐츠는 컴포넌트 내 상수(영문). 심사용 컴플라이언스 문구 없이 사용자 안내만 담는다.
+- `/support`: 문의 채널(카카오톡·이메일 복사 카드)·FAQ(영문, 환불은 App Store/Google Play 절차 병기). 콘텐츠는 컴포넌트 내 상수.
+- `/account-deletion`: 앱 내 삭제 절차 + 앱 접근 불가 시 이메일 요청(복사 카드). 콘텐츠는 컴포넌트 내 상수(영문). 심사용 컴플라이언스 문구 없이 사용자 안내만 담는다.
+- 이메일 복사 카드는 공용 컴포넌트 `components/EmailCopyCard.tsx`(클라이언트, clipboard API + 폴백)를 사용 — `/support`·`/account-deletion` 공유.
 
 ## 6. 스타일링 컨벤션
 
@@ -98,4 +99,4 @@ App Router(`app/`). `pages/` 없음. **미들웨어/라우트 가드 없음** �
 
 ### 향후 리팩토링 후보 (미적용)
 - **스타일링 2종 혼재**: 인라인 스타일(`layout.tsx`, `page.tsx`, `auth/callback`)과 CSS Module(`policy`/`support`)이 공존. 토큰은 단일화됐으나 스타일 작성 방식은 아직 두 가지(전역 CSS는 `:root` 변수 정의 용도뿐). 한쪽으로 수렴 여지.
-- **공용 컴포넌트 부재**: `components/` 없음. 카드/버튼/`pre` 등 반복 UI를 컴포넌트화 여지.
+- **공용 컴포넌트 최소**: `components/`에는 `EmailCopyCard` 하나뿐. 카드/버튼/`pre` 등 반복 UI를 추가 컴포넌트화 여지.
