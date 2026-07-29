@@ -8,11 +8,11 @@ import styles from "./policy.module.css";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "개인정보 처리방침 및 이용약관 | BeCappy",
-  description: "BeCappy 서비스의 개인정보 처리방침과 이용약관입니다.",
+  title: "Privacy Policy & Terms of Service | BeCappy",
+  description: "Privacy Policy and Terms of Service for the BeCappy app.",
 };
 
-const TERMS_HEADING = "# 이용약관";
+const TERMS_HEADING = "# Terms of Service";
 
 async function loadPolicy(): Promise<{ privacy: string; terms: string }> {
   const raw = await readFile(
@@ -29,9 +29,9 @@ export default async function PolicyPage() {
 
   return (
     <main className={styles.doc}>
-      <nav className={styles.nav} aria-label="문서 바로가기">
-        <a href="#privacy">개인정보 처리방침</a>
-        <a href="#terms">이용약관</a>
+      <nav className={styles.nav} aria-label="Document shortcuts">
+        <a href="#privacy">Privacy Policy</a>
+        <a href="#terms">Terms of Service</a>
       </nav>
 
       <section id="privacy">

@@ -5,7 +5,7 @@ Moly의 **계정 서버(backend)**(로그인 검증·회원가입 확정·프로
 ```
 moly-auth/
 ├── backend/    # Next.js 15 계정 API 서버 (Supabase Auth 토큰 검증, Vercel)
-└── frontend/   # Next.js 15 최소 앱 (/policy·/support 공개 페이지)
+└── frontend/   # Next.js 15 최소 앱 (/policy·/support·/account-deletion 공개 페이지)
 ```
 
 > **상세 문서 (단일 출처)**
@@ -19,7 +19,7 @@ moly-auth/
 
 | 서버 | 담당 | 배포 |
 |---|---|---|
-| **moly-auth backend** (이 레포) | 계정: `GET/PATCH/DELETE /me` · `POST /onboarding` · `GET/PATCH /me/notifications` · `POST /me/push-token` · `POST /auth/logout` | Vercel `https://moly-server.vercel.app` |
+| **moly-auth backend** (이 레포) | 계정: `GET/PATCH/DELETE /me` · `POST /onboarding` · `GET/PATCH /me/notifications` · `POST /me/push-token`(FCM, ios/android) · `POST /auth/logout` | Vercel `https://moly-server.vercel.app` |
 | **moly-backend** | 대화·일기·경제·상점·루틴·구독·광고·배치 워커 | EC2 `https://voice.moly.asia` |
 
 - 로그인 자체는 iOS의 Supabase SDK(소셜 전용) — 서버는 Bearer 토큰 **검증만**.
