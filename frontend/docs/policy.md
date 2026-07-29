@@ -1,8 +1,8 @@
 # Privacy Policy
 
 **Service:** BeCappy
-**Effective Date:** June 27, 2026
-**Last Revised:** July 29, 2026
+**Effective Date:** July 30, 2026
+**Last Revised:** July 30, 2026
 
 Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
 
@@ -31,6 +31,7 @@ The Operator processes personal information for the following purposes. Personal
     - Reviewing and responding to member inquiries
 7. **Ad performance measurement and marketing**
     - Measuring ad conversion and performance and optimizing marketing based on app events (sign-up completion, first conversation, purchases, etc.) using advertising platforms such as Meta
+    - When a user allows tracking on iOS, matching Meta advertising activity using a SHA-256 hashed email address
 
 ---
 
@@ -68,6 +69,7 @@ The Operator processes the following personal information items.
 - Firebase Installation ID, app usage event logs (collected via Firebase)
 - Ad transaction identifiers used to verify rewarded-ad views
 - Device advertising identifiers (IDFA on iOS, Google Advertising ID on Android), app event logs (sign-up completion, first conversation, purchases, etc.), and purchase/product interaction information (purchased product identifier, amount, etc.) — collected via the Meta SDK for ad performance measurement
+- On iOS, only after ATT authorization: email address hashed with SHA-256 by the Meta SDK for Advanced Matching
 
 ---
 
@@ -84,7 +86,7 @@ The Operator processes the following personal information items.
 | Records on contracts or withdrawal of offers, records on payment and supply of goods | 5 years (Act on Consumer Protection in Electronic Commerce of the Republic of Korea) |
 | Records on consumer complaints or dispute resolution | 3 years (Act on Consumer Protection in Electronic Commerce of the Republic of Korea) |
 | Access logs, service usage records | 3 months from collection (Protection of Communications Secrets Act of the Republic of Korea) |
-| Ad performance measurement information (device advertising identifiers, app events, purchase/product interaction information) | Retained and then destroyed in accordance with the processor's (e.g., Meta) policies |
+| Ad performance measurement information (device advertising identifiers, app events, purchase/product interaction information, and ATT-authorized hashed email) | Retained and then destroyed in accordance with the processor's (e.g., Meta) policies |
 
 3. Upon account deletion, the above information is destroyed without delay (including Cappy's memory information). Where retention is required by applicable laws, the information is stored separately from other personal information for the period prescribed by such laws and then destroyed.
 
@@ -112,7 +114,7 @@ The Operator entrusts the following personal information processing tasks to pro
 | RevenueCat, Inc. | In-app purchase status management | USA |
 | Apple Inc. | Sign in with Apple authentication, push notification delivery (APNs), App Store in-app purchase processing | USA |
 | Google LLC | Google sign-in authentication, Firebase-based app configuration and service usage analytics, push notification delivery (Firebase Cloud Messaging, FCM), ad serving (AdMob), Google Play in-app purchase and refund processing | USA |
-| Meta Platforms, Inc. | Ad performance measurement and marketing optimization based on app events (sign-up completion, first conversation, purchases) | USA |
+| Meta Platforms, Inc. | Ad performance measurement, Advanced Matching, and marketing optimization based on app events (sign-up completion, first conversation, purchases) | USA |
 | Kakao Corp. | Kakao sign-in authentication | Republic of Korea |
 
 When concluding entrustment contracts, the Operator specifies, in accordance with Article 26 of the Personal Information Protection Act, the prohibition of processing personal information for purposes other than the entrusted tasks, technical and managerial protective measures, restrictions on re-entrustment, and management and supervision of the processor, and supervises whether the processor handles personal information safely.
@@ -135,7 +137,7 @@ The Operator transfers personal information abroad as follows to provide the Ser
 | RevenueCat | USA | Member identifier, purchase status information | Transmitted over the network at the time of purchase | In-app purchase status management | Until account deletion |
 | Apple | USA | Push notification delivery information, payment processing information | Transmitted over the network when sending notifications and at the time of purchase | Push notification delivery (APNs), App Store in-app purchase processing | Until the purpose of processing is achieved |
 | Google | USA | Device information, app usage event logs, push notification device token (FCM), payment processing information | Transmitted over the network during use, when sending notifications, and at the time of purchase | App configuration and usage analytics, push notification delivery (FCM), ad serving, Google Play in-app purchase and refund processing | Until the purpose of processing is achieved |
-| Meta Platforms | USA | Device advertising identifiers (IDFA/Google Advertising ID), app events (sign-up completion, first conversation, purchases), purchase/product interaction information | Transmitted over the network when app events occur | Ad performance measurement and marketing optimization | Retained and then destroyed in accordance with the processor's policies |
+| Meta Platforms | USA | Device advertising identifiers (IDFA/Google Advertising ID), app events (sign-up completion, first conversation, purchases), purchase/product interaction information, and an ATT-authorized SHA-256 hashed email address | Transmitted over the network when app events occur; hashed email is transmitted only after ATT authorization on iOS | Ad performance measurement, Advanced Matching, and marketing optimization | Retained and then destroyed in accordance with the processor's policies |
 
 By agreeing to this Privacy Policy at sign-up, users are deemed to have consented to the cross-border transfer of personal information described above. Users have the right to refuse consent; however, refusal may restrict use of the Service.
 
@@ -184,7 +186,9 @@ The Operator takes the following measures to ensure the safety of personal infor
 
 1. The Service is a mobile application and does not use cookies.
 2. The device advertising identifier — IDFA on iOS and Google Advertising ID on Android — may be used to serve ads (such as rewarded ads) within the Service and to measure ad performance.
-    - **iOS:** Tracking using the advertising identifier (including sending app events to advertising platforms such as Meta) is performed only with the user's permission under Apple's App Tracking Transparency (ATT) framework, which applies to iOS only. Users may refuse or change this at any time in iOS Settings > Privacy & Security > Tracking.
+    - **iOS without ATT authorization:** The Service does not use the IDFA or Meta Advanced Matching. Limited App Events may still be sent directly to Meta with advertiser tracking disabled for ad performance measurement, while privacy-preserving aggregated attribution may also operate through technologies such as SKAdNetwork and AdAttributionKit.
+    - **iOS with ATT authorization:** The IDFA, app events, and a SHA-256 hashed email address may be shared with Meta for advertising measurement, Advanced Matching, and campaign optimization. Users may refuse or revoke this permission at any time in iOS Settings > Privacy & Security > Tracking. When permission is not authorized, the Service clears Meta Advanced Matching user data.
+    - Users may also review and manage information that businesses share with Meta through [Activity off Meta technologies](https://www.facebook.com/off_meta_activity/).
     - **Android:** Users may opt out of ads personalization or delete/reset their Advertising ID at any time in Android Settings > Google > Ads (or Settings > Privacy > Ads, depending on the device).
 
 ---
@@ -225,6 +229,7 @@ Data subjects may apply for dispute resolution or consultation with the Personal
 2. The revised policy takes effect on July 13, 2026.
 3. The revised policy reflecting ad performance measurement (Meta, etc.) takes effect on July 16, 2026.
 4. The revised policy reflecting the Android (Google Play) release — including FCM push notification tokens, the Google Advertising ID, Google Play billing, and publication of this policy in English — takes effect on July 29, 2026.
+5. The revised policy clarifying ATT-gated Meta Advanced Matching takes effect on July 30, 2026.
 
 # Terms of Service
 
