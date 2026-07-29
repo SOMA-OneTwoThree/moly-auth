@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import styles from "./account-deletion.module.css";
+import EmailCopyCard from "@/components/EmailCopyCard";
 
 export const dynamic = "force-static";
 
@@ -9,17 +10,6 @@ export const metadata: Metadata = {
 };
 
 const SUPPORT_EMAIL = "nonoeul123@gmail.com";
-
-const MAILTO_HREF = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-  "BeCappy Account Deletion Request"
-)}&body=${encodeURIComponent(
-  [
-    "I would like to delete my BeCappy account.",
-    "",
-    "Sign-in provider (Apple / Google / Kakao):",
-    "Email address used for sign-in:",
-  ].join("\n")
-)}`;
 
 export default function AccountDeletionPage() {
   return (
@@ -59,15 +49,12 @@ export default function AccountDeletionPage() {
             <li>Which sign-in you used (Apple, Google, or Kakao)</li>
             <li>The email address on your account</li>
           </ul>
-          <a className={styles.emailButton} href={MAILTO_HREF}>
-            <span className={styles.emailIcon} aria-hidden>
-              ✉️
-            </span>
-            <span className={styles.emailBody}>
-              <span className={styles.emailName}>Email deletion request</span>
-              <span className={styles.emailDesc}>{SUPPORT_EMAIL}</span>
-            </span>
-          </a>
+          <div className={styles.emailCard}>
+            <EmailCopyCard
+              email={SUPPORT_EMAIL}
+              title="Email deletion request"
+            />
+          </div>
           <p className={styles.note}>
             We&apos;ll confirm the account is yours and complete the deletion
             within 7 days. For details on how your data is handled, see our{" "}
