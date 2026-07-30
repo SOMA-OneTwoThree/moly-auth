@@ -8,6 +8,7 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ApiException } from "@/lib/http/api-exception";
 import { activityDateFor } from "./time";
+import { isNewSignup } from "./signup";
 import {
   deriveEntitlement,
   effectiveTokenConfig,
@@ -78,12 +79,13 @@ async function loadProfile(
   return data as ProfileRow | null;
 }
 
-function profileBlock(profile: ProfileRow) {
+function profileBlock(profile: ProfileRow, user: User, now: Date) {
   return {
     nickname: profile.nickname,
     timezone: profile.timezone,
     language: profile.language,
     onboarded: profile.nickname !== null,
+    is_new_signup: isNewSignup(profile.nickname, user.created_at, now),
   };
 }
 
@@ -218,7 +220,7 @@ export async function getMe(admin: SupabaseClient, user: User) {
     loadEquipment(admin, user.id),
   ]);
   return {
-    profile: profileBlock(profile),
+    profile: profileBlock(profile, user, now),
     entitlement,
     wallet: { balance: profile.hay_balance },
     equipment: legacyEquipmentBlock(equipment),
@@ -242,8 +244,9 @@ export async function onboard(
     throw new ApiException("ALREADY_ONBOARDED", 409, "이미 온보딩을 완료했어요.");
   }
   const updated = await updateProfile(admin, user.id, input);
-  const entitlement = await buildEntitlement(admin, updated, new Date());
-  return { profile: profileBlock(updated), entitlement };
+  const now = new Date();
+  const entitlement = await buildEntitlement(admin, updated, now);
+  return { profile: profileBlock(updated, user, now), entitlement };
 }
 
 export type PatchMeInput = {
@@ -263,7 +266,7 @@ export async function patchMe(
     Object.keys(input).length === 0
       ? profile
       : await updateProfile(admin, user.id, input);
-  return { profile: profileBlock(updated) };
+  return { profile: profileBlock(updated, user, new Date()) };
 }
 
 async function updateProfile(
