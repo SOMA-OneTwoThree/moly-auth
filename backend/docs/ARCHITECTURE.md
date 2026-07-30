@@ -18,6 +18,7 @@ Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프�
 1. **주 경로: DB 트리거** — `on_auth_user_created`(`handle_new_user`, 원본: `moly-backend/db/seed_and_triggers.sql`)가 가입 시 `profiles(id, trial_ends_at=가입+48h)`를 자동 생성. 프로덕션 DB 적용 확인됨(2026-07-09).
 2. **보조 경로: self-heal** — `GET /me`·`POST /onboarding`이 profiles가 없으면 트리거와 같은 규칙으로 생성(`lib/account/service.ts`의 `ensureProfile`, 멱등). 트리거 이전 가입자·트리거 유실에도 계정이 막히지 않는다.
 3. `nickname`이 NULL이면 온보딩 미완료 → 클라가 온보딩 화면으로 라우팅. `POST /onboarding`은 1회만(재호출 409 `ALREADY_ONBOARDED`).
+4. **신규 가입 신호** — profile 블록의 `is_new_signup`(`lib/account/signup.ts`)은 `auth.users.created_at`이 24시간 이내이고 온보딩 미완료일 때만 true. iOS가 `signup_completed` 분석 이벤트를 보낼 유일한 근거다. 클라이언트는 Supabase 세션의 `created_at`/`last_sign_in_at`을 비교할 수 없다 — 가입 시 두 값이 별도 statement로 기록돼 마이크로초 단위로 어긋난다. 온보딩 완료 시 즉시 false가 되므로 재설치한 기존 사용자에게는 true가 나오지 않는다.
 
 ## 2. 요청 수명주기 (2계층)
 
@@ -41,7 +42,7 @@ Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프�
 | 메서드 | 경로 | 용도 / 주요 응답 |
 |---|---|---|
 | GET | `/health` | 공개 헬스체크(유일한 무인증) |
-| GET | `/me` | 부팅 집계: profile·entitlement·wallet·equipment. profiles 없으면 self-heal 생성 |
+| GET | `/me` | 부팅 집계: profile(+`is_new_signup`)·entitlement·wallet·equipment. profiles 없으면 self-heal 생성 |
 | POST | `/onboarding` | 닉네임(1~10자)·타임존(IANA)·언어(ISO 639-1) 저장 → `{profile, entitlement}`. 재호출 409 |
 | PATCH | `/me` | 보낸 필드만 변경 → `{profile}` |
 | GET/PATCH | `/me/notifications` | 알림 2종(morning_diary·evening_chat) on/off. 행 없으면 기본 on |
