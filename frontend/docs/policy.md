@@ -1,8 +1,8 @@
 # Privacy Policy
 
 **Service:** BeCappy
-**Effective Date:** July 30, 2026
-**Last Revised:** July 30, 2026
+**Effective Date:** August 4, 2026
+**Last Revised:** August 4, 2026
 
 Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
 
@@ -13,7 +13,7 @@ Rho changjun (the "Operator") complies with the Personal Information Protection 
 The Operator processes personal information for the following purposes. Personal information being processed will not be used for any purpose other than the following, and if the purpose of use changes, the Operator will take necessary measures such as obtaining separate consent under Article 18 of the Personal Information Protection Act.
 
 1. **Membership registration and management**
-    - Identifying and verifying members through Apple, Google, and Kakao social sign-in
+    - Identifying and verifying members through Apple, Google, Kakao, and LINE social sign-in
     - Maintaining and managing membership status, preventing fraudulent use of the Service
 2. **Service provision**
     - Providing conversations with the AI character "Cappy" (generating AI responses)
@@ -43,11 +43,13 @@ The Operator processes the following personal information items.
 
 | Type | Items | Collection Method |
 | --- | --- | --- |
-| Required | Email address, social sign-in identifier (Apple/Google/Kakao) | Social sign-in |
+| Required | Email address, social sign-in identifier (Apple/Google/Kakao/LINE) | Social sign-in |
 | Required | Nickname | Entered directly by the user |
 | Required | Time zone, content language setting | Automatically set based on device information (changeable) |
 
 > For Sign in with Apple, if the user chooses to hide their email, a random relay email address provided by Apple is collected.
+>
+> For LINE Login, the user's email address is collected only after the user grants permission for LINE to share it.
 
 ### 2. Information stored while using the Service
 
@@ -116,6 +118,7 @@ The Operator entrusts the following personal information processing tasks to pro
 | Google LLC | Google sign-in authentication, Firebase-based app configuration and service usage analytics, push notification delivery (Firebase Cloud Messaging, FCM), ad serving (AdMob), Google Play in-app purchase and refund processing | USA |
 | Meta Platforms, Inc. | Ad performance measurement, Advanced Matching, and marketing optimization based on app events (sign-up completion, first conversation, purchases) | USA |
 | Kakao Corp. | Kakao sign-in authentication | Republic of Korea |
+| LY Corporation | LINE Login authentication | Japan |
 
 When concluding entrustment contracts, the Operator specifies, in accordance with Article 26 of the Personal Information Protection Act, the prohibition of processing personal information for purposes other than the entrusted tasks, technical and managerial protective measures, restrictions on re-entrustment, and management and supervision of the processor, and supervises whether the processor handles personal information safely.
 
@@ -138,6 +141,7 @@ The Operator transfers personal information abroad as follows to provide the Ser
 | Apple | USA | Push notification delivery information, payment processing information | Transmitted over the network when sending notifications and at the time of purchase | Push notification delivery (APNs), App Store in-app purchase processing | Until the purpose of processing is achieved |
 | Google | USA | Device information, app usage event logs, push notification device token (FCM), payment processing information | Transmitted over the network during use, when sending notifications, and at the time of purchase | App configuration and usage analytics, push notification delivery (FCM), ad serving, Google Play in-app purchase and refund processing | Until the purpose of processing is achieved |
 | Meta Platforms | USA | Device advertising identifiers (IDFA/Google Advertising ID), app events (sign-up completion, first conversation, purchases), purchase/product interaction information, and an ATT-authorized SHA-256 hashed email address | Transmitted over the network when app events occur; hashed email is transmitted only after ATT authorization on iOS | Ad performance measurement, Advanced Matching, and marketing optimization | Retained and then destroyed in accordance with the processor's policies |
+| LY Corporation | Japan | LINE account identifier, email address (only when authorized by the user), and authentication request information | Transmitted over the network when using LINE Login | LINE Login authentication | Until the purpose of processing is achieved or in accordance with the recipient's policy |
 
 By agreeing to this Privacy Policy at sign-up, users are deemed to have consented to the cross-border transfer of personal information described above. Users have the right to refuse consent; however, refusal may restrict use of the Service.
 
@@ -216,26 +220,15 @@ Data subjects may apply for dispute resolution or consultation with the Personal
 
 ---
 
-## Article 14 (Changes to This Privacy Policy)
+## Changes to This Privacy Policy
 
-1. This Privacy Policy applies from the effective date. When there are additions, deletions, or corrections to this policy under applicable laws or internal policies, changes will be announced through in-app notices from 7 days before they take effect.
-2. However, significant changes to user rights will be announced at least 30 days in advance.
-
----
-
-**Addendum**
-
-1. This policy was established on June 27, 2026.
-2. The revised policy takes effect on July 13, 2026.
-3. The revised policy reflecting ad performance measurement (Meta, etc.) takes effect on July 16, 2026.
-4. The revised policy reflecting the Android (Google Play) release — including FCM push notification tokens, the Google Advertising ID, Google Play billing, and publication of this policy in English — takes effect on July 29, 2026.
-5. The revised policy clarifying ATT-gated Meta Advanced Matching takes effect on July 30, 2026.
+We may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. We will notify you of any changes by posting the new Privacy Policy on this page.
 
 # Terms of Service
 
 **Service:** BeCappy
-**Effective Date:** June 27, 2026
-**Last Revised:** July 29, 2026
+**Effective Date:** August 4, 2026
+**Last Revised:** August 4, 2026
 
 ---
 
@@ -251,7 +244,7 @@ The terms used in these Terms are defined as follows.
 
 1. **Service**: The conversation-based mobile application "BeCappy" featuring an AI character, and all related services provided by the Operator.
 2. **User**: A member who uses the Service provided by the Operator in accordance with these Terms.
-3. **Member**: A person who has signed in to the Service with an Apple, Google, or Kakao account and registered user information, and who may use the Service on an ongoing basis.
+3. **Member**: A person who has signed in to the Service with an Apple, Google, Kakao, or LINE account and registered user information, and who may use the Service on an ongoing basis.
 4. **Nickname**: A string of characters set directly by the member and registered by the Operator for member identification and use of the Service.
 5. **Cappy**: The artificial intelligence character that converses with users within the Service.
 6. **Hay**: The Service-exclusive currency that can be used for purchasing decoration items and similar purposes within the Service. It may be purchased through payment (paid Hay) or granted free of charge as rewards for attendance, ad viewing, routine completion, and the like (free Hay).
@@ -275,14 +268,14 @@ The terms used in these Terms are defined as follows.
     - Earning Hay (attendance, rewarded ads, routine rewards) and purchasing/equipping decoration items
     - Paid services such as Hay packs
     - Any other services additionally developed by the Operator or provided to members through partnership agreements with other companies
-2. In principle, the Service is provided 24 hours a day, year-round. However, the Service may be temporarily suspended for operational or technical reasons such as system maintenance, communication failures, force majeure, or failures of third-party services (AWS, Anthropic, OpenAI, Apple, Google, RevenueCat, etc.), and the Service may be temporarily suspended during periods determined by the Operator for operational purposes. In such cases, the Operator will give notice in advance or afterward.
+2. In principle, the Service is provided 24 hours a day, year-round. However, the Service may be temporarily suspended for operational or technical reasons such as system maintenance, communication failures, force majeure, or failures of third-party services (AWS, Anthropic, OpenAI, Apple, Google, LINE, RevenueCat, etc.), and the Service may be temporarily suspended during periods determined by the Operator for operational purposes. In such cases, the Operator will give notice in advance or afterward.
 3. Daily usage limits may apply to the conversation feature, and limits reset at a set time each day. Specific limits are displayed within the app.
 
 ---
 
 ## Article 5 (Membership Registration and Age Requirement)
 
-1. A user applies for membership by signing in with an Apple, Google, or Kakao account in accordance with the registration form set by the Operator, setting a nickname, and expressing agreement to these Terms and the Privacy Policy.
+1. A user applies for membership by signing in with an Apple, Google, Kakao, or LINE account in accordance with the registration form set by the Operator, setting a nickname, and expressing agreement to these Terms and the Privacy Policy.
 2. Children under the age of 14 may not register as members.
 3. The Operator registers as a member any user who applies as described in Paragraph 1, unless the applicant falls under any of the following.
     - The applicant has previously lost membership under these Terms
@@ -422,11 +415,3 @@ Inquiries regarding use of the Service may be directed to the contact below.
 
 - **Operator:** Rho changjun
 - **Email:** nonoeul123@gmail.com
-
----
-
-**Addendum**
-
-1. These Terms were established on June 27, 2026.
-2. The amended Terms take effect on July 13, 2026.
-3. The amended Terms reflecting the Android (Google Play) release — including Google Play billing and refund procedures and publication of these Terms in English — take effect on July 29, 2026.

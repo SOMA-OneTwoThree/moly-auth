@@ -46,7 +46,7 @@ export default function AccountDeletionPage() {
             Email us and we&apos;ll delete your account for you. Please tell us:
           </p>
           <ul className={styles.list}>
-            <li>Which sign-in you used (Apple, Google, or Kakao)</li>
+            <li>Which sign-in you used (Apple, Google, Kakao, or LINE)</li>
             <li>The email address on your account</li>
           </ul>
           <div className={styles.emailCard}>
