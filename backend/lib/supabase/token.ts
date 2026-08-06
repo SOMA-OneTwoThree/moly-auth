@@ -9,11 +9,13 @@ import { createClient } from "@supabase/supabase-js";
  *
  * Validate the token with `client.auth.getUser(accessToken)` before trusting it
  * (see `lib/auth/require-user.ts`).
+ *
+ * legacy SUPABASE_ANON_KEY는 전환기 폴백 — Vercel env 교체 후 제거.
  */
 export function createSupabaseTokenClient(accessToken: string) {
   return createClient(
     process.env.SUPABASE_URL!,
-    process.env.SUPABASE_ANON_KEY!,
+    (process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY)!,
     {
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
       auth: { persistSession: false, autoRefreshToken: false },
