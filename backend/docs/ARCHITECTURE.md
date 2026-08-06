@@ -93,13 +93,15 @@ backend/
 | 키 | 설명 |
 |---|---|
 | `SUPABASE_URL` | 프로덕션 Supabase 프로젝트 URL (moly-backend와 **같은 프로젝트**여야 함) |
-| `SUPABASE_ANON_KEY` | 공개 키 — getUser 검증용 토큰 클라이언트 |
-| `SUPABASE_SERVICE_ROLE_KEY` | service_role — admin 클라이언트. **클라이언트 노출 절대 금지** |
+| `SUPABASE_PUBLISHABLE_KEY` | 공개 키(`sb_publishable_…`) — getUser 검증용 토큰 클라이언트 |
+| `SUPABASE_SECRET_KEY` | secret key(`sb_secret_…`) — admin 클라이언트. **클라이언트 노출 절대 금지** |
+
+> legacy `SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY`는 2026-08 유출로 폐기(코드에 전환기 폴백만 남음 — Vercel env 교체 후 제거).
 | `CORS_ALLOWED_ORIGINS` | 허용 origin(쉼표 구분, 정확한 origin만). 네이티브 앱은 Origin 미전송이라 무관 |
 
 ## 8. 런북
 
 - **검증 3종**: `npm run typecheck` · `npm run lint` · `npm test` (+ `npm run build`)
 - **탈퇴했는데 mem0 잔존 의심**: Vercel 함수 로그에서 `[mem0 cleanup failed]` 검색 → 해당 user_id의 `memories` 행을 SQL로 수동 정리
-- **모든 계정 요청 401**: Vercel env의 `SUPABASE_URL`/`SUPABASE_ANON_KEY`가 프로덕션 프로젝트인지 확인
+- **모든 계정 요청 401**: Vercel env의 `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`가 프로덕션 프로젝트인지 확인
 - **profiles 안 생김 의심**: 트리거 확인 쿼리(`pg_trigger`에서 `on_auth_user_created`) — 없어도 self-heal이 커버하지만 트리거 복구 필요(`moly-backend/db/seed_and_triggers.sql` §1)

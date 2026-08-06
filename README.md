@@ -32,7 +32,7 @@ moly-auth/
 cd backend
 npm install
 npm run typecheck && npm run lint && npm test   # 검증 3종
-npm run dev                                      # 로컬 (.env.local: SUPABASE_URL/ANON/SERVICE_ROLE)
+npm run dev                                      # 로컬 (.env.local: SUPABASE_URL/PUBLISHABLE/SECRET)
 ```
 
 Google OAuth → Authorized redirect URIs에는 Supabase 콜백만: `https://<project-ref>.supabase.co/auth/v1/callback`.
