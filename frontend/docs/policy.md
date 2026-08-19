@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **Service:** BeCappy
-**Effective Date:** August 4, 2026
+**Effective Date:** August 19, 2026
 **Last Revised:** August 19, 2026
 
 Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
@@ -227,6 +227,14 @@ Data subjects may apply for dispute resolution or consultation with the Personal
 ## Changes to This Privacy Policy
 
 We may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. We will notify you of any changes by posting the new Privacy Policy on this page.
+
+### Revision history
+
+| Effective Date | Summary |
+| --- | --- |
+| August 19, 2026 | Disclosed Amplitude service usage analytics and Firebase Crashlytics crash diagnostics. Corrected the description of Meta Advanced Matching on Android, which is not gated by a tracking permission, and added the Android ad consent form and its in-app entry point. |
+| August 4, 2026 | Previous version. |
+
 
 # Terms of Service
 
