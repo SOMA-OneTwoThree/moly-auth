@@ -2,7 +2,7 @@
 
 **Service:** BeCappy
 **Effective Date:** August 4, 2026
-**Last Revised:** August 4, 2026
+**Last Revised:** August 19, 2026
 
 Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
 
@@ -70,6 +70,7 @@ The Operator processes the following personal information items.
 - Service usage records, access logs, device information (OS version, app version), IP address
 - Firebase Installation ID, app usage event logs (collected via Firebase)
 - Ad transaction identifiers used to verify rewarded-ad views
+- App usage event logs (event names, screen names, event properties), session and app-lifecycle events, and the member identifier — collected via Amplitude for service usage analysis. Location-related automatic collection (IP address, city, region, DMA) and the device advertising identifier are disabled for this processor.
 - Device advertising identifiers (IDFA on iOS, Google Advertising ID on Android), app event logs (sign-up completion, first conversation, purchases, etc.), and purchase/product interaction information (purchased product identifier, amount, etc.) — collected via the Meta SDK for ad performance measurement
 - On iOS, only after ATT authorization: email address hashed with SHA-256 by the Meta SDK for Advanced Matching
 
@@ -116,6 +117,7 @@ The Operator entrusts the following personal information processing tasks to pro
 | RevenueCat, Inc. | In-app purchase status management | USA |
 | Apple Inc. | Sign in with Apple authentication, push notification delivery (APNs), App Store in-app purchase processing | USA |
 | Google LLC | Google sign-in authentication, Firebase-based app configuration and service usage analytics, push notification delivery (Firebase Cloud Messaging, FCM), ad serving (AdMob), Google Play in-app purchase and refund processing | USA |
+| Amplitude, Inc. | Service usage event analytics | USA |
 | Meta Platforms, Inc. | Ad performance measurement, Advanced Matching, and marketing optimization based on app events (sign-up completion, first conversation, purchases) | USA |
 | Kakao Corp. | Kakao sign-in authentication | Republic of Korea |
 | LY Corporation | LINE Login authentication | Japan |
@@ -140,6 +142,7 @@ The Operator transfers personal information abroad as follows to provide the Ser
 | RevenueCat | USA | Member identifier, purchase status information | Transmitted over the network at the time of purchase | In-app purchase status management | Until account deletion |
 | Apple | USA | Push notification delivery information, payment processing information | Transmitted over the network when sending notifications and at the time of purchase | Push notification delivery (APNs), App Store in-app purchase processing | Until the purpose of processing is achieved |
 | Google | USA | Device information, app usage event logs, push notification device token (FCM), payment processing information | Transmitted over the network during use, when sending notifications, and at the time of purchase | App configuration and usage analytics, push notification delivery (FCM), ad serving, Google Play in-app purchase and refund processing | Until the purpose of processing is achieved |
+| Amplitude | USA | Member identifier, app usage event logs (event names, screen names, event properties) | Transmitted over the network during use | Service usage analytics | Until the purpose of processing is achieved |
 | Meta Platforms | USA | Device advertising identifiers (IDFA/Google Advertising ID), app events (sign-up completion, first conversation, purchases), purchase/product interaction information, and an ATT-authorized SHA-256 hashed email address | Transmitted over the network when app events occur; hashed email is transmitted only after ATT authorization on iOS | Ad performance measurement, Advanced Matching, and marketing optimization | Retained and then destroyed in accordance with the processor's policies |
 | LY Corporation | Japan | LINE account identifier, email address (only when authorized by the user), and authentication request information | Transmitted over the network when using LINE Login | LINE Login authentication | Until the purpose of processing is achieved or in accordance with the recipient's policy |
 
@@ -228,7 +231,7 @@ We may update our Privacy Policy from time to time. Thus, you are advised to rev
 
 **Service:** BeCappy
 **Effective Date:** August 4, 2026
-**Last Revised:** August 4, 2026
+**Last Revised:** August 19, 2026
 
 ---
 
