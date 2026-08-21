@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import styles from "./support.module.css";
 import kakaoIcon from "@/images/kakaotalk.png";
 import EmailCopyCard from "@/components/EmailCopyCard";
@@ -27,7 +28,7 @@ const FAQ: { q: string; a: ReactNode }[] = [
         Go to Settings &gt; Delete Account in the app. All your data, including
         conversations and diaries, is permanently deleted and can&apos;t be
         recovered. If you can no longer access the app, see the{" "}
-        <a href="/account-deletion">Account Deletion page</a>.
+        <Link href="/account-deletion">Account Deletion page</Link>.
       </>
     ),
   },

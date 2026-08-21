@@ -1,0 +1,373 @@
+/*
+ * BeCappy 랜딩 — design/DESIGN.pen의 `Landing — *` (1440) / `Landing — * (Mobile)`
+ * (390) 두 아트보드를 그대로 옮긴 스타일.
+ *
+ * 두 아트보드 사이 값은 clamp()로 390px↔1440px 구간을 선형 보간한다. 각 clamp의
+ * 기울기/절편은 `min + (max-min) * (100vw-390px)/1050px`를 전개한 값이라, 디자인
+ * 수치를 고칠 때는 min/max만 보고 다시 계산하면 된다.
+ *
+ * 전역 다크 토큰(globals.css)은 policy/support 전용이라 여기서는 쓰지 않는다.
+ */
+.page {
+  --bg-room: #d5a181;
+  --navbar: #5a4032;
+  --cream: #fff9ed;
+  --ink: #353535;
+  --footer-ink: #4a3428a6;
+  --footer-ink-hover: #3a2820;
+
+  --font-display: var(--font-quicksand), "Quicksand", sans-serif;
+  --font-body: "Pretendard Variable", Pretendard, system-ui, -apple-system,
+    "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+
+  /* 좌우 여백: 20px(390) → 64px(1440). 워드마크 최대 크기 계산에도 쓰인다. */
+  --pad-x: clamp(20px, 4.19vw + 3.66px, 64px);
+  --hero-gap: clamp(16px, 0.571vw + 13.77px, 22px);
+
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background: var(--bg-room);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page[data-lang="ja"] {
+  --font-body: "Pretendard JP Variable", "Pretendard JP", system-ui,
+    -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+}
+
+/* ---------------------------------------------------------------- 네비게이션 */
+.nav {
+  height: clamp(56px, 1.524vw + 50.06px, 72px);
+  padding: 0 clamp(18px, 4.381vw + 0.91px, 64px);
+  background: var(--navbar);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 0.19vw + 7.26px, 10px);
+  text-decoration: none;
+}
+
+.brandIcon {
+  width: clamp(24px, 1.143vw + 19.55px, 36px);
+  height: auto;
+  border-radius: clamp(6px, 0.286vw + 4.89px, 9px);
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(17px, 0.476vw + 15.14px, 22px);
+  color: var(--cream);
+  letter-spacing: 0;
+}
+
+/* ------------------------------------------------------------- 언어 스위치 */
+.langSwitch {
+  position: relative;
+}
+
+.langPill {
+  display: flex;
+  align-items: center;
+  gap: 0.46em;
+  padding: 0.5em 0.9em;
+  border: 2px solid #fff9ed55;
+  border-radius: 999px;
+  background: #fff9ed22;
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: clamp(13px, 0.19vw + 12.26px, 15px);
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.langPill:hover {
+  background: #fff9ed33;
+}
+
+.langCurrent {
+  white-space: nowrap;
+}
+
+.langGlobe {
+  width: 1.1em;
+  height: 1.1em;
+  flex: none;
+}
+
+.langChevron {
+  width: 0.95em;
+  height: 0.95em;
+  flex: none;
+  color: #fff9edaa;
+  transition: transform 120ms ease;
+}
+
+.langChevronOpen {
+  transform: rotate(180deg);
+}
+
+.langMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  min-width: 100%;
+  border-radius: 14px;
+  background: var(--navbar);
+  border: 2px solid #fff9ed33;
+  box-shadow: 0 12px 28px #2e211944;
+}
+
+.langOption {
+  display: block;
+  padding: 8px 14px;
+  border-radius: 9px;
+  color: #fff9edcc;
+  font-size: clamp(13px, 0.19vw + 12.26px, 15px);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.langOption:hover {
+  background: #fff9ed1f;
+  color: var(--cream);
+}
+
+.langOptionActive {
+  color: var(--cream);
+  font-weight: 700;
+}
+
+/* --------------------------------------------------------------------- 히어로 */
+.hero {
+  padding: clamp(104px, 6.857vw + 77.26px, 176px) var(--pad-x)
+    clamp(44px, 3.81vw + 29.14px, 84px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hero-gap);
+}
+
+/*
+ * 워드마크 + 그 위에 걸터앉은 캐피. 캐피 위치는 폰트 크기 기준 em이라
+ * (디자인의 desktop 215px / mobile 82px 두 값이 같은 비율) 어떤 폭에서도
+ * 같은 글자 위에 얹힌다.
+ */
+.wordmarkStack {
+  position: relative;
+  font-family: var(--font-display);
+  /* 80px(390) → 215px(1440). 뒤의 min()은 좌우 여백 안에 반드시 들어오게 하는 상한. */
+  font-size: min(
+    clamp(80px, 12.857vw + 29.86px, 215px),
+    calc((100vw - 2 * var(--pad-x)) / 4.4)
+  );
+  line-height: 1;
+}
+
+.wordmarkBig {
+  display: block;
+  font-weight: 700;
+  font-size: 1em;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.cappyLying {
+  position: absolute;
+  left: 2.223em;
+  top: -0.087em;
+  width: 1.071em;
+  height: auto;
+}
+
+.tagline {
+  margin: 0;
+  max-width: min(780px, 100%);
+  font-weight: 700;
+  font-size: clamp(17px, 0.857vw + 13.66px, 26px);
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--ink);
+}
+
+.badges {
+  /* 디자인상 태그라인↔배지 간격은 hero gap + 6px 스페이서다. */
+  margin-top: calc(var(--hero-gap) + 6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  display: block;
+}
+
+.badgeImage {
+  width: auto;
+  /*
+   * .pen은 전 구간 56px 고정이지만, 넓은 화면에서 배지가 눈에 띄게 작아 보여
+   * 참고 사이트(takeabook.app, 뷰포트 대비 약 6.3vw) 수준으로 같이 키운다.
+   * 모바일은 디자인값 56px를 하한으로 유지한다.
+   */
+  height: clamp(56px, 6.11vw, 104px);
+}
+
+@media (min-width: 480px) {
+  .badges {
+    flex-direction: row;
+    gap: clamp(18px, 1.53vw, 28px);
+  }
+}
+
+/* ------------------------------------------------------------------ 스크린샷 */
+.features {
+  padding: 24px 0 25px;
+}
+
+.featureRow {
+  display: flex;
+  gap: 32px;
+  margin: 0;
+  padding: 0 var(--pad-x);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.featureRow::-webkit-scrollbar {
+  display: none;
+}
+
+.shot {
+  flex: none;
+  /* 좁은 화면에서 폰이 너무 커 보이지 않게 화면 폭의 절반 정도로 잡는다. */
+  width: clamp(200px, 50vw, 300px);
+  scroll-snap-align: center;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 14px 34px #2e211944;
+}
+
+.shotImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1000 / 2164;
+  object-fit: cover;
+}
+
+/* 넓은 화면에서는 5장이 한 줄에 균등 배치된다(디자인 1440 아트보드). */
+@media (min-width: 1024px) {
+  .features {
+    padding: 0 clamp(24px, 2.5vw, 64px) clamp(56px, 5.56vw, 128px);
+  }
+
+  .featureRow {
+    /* 고정 상한을 두지 않는다. 넓은 화면일수록 5장이 같이 커져 화면을 채운다. */
+    margin: 0 auto;
+    padding: 14px 0 34px;
+    gap: clamp(12px, 1.11vw, 26px);
+    justify-content: center;
+    overflow-x: visible;
+    scroll-snap-type: none;
+  }
+
+  .shot {
+    flex: 1 1 0;
+    width: auto;
+    /* 초대형 화면에서 폰이 지나치게 커지는 것만 막는다(높이 = 폭 x 2.16). */
+    max-width: 420px;
+  }
+}
+
+/* --------------------------------------------------------------------- 푸터 */
+.footer {
+  padding: clamp(56px, 3.81vw + 41.14px, 96px) var(--pad-x)
+    clamp(72px, 3.81vw + 57.14px, 112px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.footerWordmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(26px, 0.571vw + 23.77px, 32px);
+  color: var(--footer-ink);
+  margin-bottom: clamp(28px, 0.762vw + 25.03px, 36px);
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(16px, 0.571vw + 13.77px, 22px);
+  margin-top: clamp(12px, 0.19vw + 11.26px, 14px);
+}
+
+.footerLink {
+  color: var(--footer-ink);
+  font-weight: 500;
+  font-size: clamp(14px, 0.19vw + 13.26px, 16px);
+  text-decoration: none;
+}
+
+.footer > .footerLink {
+  font-size: clamp(15px, 0.095vw + 14.63px, 16px);
+}
+
+.footerLink:hover {
+  color: var(--footer-ink-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .langChevron {
+    transition: none;
+  }
+}
+
+/*
+ * 1440 아트보드보다 넓은 화면. 디자인 수치에서 바로 멈추면 화면 대비 히어로가
+ * 작아 보이므로 1440에서의 비율(예: 워드마크 215/1440 = 14.931vw)로 이어서
+ * 키우되, 무한정 커지지 않게 min()으로 상한을 둔다. 상한은 대략 1750~1800px
+ * 부근에서 걸리고 그 이상에서는 크기가 고정된다.
+ * 네비/푸터는 화면 크롬이라 확대하지 않는다.
+ */
+@media (min-width: 1440px) {
+  .page {
+    --pad-x: min(4.444vw, 90px);
+    --hero-gap: min(1.528vw, 28px);
+  }
+
+  .hero {
+    padding: min(12.222vw, 220px) var(--pad-x) min(5.833vw, 105px);
+  }
+
+  .wordmarkStack {
+    font-size: min(14.931vw, 260px);
+  }
+
+  .tagline {
+    max-width: min(54.17vw, 900px);
+    font-size: min(1.806vw, 32px);
+  }
+}

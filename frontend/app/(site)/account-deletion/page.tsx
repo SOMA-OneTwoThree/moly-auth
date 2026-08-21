@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import styles from "./account-deletion.module.css";
 import EmailCopyCard from "@/components/EmailCopyCard";
 
@@ -58,9 +59,9 @@ export default function AccountDeletionPage() {
           <p className={styles.note}>
             We&apos;ll confirm the account is yours and complete the deletion
             within 7 days. For details on how your data is handled, see our{" "}
-            <a className={styles.policyLink} href="/policy">
+            <Link className={styles.policyLink} href="/policy">
               Privacy Policy
-            </a>
+            </Link>
             .
           </p>
         </div>

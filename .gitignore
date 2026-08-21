@@ -10,3 +10,6 @@ next-env.d.ts
 .omc/
 # 루트 기획 문서(API_SPEC·ERD)만 제외 — frontend/docs(policy.md)는 추적 유지
 /docs/
+# 디자인 원본(Pencil .pen + 원본 에셋 20MB)은 레포에 넣지 않는다.
+# 랜딩이 실제로 쓰는 이미지는 frontend/images/landing/ 로 복사되어 추적된다.
+/frontend/design/
