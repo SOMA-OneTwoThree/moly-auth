@@ -24,7 +24,7 @@ export type ActiveSubscription = {
 export type TokenConfig = {
   daily_token_limit: { free?: number; trial?: number; subscriber?: number };
   diary_llm_min_tokens: number | null;
-  // 런칭 무료 기간(2026-09-01T04:00+09:00까지 전원 무료) — app_config로 조정. null=OFF.
+  // 런칭 무료 기간(2026-10-01T04:00+09:00까지 전원 무료) — app_config로 조정. null=OFF.
   free_launch_until: string | null;
   free_launch_token_limit: number | null;
 };
@@ -33,7 +33,7 @@ export type TokenConfig = {
 export const DEFAULT_TOKEN_CONFIG: TokenConfig = {
   daily_token_limit: { free: 20_000, trial: 100_000, subscriber: 100_000 },
   diary_llm_min_tokens: 2_000,
-  free_launch_until: "2026-09-01T04:00:00+09:00",
+  free_launch_until: "2026-10-01T04:00:00+09:00",
   free_launch_token_limit: 30_000,
 };
 

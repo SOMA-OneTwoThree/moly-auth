@@ -107,7 +107,7 @@ describe("effectiveTokenConfig — app_config 우선, 없으면 기본값", () =
 describe("런칭 무료 기간 — free_launch_until 스위치", () => {
   const LAUNCH = {
     ...DEFAULT_TOKEN_CONFIG,
-    free_launch_until: "2026-09-01T04:00:00+09:00",
+    free_launch_until: "2026-10-01T04:00:00+09:00",
     free_launch_token_limit: 30_000,
   };
 
@@ -117,7 +117,7 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
     expect(e.is_subscriber).toBe(false);
     expect(e.daily_token_limit).toBe(30_000); // moly-backend와 같은 런칭 한도
     expect(e.tokens_remaining).toBe(20_000);
-    expect(e.trial_ends_at).toBe("2026-09-01T04:00:00+09:00");
+    expect(e.trial_ends_at).toBe("2026-10-01T04:00:00+09:00");
   });
 
   it("런칭 중이어도 실제 구독자는 subscriber 우선", () => {
@@ -128,7 +128,7 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
   });
 
   it("종료일 지나면 정상 등급으로 복귀", () => {
-    const after = new Date("2026-09-02T00:00:00Z");
+    const after = new Date("2026-10-02T00:00:00Z");
     const e = deriveEntitlement({ trial_ends_at: null }, null, 500, LAUNCH, after);
     expect(e.plan).toBe("free");
     expect(e.daily_token_limit).toBe(DEFAULT_TOKEN_CONFIG.daily_token_limit.free);
