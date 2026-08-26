@@ -99,6 +99,8 @@ backend/
 > legacy `SUPABASE_ANON_KEY`/`SUPABASE_SERVICE_ROLE_KEY`는 2026-08 유출로 폐기(코드에 전환기 폴백만 남음 — Vercel env 교체 후 제거).
 | `CORS_ALLOWED_ORIGINS` | 허용 origin(쉼표 구분, 정확한 origin만). 네이티브 앱은 Origin 미전송이라 무관 |
 
+Google OAuth → Authorized redirect URIs에는 Supabase 콜백만: `https://<project-ref>.supabase.co/auth/v1/callback`.
+
 ## 8. 런북
 
 - **검증 3종**: `npm run typecheck` · `npm run lint` · `npm test` (+ `npm run build`)

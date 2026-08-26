@@ -61,7 +61,17 @@ export type LandingContent = {
   langSwitchLabel: string;
   instagram: { label: string; href: string };
   footerLinks: FooterLink[];
+  /** 푸터 링크 아래 사업자 정보 한 줄. 값은 사업자 등록 서류 기준. */
+  businessInfo: string;
+  copyright: string;
 };
+
+/** 사업자 정보는 ko만 국문 표기, en/ja는 영문 표기를 공유한다. */
+const BUSINESS_INFO_KO =
+  "대표 : 노창준 · 사업자등록번호 486-49-01105 · 통신판매업신고 제2026-별내-1461호 · Contact nonoeul123@gmail.com";
+const BUSINESS_INFO_EN =
+  "CEO : Rho Changjun · Business Registration No. 486-49-01105 · Mail Order Business Report 2026-Byeollae-1461 · Contact nonoeul123@gmail.com";
+const COPYRIGHT = "© 2026 BeCappy. All rights reserved.";
 
 export const CONTENT: Record<Lang, LandingContent> = {
   ko: {
@@ -92,6 +102,8 @@ export const CONTENT: Record<Lang, LandingContent> = {
       { label: "이용약관", href: "/policy#terms" },
       { label: "개인정보 처리방침", href: "/policy" },
     ],
+    businessInfo: BUSINESS_INFO_KO,
+    copyright: COPYRIGHT,
   },
   en: {
     langLabel: "English",
@@ -121,6 +133,8 @@ export const CONTENT: Record<Lang, LandingContent> = {
       { label: "Terms", href: "/policy#terms" },
       { label: "Privacy Policy", href: "/policy" },
     ],
+    businessInfo: BUSINESS_INFO_EN,
+    copyright: COPYRIGHT,
   },
   ja: {
     langLabel: "日本語",
@@ -150,5 +164,7 @@ export const CONTENT: Record<Lang, LandingContent> = {
       { label: "利用規約", href: "/policy#terms" },
       { label: "プライバシーポリシー", href: "/policy" },
     ],
+    businessInfo: BUSINESS_INFO_EN,
+    copyright: COPYRIGHT,
   },
 };

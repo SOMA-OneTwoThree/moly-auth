@@ -339,6 +339,29 @@
   color: var(--footer-ink-hover);
 }
 
+/* 사업자 정보 · 저작권 — 링크보다 한 톤 작게, 같은 잉크 계열로 가라앉힌다. */
+.footerBusiness,
+.footerCopyright {
+  margin: 0;
+  max-width: min(880px, 100%);
+  color: var(--footer-ink);
+  text-align: center;
+  text-wrap: balance;
+  line-height: 1.6;
+}
+
+.footerBusiness {
+  margin-top: clamp(24px, 0.762vw + 21.03px, 32px);
+  font-weight: 400;
+  font-size: clamp(12px, 0.19vw + 11.26px, 14px);
+}
+
+.footerCopyright {
+  margin-top: clamp(10px, 0.19vw + 9.26px, 12px);
+  font-weight: 500;
+  font-size: clamp(13px, 0.19vw + 12.26px, 15px);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .langChevron {
     transition: none;

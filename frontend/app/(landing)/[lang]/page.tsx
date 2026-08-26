@@ -182,6 +182,8 @@ export default async function LandingPage({ params }: Props) {
             </Link>
           ))}
         </nav>
+        <p className={styles.footerBusiness}>{c.businessInfo}</p>
+        <p className={styles.footerCopyright}>{c.copyright}</p>
       </footer>
     </div>
   );
