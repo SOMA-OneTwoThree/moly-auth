@@ -19,7 +19,6 @@ import {
 } from "./entitlement";
 
 const NOTIF_TYPES = ["morning_diary", "evening_chat"] as const; // 알림 2종 고정
-const MEMORY_TABLE = "memories"; // mem0 collection (moly-backend settings.memory_collection)
 
 const PROFILE_COLUMNS =
   "id, nickname, language, timezone, hay_balance, trial_ends_at, review_prompted_at";
@@ -395,7 +394,10 @@ export async function deleteAccount(
 }
 
 /**
- * mem0 pgvector 행 직접 삭제 — TS에는 mem0 SDK가 없어 테이블을 직접 지운다.
+ * mem0 v2 벡터 기억 삭제 — 컬렉션(vecs.moly_memories_v2)이 PostgREST 비노출
+ * 스키마라 `.from()`으로 못 지우므로 SECURITY DEFINER RPC(delete_user_memories,
+ * db/seed_and_triggers.sql)로 지운다. 과거 v1 `memories` 테이블을 지우던 코드는
+ * v2 전환 뒤 대상 테이블이 없어 조용한 no-op였다(2026-08-28 사고 후속).
  * (mem0의 로컬 history SQLite는 비권위 캐시라 무관 — moly-backend ERD §7 참고)
  */
 async function deleteMemories(
@@ -403,10 +405,9 @@ async function deleteMemories(
   userId: string,
 ): Promise<void> {
   try {
-    const { error } = await admin
-      .from(MEMORY_TABLE)
-      .delete()
-      .filter("metadata->>user_id", "eq", userId);
+    const { error } = await admin.rpc("delete_user_memories", {
+      p_user_id: userId,
+    });
     if (error) throw error;
   } catch (e) {
     // 탈퇴 자체는 완료 — mem0 정리 실패만 로그(런북 따라 수동 정리 대상).
