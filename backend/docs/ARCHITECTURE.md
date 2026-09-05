@@ -107,3 +107,18 @@ Google OAuth → Authorized redirect URIs에는 Supabase 콜백만: `https://<pr
 - **탈퇴했는데 mem0 잔존 의심**: Vercel 함수 로그에서 `[mem0 cleanup failed]` 검색 → 해당 user_id의 `memories` 행을 SQL로 수동 정리
 - **모든 계정 요청 401**: Vercel env의 `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`가 프로덕션 프로젝트인지 확인
 - **profiles 안 생김 의심**: 트리거 확인 쿼리(`pg_trigger`에서 `on_auth_user_created`) — 없어도 self-heal이 커버하지만 트리거 복구 필요(`moly-backend/db/seed_and_triggers.sql` §1)
+
+## 개발 계정 API
+
+개발 Supabase의 기존 Apple·Google·카카오 인증 설정을 재사용한다. LINE은 개발 프로젝트에 미등록이다.
+
+| 대상 | Vercel 프로젝트 | 배포 브랜치 | API | Supabase |
+|---|---|---|---|---|
+| 개발 | moly-server-dev | dev | https://moly-server-dev.vercel.app | wywzjslvxwttxkecbyis |
+| 운영 | moly-server | main | https://moly-server.vercel.app | qkgjlgzsharnilxnkytd |
+
+각 프로젝트의 SUPABASE_URL·SUPABASE_PUBLISHABLE_KEY·SUPABASE_SECRET_KEY는 같은 환경의 Supabase를 가리킨다.
+서버 비밀 키는 Vercel 환경 변수에만 보관한다. 개발 프로젝트는 운영 키를 상속하지 않는다.
+Vercel에서 개발 프로젝트의 Production은 위 개발 API 고정 주소의 배포 슬롯을 뜻하며 운영 DB를 의미하지 않는다.
+Preview는 Vercel 인증 보호를 유지한다. 앱은 고정 API 주소를 사용하고 /me 등은 기존 Supabase 사용자 인증을 요구한다.
+/health 200 및 무인증 /me 401을 배포 후 확인한다. 실제 로그인·온보딩·재실행·탈퇴 검수는 개발 앱에서 수행한다.
