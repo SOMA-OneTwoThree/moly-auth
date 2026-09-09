@@ -1,8 +1,8 @@
 # Privacy Policy
 
 **Service:** BeCappy
-**Effective Date:** August 19, 2026
-**Last Revised:** August 19, 2026
+**Effective Date:** September 9, 2026
+**Last Revised:** September 9, 2026
 
 Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
 
@@ -20,11 +20,12 @@ The Operator processes personal information for the following purposes. Personal
     - Creating and publishing diary content based on conversations
     - Creating and managing memory information to maintain natural conversational context
     - Providing routine (habit) management features
+    - Providing daily fortunes using the user's date of birth, checking the minimum age for this feature, maintaining the fortune profile, and using fortune results as context when the user starts a fortune-related conversation
     - Granting, purchasing, holding, and equipping in-app currency (Hay) and decoration items
 3. **Paid services and payment management**
     - Verifying and managing in-app purchase status, managing purchase history, handling refunds
 4. **Advertising rewards**
-    - Verifying rewarded-ad views and granting rewards (Hay)
+    - Verifying rewarded-ad views and granting rewards (Hay or access to detailed fortune results)
 5. **Notification services**
     - Sending push notifications such as diary publication and check-in greetings
 6. **Customer support**
@@ -59,18 +60,22 @@ The Operator processes the following personal information items.
 | Stored | **Diary content** | Generated from conversations and stored; deleted upon account deletion |
 | Stored | **Cappy's memory information** | Information shared by the user during conversations (interests, recent updates, preferences, names, etc.) stored in summarized form to maintain conversational context |
 | Stored | Routine information (name, days/frequency, completion records), notification settings | Stored to provide features |
+| Stored | **Fortune profile** (date of birth and gender, associated with the member identifier) | Entered directly by the user when setting up the fortune feature and stored on the server. Date of birth is used to calculate fortunes and check that the user is at least 14. Gender is stored as part of the fortune profile but is not currently used in fortune calculations. |
+| Stored | **Fortune results and access information** (fortune date, time zone, result content, and detailed-result access status) | Stored to display the current fortune, maintain access to detailed results, and support fortune-related conversations |
 | Stored | Hay balance and transaction history, item ownership and equipment information | Stored to manage currency and items |
 | Stored | In-app purchase history (product identifier, transaction identifier, purchase date, etc.) | Stored to manage purchase status. **Payment method details such as credit card numbers are processed by Apple (App Store) or Google (Google Play) and are not collected by the Operator** |
 | Stored | Push notification device token (FCM registration token; on iOS, notifications are relayed through APNs) | Stored to send notifications; invalidated upon logout or account deletion |
 
 > ⚠️ Content you enter during conversations is stored on the server, and some personal details may be stored as Cappy's memory information and used as context for future conversations. Please avoid entering sensitive personal information such as resident registration numbers, credit card numbers, or passwords during conversations.
 
+Fortune results are calculated on the Service's servers. If you start a fortune-related conversation, relevant fortune result text is sent to the AI response provider as conversation context. The date of birth and gender stored in your fortune profile are not automatically added to that AI context or sent to advertising or analytics providers by the fortune feature.
+
 ### 3. Information automatically generated or collected while using the Service
 
 - Service usage records, access logs, device information (OS version, app version), IP address
 - Firebase Installation ID, app usage event logs (collected via Firebase)
 - Crash and stability diagnostics (crash stack traces, device state at the time of the crash, OS and app version) together with the member identifier — collected via Firebase Crashlytics to diagnose failures and improve stability
-- Ad transaction identifiers used to verify rewarded-ad views
+- Member identifiers, ad session identifiers, ad transaction identifiers, and verification status used to verify rewarded-ad views and grant Hay or access to detailed fortune results
 - App usage event logs (event names, screen names, event properties), session and app-lifecycle events, and the member identifier — collected via Amplitude for service usage analysis. Location-related automatic collection (IP address, city, region, DMA) and the device advertising identifier are disabled for this processor.
 - Device advertising identifiers (IDFA on iOS, Google Advertising ID on Android), app event logs (sign-up completion, first conversation, purchases, etc.), and purchase/product interaction information (purchased product identifier, amount, etc.) — collected via the Meta SDK for ad performance measurement
 - Email address hashed with SHA-256 by the Meta SDK for Advanced Matching. On iOS this is sent only after ATT authorization. **Android has no system-level tracking-permission framework equivalent to ATT, so on Android it is sent whenever a signed-in user's email address is available.**
@@ -87,6 +92,9 @@ The Operator processes the following personal information items.
 | Sign-up information (email, social identifier, nickname, time zone/language) | Until account deletion |
 | Conversation content, diaries, Cappy's memory information | Until account deletion |
 | Routine/notification settings, currency/item information | Until account deletion |
+| Fortune profile (date of birth and gender) | Until deletion of the fortune profile or account deletion, whichever occurs first |
+| Fortune results and detailed-result access information | Until replaced by a newly generated result, deletion of the fortune profile, or account deletion, whichever occurs first |
+| Fortune ad session and verification records | Deleted through periodic cleanup after 7 days have elapsed from session expiry, or earlier upon deletion of the fortune profile or account deletion |
 | Records on contracts or withdrawal of offers, records on payment and supply of goods | 5 years (Act on Consumer Protection in Electronic Commerce of the Republic of Korea) |
 | Records on consumer complaints or dispute resolution | 3 years (Act on Consumer Protection in Electronic Commerce of the Republic of Korea) |
 | Access logs, service usage records | 3 months from collection (Protection of Communications Secrets Act of the Republic of Korea) |
@@ -110,11 +118,11 @@ The Operator entrusts the following personal information processing tasks to pro
 
 | Processor | Entrusted Tasks | Location |
 | --- | --- | --- |
-| Supabase, Inc. | Member authentication and database operation | USA |
+| Supabase, Inc. | Member authentication and database operation, including storage of fortune profiles, results, and ad verification records | USA |
 | Vercel Inc. | Account server hosting | USA |
 | Amazon Web Services, Inc. (AWS) | Service server infrastructure operation and data processing | USA |
 | Anthropic, PBC | AI conversation responses and diary content generation | USA |
-| OpenAI, L.L.C. | Summarization and processing of conversation memory information | USA |
+| OpenAI, L.L.C. | AI conversation responses (including fortune-related conversations), diary content generation, and processing of conversation memory information | USA |
 | RevenueCat, Inc. | In-app purchase status management | USA |
 | Apple Inc. | Sign in with Apple authentication, push notification delivery (APNs), App Store in-app purchase processing | USA |
 | Google LLC | Google sign-in authentication, Firebase-based app configuration and service usage analytics, crash and stability diagnostics (Firebase Crashlytics), push notification delivery (Firebase Cloud Messaging, FCM), ad serving (AdMob), Google Play in-app purchase and refund processing | USA |
@@ -135,14 +143,14 @@ The Operator transfers personal information abroad as follows to provide the Ser
 
 | Recipient | Country | Items Transferred | Time and Method of Transfer | Purpose of Use | Retention Period |
 | --- | --- | --- | --- | --- | --- |
-| Supabase | USA | Sign-up information | Transmitted over the network at sign-up and during use | Member authentication and database operation | Until account deletion |
+| Supabase | USA | Sign-up information and fortune service data, including date of birth, gender, fortune results, and ad verification records | Transmitted over the network at sign-up and during use | Member authentication and database operation | See Article 3 above |
 | Vercel | USA | Account-related request data | Transmitted over the network during use | Account server hosting | Until the purpose of processing is achieved |
-| Amazon Web Services | USA | Service data such as conversations, diaries, and memory information | Transmitted over the network during use | Server infrastructure operation | See Article 3 above |
+| Amazon Web Services | USA | Service data such as conversations, diaries, memory information, and fortune profiles and results | Transmitted over the network during use | Server infrastructure operation | See Article 3 above |
 | Anthropic | USA | Conversation text and related context | Transmitted in real time when generating conversations/diaries | AI responses and diary generation | Retained up to 30 days under the processor's policy, then destroyed |
-| OpenAI | USA | Information for summarizing conversation text | Transmitted in real time when processing memory information | Memory summarization and processing | Retained up to 30 days under the processor's policy, then destroyed |
+| OpenAI | USA | Conversation text and related context, including fortune result text when the user starts a fortune-related conversation, and information for processing conversation memory | Transmitted in real time when generating conversations/diaries or processing memory information | AI responses, diary generation, and memory processing | Retained up to 30 days under the processor's policy, then destroyed |
 | RevenueCat | USA | Member identifier, purchase status information | Transmitted over the network at the time of purchase | In-app purchase status management | Until account deletion |
 | Apple | USA | Push notification delivery information, payment processing information | Transmitted over the network when sending notifications and at the time of purchase | Push notification delivery (APNs), App Store in-app purchase processing | Until the purpose of processing is achieved |
-| Google | USA | Device information, app usage event logs, crash diagnostics and the member identifier, push notification device token (FCM), payment processing information | Transmitted over the network during use, when a crash occurs, when sending notifications, and at the time of purchase | App configuration and usage analytics, crash diagnostics and stability improvement, push notification delivery (FCM), ad serving, Google Play in-app purchase and refund processing | Until the purpose of processing is achieved |
+| Google | USA | Device information, app usage event logs, crash diagnostics and the member identifier, push notification device token (FCM), payment processing information, and member/ad session/transaction identifiers for rewarded-ad verification | Transmitted over the network during use, when verifying rewarded ads, when a crash occurs, when sending notifications, and at the time of purchase | App configuration and usage analytics, crash diagnostics and stability improvement, push notification delivery (FCM), ad serving and verification of Hay or detailed-fortune access rewards, Google Play in-app purchase and refund processing | Until the purpose of processing is achieved |
 | Amplitude | USA | Member identifier, app usage event logs (event names, screen names, event properties) | Transmitted over the network during use | Service usage analytics | Until the purpose of processing is achieved |
 | Meta Platforms | USA | Device advertising identifiers (IDFA/Google Advertising ID), app events (sign-up completion, first conversation, purchases), purchase/product interaction information, and a SHA-256 hashed email address | Transmitted over the network when app events occur; the hashed email is transmitted only after ATT authorization on iOS, and whenever a signed-in user's email address is available on Android | Ad performance measurement, Advanced Matching, and marketing optimization | Retained and then destroyed in accordance with the processor's policies |
 | LY Corporation | Japan | LINE account identifier, email address (only when authorized by the user), and authentication request information | Transmitted over the network when using LINE Login | LINE Login authentication | Until the purpose of processing is achieved or in accordance with the recipient's policy |
@@ -168,6 +176,7 @@ The Operator does not collect personal information from children under the age o
 3. If a data subject requests correction or deletion of errors in their personal information, the Operator will not use or provide the personal information in question until the correction or deletion is completed.
 4. The rights under Paragraph 1 may be exercised through an agent, such as the data subject's legal representative or an authorized person. In such cases, a power of attorney must be submitted.
 5. Users may request deletion of all of their personal information at any time directly through the in-app "Delete Account" feature, and may also request deletion via the [Account Deletion Request page](/account-deletion) even without accessing the app. Users may request the Operator to access or delete Cappy's memory information.
+6. Users may request access to, correction of, or deletion of their fortune profile through the contact email in Article 12. Deletion of the fortune profile also deletes the associated fortune results and ad verification records. Conversation records created while discussing a fortune are retained under the conversation retention period in Article 3.
 
 ---
 
@@ -232,6 +241,7 @@ We may update our Privacy Policy from time to time. Thus, you are advised to rev
 
 | Effective Date | Summary |
 | --- | --- |
+| September 9, 2026 | Added fortune profile collection and use, fortune result and ad verification data, retention and deletion procedures, and related processor disclosures. Clarified AI processing of conversations, diaries, and fortune result context. |
 | August 19, 2026 | Disclosed Amplitude service usage analytics and Firebase Crashlytics crash diagnostics. Corrected the description of Meta Advanced Matching on Android, which is not gated by a tracking permission, and added the Android ad consent form and its in-app entry point. |
 | August 4, 2026 | Previous version. |
 
