@@ -241,7 +241,7 @@ We may update our Privacy Policy from time to time. Thus, you are advised to rev
 
 | Effective Date | Summary |
 | --- | --- |
-| September 9, 2026 | Added fortune profile collection and use, fortune result and ad verification data, retention and deletion procedures, and related processor disclosures. Clarified AI processing of conversations, diaries, and fortune result context. |
+| September 9, 2026 | Added collection and use of fortune profile information (date of birth and gender), fortune result and ad verification data, retention and deletion procedures, and related processor disclosures. Clarified that gender is stored but not currently used in fortune calculations, and described AI processing of conversations, diaries, and fortune result context. |
 | August 19, 2026 | Disclosed Amplitude service usage analytics and Firebase Crashlytics crash diagnostics. Corrected the description of Meta Advanced Matching on Android, which is not gated by a tracking permission, and added the Android ad consent form and its in-app entry point. |
 | August 4, 2026 | Previous version. |
 
