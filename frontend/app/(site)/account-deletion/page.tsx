@@ -6,6 +6,7 @@ import EmailCopyCard from "@/components/EmailCopyCard";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/account-deletion" },
   title: "Account Deletion | BeCappy",
   description: "How to delete your BeCappy account.",
 };

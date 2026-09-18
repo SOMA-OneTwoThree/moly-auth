@@ -9,6 +9,7 @@ import EmailCopyCard from "@/components/EmailCopyCard";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/support" },
   title: "Support | BeCappy",
   description: "Contact channels and frequently asked questions for the BeCappy app.",
 };

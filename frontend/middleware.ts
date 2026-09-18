@@ -23,7 +23,9 @@ export function middleware(request: NextRequest) {
     ? chosen
     : pickLangFromAcceptLanguage(request.headers.get("accept-language"));
 
-  const response = NextResponse.redirect(new URL(`/${lang}`, request.url), 307);
+  const destination = request.nextUrl.clone();
+  destination.pathname = `/${lang}`;
+  const response = NextResponse.redirect(destination, 307);
   // 응답이 요청 헤더/쿠키에 따라 달라지므로, CDN이 한 언어의 리다이렉트를
   // 모두에게 재사용하지 않도록 반드시 알린다.
   response.headers.set("Vary", "Accept-Language, Cookie");
