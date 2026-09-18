@@ -8,6 +8,7 @@ import styles from "./policy.module.css";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/policy" },
   title: "Privacy Policy & Terms of Service | BeCappy",
   description: "Privacy Policy and Terms of Service for the BeCappy app.",
 };

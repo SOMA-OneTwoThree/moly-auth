@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 
 import cappyLying from "@/images/landing/cappy-lying.png";
 import logo from "@/images/landing/logo.png";
+import { SITE_URL } from "@/lib/site-url";
 
 import {
   APP_STORE_URL,
@@ -25,14 +26,6 @@ const quicksand = Quicksand({
   display: "swap",
   variable: "--font-quicksand",
 });
-
-/*
- * 배포 도메인. 커스텀 도메인으로 옮길 때는 NEXT_PUBLIC_SITE_URL만 바꾸면 된다.
- * 빌드 타임에 인라인되므로 배포 환경에 설정해야 반영된다.
- */
-const SITE_URL = new URL(
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://moly-server-frontend.vercel.app",
-);
 
 export const dynamic = "force-static";
 export const dynamicParams = false;

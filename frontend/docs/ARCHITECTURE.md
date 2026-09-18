@@ -1,6 +1,6 @@
 # Frontend 아키텍처
 
-인증 체인 확인용 **최소 앱** + 앱 출시에 필요한 **공개 페이지**(개인정보 처리방침·고객 지원·계정 삭제 요청)를 한 Next.js 앱에 둔다. 백엔드(`moly-server/backend`)와 짝을 이룬다.
+BeCappy의 **마케팅 랜딩과 공개 페이지**(개인정보 처리방침·고객 지원·계정 삭제 안내)를 제공하는 Next.js 앱이다. 계정 API는 별도 `backend/` 프로젝트가 담당한다.
 
 > 이 문서가 frontend 구조의 **단일 출처**다. 라우트·env·스타일 토큰의 상세는 항상 여기에 기록하고, 루트 `README.md`는 요약 + 링크만 둔다.
 >
@@ -10,17 +10,16 @@
 
 ## 1. 개요 / 역할
 
-- **인증 체인 검증 하니스**: 구글 로그인 버튼 하나로 **발급(프론트 SDK) → Bearer → 백엔드 `getUser`** 전체 체인을 눈으로 확인한다. 로그인 후 `/api/me`를 호출해 본인 신원(JSON)을 화면에 출력.
+- **마케팅 랜딩**: 앱 소개와 App Store·Google Play 링크를 제공한다. 프론트엔드에서 로그인하거나 계정 API를 호출하지 않는다.
 - **출시용 공개 페이지**: `/policy`(Privacy Policy·Terms of Service), `/support`(고객 지원), `/account-deletion`(계정 삭제 요청 — Google Play "앱 외부 삭제 요청 URL" 요건). 로그인 없이 접근 가능 — App Store·Google Play/OAuth 심사 제출용.
 - **언어 정책**: 공개 페이지(`/policy`·`/support`·`/account-deletion`)는 **영문 단일**로 유지한다. 랜딩만 **한국어·영어·일본어 3개 언어**를 각각 `/ko`·`/en`·`/ja`로 제공하고(네비게이션의 언어 스위치로 전환), `/`는 미들웨어가 브라우저 언어를 보고 셋 중 하나로 보낸다. 따라서 **ko·ja 랜딩에서도 푸터의 방침·약관·고객지원 링크는 영문 페이지로 간다** — 의도된 동작이다.
-- 미들웨어가 없어 **새 라우트는 기본 public**이다(아래 [라우트](#3-라우트) 참조).
+- 인증 미들웨어가 없어 **새 라우트는 기본 public**이다. 언어 선택 미들웨어만 사용한다.
 
 ## 2. 기술 스택
 
 | 항목 | 값 |
 |---|---|
 | 프레임워크 | Next.js 15 (App Router), React 19 |
-| 데이터/인증 | `@supabase/supabase-js` |
 | 마크다운 | `react-markdown` + `remark-gfm` — `/policy` 렌더 전용 |
 | 언어 | TypeScript(`strict`), `target ES2017`, `jsx: preserve` |
 | 경로 별칭 | `@/*` → `./*` |
@@ -29,7 +28,7 @@
 
 ## 3. 라우트
 
-App Router(`app/`). `pages/` 없음. **라우트 가드 없음** → 모든 라우트는 기술적으로 public이며, 홈의 "잠김"은 컴포넌트 내부 조건부 렌더링일 뿐이다.
+App Router(`app/`). `pages/` 없음. **인증 라우트 가드 없음** → 모든 페이지는 공개다.
 
 **라우트 그룹으로 루트 레이아웃이 둘이다** — `app/layout.tsx`는 없다.
 
@@ -46,25 +45,15 @@ App Router(`app/`). `pages/` 없음. **라우트 가드 없음** → 모든 라�
 |---|---|---|---|---|
 | `/` | `middleware.ts` | 리다이렉트(Edge) | **공개** | 언어 감지 후 `/ko`·`/en`·`/ja`로 307. 우선순위: 선택 쿠키 > `Accept-Language` > `ko` |
 | `/ko` `/en` `/ja` | `app/(landing)/[lang]/page.tsx` | 서버(`force-static` + `generateStaticParams`) | **공개** | 마케팅 랜딩. `dynamicParams = false`라 그 외 값은 404 |
-| `/auth/callback` | `app/auth/callback/page.tsx` | 클라이언트 | 공개(전이) | OAuth 랜딩. `?code=` 자동 교환 후 `/`로 replace, 7s 타임아웃 |
 | `/policy` | `app/(site)/policy/page.tsx` | 서버(`force-static`) | **공개** | `docs/policy.md`(영문)를 분리 렌더(Privacy Policy + Terms of Service) |
 | `/support` | `app/(site)/support/page.tsx` | 서버(`force-static`) | **공개** | 고객 지원(문의 채널·FAQ, 영문) |
 | `/account-deletion` | `app/(site)/account-deletion/page.tsx` | 서버(`force-static`) | **공개** | 계정 삭제 안내(영문): 앱 내 절차 + 이메일 요청(복사 카드) |
 
-## 4. 인증 / 데이터 흐름
+## 4. 데이터와 서비스 경계
 
-`lib/supabaseClient.ts`:
-- **모듈 레벨 싱글톤** `supabase` — strict-mode 재마운트에도 클라이언트 하나만 유지.
-- 옵션: **`flowType: "pkce"`**(기본 implicit 대신 명시), `detectSessionInUrl: true`(콜백에서 SDK가 `?code=` 자동 교환 — 수동 `exchangeCodeForSession` 불필요), `persistSession: true`, `autoRefreshToken: true`.
-- **`API_BASE`** = `NEXT_PUBLIC_API_BASE`(백엔드 base URL, 빌드 타임 인라인).
+랜딩 콘텐츠는 `content.ts`, 정책 본문은 `docs/policy.md`, 지원·삭제 안내는 각 페이지의 상수에서 읽는다. 계정 API 호출, Supabase SDK, 웹 로그인 callback은 현재 프론트엔드에 없다.
 
-체인(홈 → 백엔드), `app/page.tsx`:
-1. 마운트 시 `supabase.auth.getSession()`으로 세션 시드 + `onAuthStateChange` 구독(언마운트 시 해제).
-2. `signIn()` → `signInWithOAuth({ provider: "google", options: { redirectTo: ${origin}/auth/callback } })`.
-3. `callMe()` → `getSession()`의 `access_token`을 꺼내 `fetch(${API_BASE}/api/me, { headers: { Authorization: Bearer <token> } })` → JSON/에러 출력(CORS·네트워크 catch).
-4. `signOut()` → `supabase.auth.signOut()`.
-
-콜백(`app/auth/callback/page.tsx`): `handled` ref로 strict-mode 이중 실행 가드, `getSession()` + `onAuthStateChange`로 세션 확정 후 `/`로 이동, **7s 타임아웃**으로 무한 대기 방지(PKCE verifier 분실/다른 브라우저 동의 등 커버).
+공개 사이트 도메인 변경은 모바일 인증 callback이나 계정 API 주소 변경을 요구하지 않는다. 배포·도메인 전환 순서와 검증 기록은 [도메인 이전 계획](BECAPPY-DOMAIN-MIGRATION-PLAN.md)을 참고한다.
 
 ## 5. 랜딩 (`/ko`, `/en`, `/ja`)
 
@@ -81,14 +70,16 @@ Pencil 디자인 파일 `frontend/design/DESIGN.pen`의 `Landing — *`(1440) / 
 - `middleware.ts` + `lib/lang.ts` — `/` 로 들어온 요청만 언어별 랜딩으로 307 리다이렉트한다.
   - 우선순위: **직접 고른 언어 쿠키(`becappy-lang`) > `Accept-Language` > `ko`**. 쿠키는 언어 스위치로 선택했을 때만 기록된다(`LangSwitcher`의 `rememberLang`).
   - `matcher`가 `/` 하나뿐이라 `/en`·`/ja` 같은 **명시적 링크는 절대 재분기되지 않는다** — 공유 링크·스토어 등록정보 URL이 어느 브라우저에서든 그 언어로 열린다.
+  - URL의 pathname만 바꾸므로 UTM 등 query를 보존한다.
   - 요청 헤더·쿠키에 따라 응답이 달라지므로 `Vary: Accept-Language, Cookie`를 붙인다.
   - `lib/lang.ts`는 Edge 런타임에서 도는 미들웨어가 쓰므로 **이미지 등 무거운 import를 넣지 않는다**. 언어별 카피·에셋은 `content.ts` 담당.
   - `next.config.ts`의 `redirects()`는 미들웨어보다 **먼저** 평가된다. `/` 리다이렉트를 거기에 다시 추가하면 언어 감지가 통째로 죽는다.
-- SEO/공유: `metadataBase`(`NEXT_PUBLIC_SITE_URL`)가 있어야 hreflang·`og:url`이 **절대 URL**로 나간다(상대경로면 Google이 hreflang을 무시하고 공유 카드도 깨진다). `x-default`는 언어를 감지하는 `/`를 가리키고, `og:locale`은 `ko_KR`·`en_US`·`ja_JP` 형식을 쓴다.
+- SEO/공유: `lib/site-url.ts`의 공통 `SITE_URL`을 사용한다. `metadataBase`(`NEXT_PUBLIC_SITE_URL`)가 있어야 hreflang·`og:url`이 **절대 URL**로 나간다(상대경로면 Google이 hreflang을 무시하고 공유 카드도 깨진다). `x-default`는 언어를 감지하는 `/`를 가리키고, `og:locale`은 `ko_KR`·`en_US`·`ja_JP` 형식을 쓴다.
 - `<html lang>`은 `app/(landing)/[lang]/layout.tsx`가 언어별로 낸다(`ko`/`en`/`ja`).
 
 ## 6. 공개 페이지 (`/policy`, `/support`, `/account-deletion`)
 
+- `(site)/layout.tsx`가 공통 `metadataBase`를 설정하고 각 페이지가 자기 경로의 canonical을 선언한다.
 - 모두 **서버 컴포넌트 + `export const dynamic = "force-static"`** → 빌드 타임에 정적 HTML 생성(런타임 파일 I/O 없음).
 - `/policy`: `docs/policy.md`(영문)를 읽어 `# Terms of Service` 헤딩 기준으로 **Privacy Policy / Terms of Service 두 섹션**(`#privacy` / `#terms`)으로 분리, `react-markdown + remark-gfm`로 렌더(GFM 테이블 지원). 방침 제8조에서 `/account-deletion`을 링크.
 - `/support`: 문의 채널(카카오톡·이메일 복사 카드)·FAQ(영문, 환불은 App Store/Google Play 절차 병기). 콘텐츠는 컴포넌트 내 상수.
@@ -119,10 +110,7 @@ Pencil 디자인 파일 `frontend/design/DESIGN.pen`의 `Landing — *`(1440) / 
 
 | 키 | 설명 |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | publishable/anon 키(브라우저 노출 안전, RLS 보호) |
-| `NEXT_PUBLIC_API_BASE` | 백엔드 base URL |
-| `NEXT_PUBLIC_SITE_URL` | 배포 도메인. 랜딩의 `metadataBase` — hreflang·`og:url`을 절대 URL로 만든다. 미설정 시 `https://moly-server-frontend.vercel.app`로 폴백 |
+| `NEXT_PUBLIC_SITE_URL` | 정규 사이트 URL. `lib/site-url.ts`에서 랜딩·공개 페이지의 metadataBase로 공유한다. 미설정 시 `https://becappy.io`로 폴백. Production에 같은 값을 설정한 후 재빌드한다 |
 
 > secret/service_role 키는 **절대 프론트에 두지 않는다**.
 
@@ -130,8 +118,7 @@ Pencil 디자인 파일 `frontend/design/DESIGN.pen`의 `Landing — *`(1440) / 
 
 ### 처리 완료
 - ✅ **디자인 토큰 단일화**: `app/globals.css`의 `:root` CSS 변수로 다크 테마 토큰을 모았다(`layout.tsx`에서 import). primary blue 충돌은 앱 포인트색 `--accent`(#6ea8fe)와 구글 브랜드색 `--google`(#4285f4, 로그인 버튼 전용)으로 분리, 보더 그레이는 `--border`(#2a2c33)로 통일. 인라인/CSS Module 모두 `var(--*)` 참조.
-- ✅ **`apiFetch` 헬퍼 추출**: `lib/api.ts`에 세션 토큰 추출 + `API_BASE` + Bearer 호출을 모았다(상대경로 가드 포함). `page.tsx`의 `callMe`가 사용.
 
 ### 향후 리팩토링 후보 (미적용)
-- **스타일링 2종 혼재**: 인라인 스타일(`layout.tsx`, `page.tsx`, `auth/callback`)과 CSS Module(`policy`/`support`)이 공존. 토큰은 단일화됐으나 스타일 작성 방식은 아직 두 가지(전역 CSS는 `:root` 변수 정의 용도뿐). 한쪽으로 수렴 여지.
+- **스타일링 2종 혼재**: 인라인 스타일(`layout.tsx`, `page.tsx`)과 CSS Module(`policy`/`support`)이 공존. 토큰은 단일화됐으나 스타일 작성 방식은 아직 두 가지(전역 CSS는 `:root` 변수 정의 용도뿐). 한쪽으로 수렴 여지.
 - **공용 컴포넌트 최소**: `components/`에는 `EmailCopyCard` 하나뿐. 카드/버튼/`pre` 등 반복 UI를 추가 컴포넌트화 여지.
