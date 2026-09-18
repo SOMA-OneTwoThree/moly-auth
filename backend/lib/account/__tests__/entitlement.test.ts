@@ -10,18 +10,18 @@ const NOW = new Date("2026-07-09T12:00:00Z");
 const CONFIG = { ...DEFAULT_TOKEN_CONFIG, free_launch_until: null };
 
 describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
-  it("유효 구독이 있으면 구독 플랜(체험 기간 남아 있어도 구독 우선)", () => {
+  it.each(["monthly", "yearly"] as const)("유효 %s 구독이 있으면 구독 플랜(체험 기간 남아 있어도 구독 우선)", (plan) => {
     const e = deriveEntitlement(
       { trial_ends_at: "2026-07-10T00:00:00Z" },
-      { plan: "monthly" },
+      { plan },
       100,
       CONFIG,
       NOW,
     );
-    expect(e.plan).toBe("monthly");
+    expect(e.plan).toBe(plan);
     expect(e.is_subscriber).toBe(true);
     expect(e.trial_ends_at).toBeNull();
-    expect(e.ads_removed).toBe(true);
+    expect(e.ads_removed).toBe(false);
     expect(e.subscriber_theme_unlocked).toBe(true);
   });
 
@@ -36,7 +36,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
     expect(e.plan).toBe("trial");
     expect(e.is_subscriber).toBe(false);
     expect(e.trial_ends_at).toBe("2026-07-10T00:00:00Z");
-    expect(e.ads_removed).toBe(true);
+    expect(e.ads_removed).toBe(false);
     expect(e.subscriber_theme_unlocked).toBe(false);
     expect(e.daily_token_limit).toBe(CONFIG.daily_token_limit.trial);
   });
@@ -50,7 +50,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
       NOW,
     );
     expect(e.plan).toBe("free");
-    expect(e.ads_removed).toBe(true); // 배너 광고 미출시 — 전 등급 항상 true(2026-07-09)
+    expect(e.ads_removed).toBe(false);
     expect(e.daily_token_limit).toBe(CONFIG.daily_token_limit.free);
   });
 
@@ -115,6 +115,7 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
     const e = deriveEntitlement({ trial_ends_at: null }, null, 10_000, LAUNCH, NOW);
     expect(e.plan).toBe("trial");
     expect(e.is_subscriber).toBe(false);
+    expect(e.ads_removed).toBe(false);
     expect(e.daily_token_limit).toBe(30_000); // moly-backend와 같은 런칭 한도
     expect(e.tokens_remaining).toBe(20_000);
     expect(e.trial_ends_at).toBe("2026-10-01T04:00:00+09:00");
