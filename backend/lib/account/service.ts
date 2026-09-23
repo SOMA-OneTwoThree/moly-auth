@@ -216,21 +216,17 @@ export async function getMe(admin: SupabaseClient, user: User) {
   const profile = await ensureProfile(admin, user);
   const now = new Date();
   const config = await loadTokenConfig(admin);
-  const [sub, tokensUsed, equipment] = await Promise.all([
+  const [sub, tokensUsed, equipment, launchAccess] = await Promise.all([
     loadActiveSubscription(admin, user.id, now),
     loadTokensUsed(admin, user.id, activityDateFor(now, profile.timezone)),
     loadEquipment(admin, user.id),
+    loadSubscriptionLaunchAccess(admin, user.id),
   ]);
   const entitlement = deriveEntitlement(profile, sub, tokensUsed, config, now);
-  const enabled = config.subscription_launch?.enabled === true;
-  const cutoff = config.subscription_launch?.existing_user_cutoff;
-  const offerExpiry = config.subscription_launch?.legacy_offer_expires_at;
+  const enabled = launchAccess.enabled;
   const hasStartedTrial = Boolean(profile.app_trial_started_at);
   const available = enabled && profile.nickname !== null && sub === null && !hasStartedTrial;
-  const legacyOfferEligible = enabled && sub === null && Boolean(cutoff) && Boolean(offerExpiry)
-    && now.getTime() < Date.parse(offerExpiry!)
-    && Date.parse(cutoff!) < Date.parse(offerExpiry!)
-    && Date.parse(user.created_at) < Date.parse(cutoff!);
+  const legacyOfferEligible = enabled && sub === null && launchAccess.legacy_offer_eligible;
   const offerStatus = legacyOfferEligible
     ? await loadSubscriptionOfferStatus(admin, user.id)
     : { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
@@ -466,6 +462,16 @@ type SubscriptionOfferStatus = {
   claimed_offer: SubscriptionOfferSelection | null;
   offer_redeemed: boolean;
 };
+
+async function loadSubscriptionLaunchAccess(admin: SupabaseClient, userId: string) {
+  const { data, error } = await admin.rpc("subscription_launch_access", { p_user_id: userId });
+  if (error) {
+    // Account access survives unavailable enrollment configuration; purchase stays closed.
+    console.error("[subscription_launch_access]", error.code);
+    return { enabled: false, legacy_offer_eligible: false };
+  }
+  return { enabled: data?.enabled === true, legacy_offer_eligible: data?.legacy_offer_eligible === true };
+}
 
 async function loadSubscriptionOfferStatus(admin: SupabaseClient, userId: string): Promise<SubscriptionOfferStatus> {
   const { data, error } = await admin.rpc("subscription_offer_status", { p_user_id: userId });

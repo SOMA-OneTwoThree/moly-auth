@@ -8,7 +8,17 @@ import { getMe } from "../service";
  */
 function fakeAdmin(tables: Record<string, { data: unknown; error: null }>): SupabaseClient {
   return {
-    rpc: async () => ({ data: { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null }, error: null }),
+    rpc: async (name: string, args: { p_user_id: string }) => {
+      if (name === "subscription_launch_access") {
+        const rows = tables.app_config.data as { key: string; value: unknown }[];
+        const launch = rows.find(row => row.key === "subscription_launch")?.value as Record<string, unknown> | undefined;
+        const cutoff = typeof launch?.existing_user_cutoff === "string" ? Date.parse(launch.existing_user_cutoff) : NaN;
+        const expiry = typeof launch?.legacy_offer_expires_at === "string" ? Date.parse(launch.legacy_offer_expires_at) : NaN;
+        return { data: { enabled: launch?.enabled === true && Number.isFinite(cutoff),
+          legacy_offer_eligible: Date.parse(createdByUser.get(args.p_user_id) ?? "") < cutoff && expiry > Date.now() && expiry > cutoff }, error: null };
+      }
+      return { data: { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null }, error: null };
+    },
     from(table: string) {
       const result = tables[table];
       if (result === undefined) throw new Error(`스텁에 없는 테이블: ${table}`);
@@ -59,7 +69,9 @@ function admin(nickname: string | null, config: Record<string, unknown> = {}, ap
   });
 }
 
+const createdByUser = new Map<string, string>();
 function user(createdAt: string): User {
+  createdByUser.set("11111111-1111-1111-1111-111111111111", createdAt);
   return {
     id: "11111111-1111-1111-1111-111111111111",
     created_at: createdAt,
@@ -155,5 +167,41 @@ describe("GET /me subscription rollout eligibility", () => {
     expect(me.subscription_rollout.has_started_trial).toBe(true);
     expect(me.subscription_rollout.self_trial_available).toBe(false);
     expect(me.subscription_rollout.should_show_paywall).toBe(false);
+  });
+});
+
+
+describe("GET /me account-scoped enrollment RPC", () => {
+  it.each([false, true])("uses server test mode without a production cutoff (legacy=%s)", async (legacy) => {
+    const db = admin("tester");
+    vi.spyOn(db, "rpc").mockImplementation((async (name: string) => ({
+      data: name === "subscription_launch_access"
+        ? { enabled: true, legacy_offer_eligible: legacy }
+        : { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false },
+      error: null,
+    })) as never);
+    const me = await getMe(db, user("2026-09-24T00:00:00Z"));
+    expect(me.subscription_rollout.enabled).toBe(true);
+    expect(me.subscription_rollout.self_trial_available).toBe(true);
+    expect(me.subscription_rollout.legacy_offer_eligible).toBe(legacy);
+    expect(me.subscription_rollout.ios_offer_ready).toBe(false);
+    expect(me.subscription_rollout.android_offer_ready).toBe(false);
+    expect(db.rpc).toHaveBeenCalledWith("subscription_launch_access", { p_user_id: "11111111-1111-1111-1111-111111111111" });
+  });
+  it("unlisted or expired test access leaves purchases closed", async () => {
+    const db = admin("tester");
+    vi.spyOn(db, "rpc").mockResolvedValue({ data: { enabled: false, legacy_offer_eligible: false }, error: null } as never);
+    const me = await getMe(db, user(JUST_NOW()));
+    expect(me.subscription_rollout.enabled).toBe(false);
+    expect(me.subscription_rollout.should_show_paywall).toBe(false);
+    expect(me.subscription_rollout.self_trial_available).toBe(false);
+  });
+  it("RPC failure does not block /me and never enables purchases", async () => {
+    const db = admin("tester");
+    vi.spyOn(db, "rpc").mockResolvedValue({ data: null, error: { code: "PGRST202" } } as never);
+    const me = await getMe(db, user(JUST_NOW()));
+    expect(me.profile.onboarded).toBe(true);
+    expect(me.subscription_rollout.enabled).toBe(false);
+    expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
   });
 });
