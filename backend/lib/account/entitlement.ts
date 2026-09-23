@@ -30,7 +30,11 @@ export type TokenConfig = {
   // 런칭 무료 기간(2026-10-01T04:00+09:00까지 전원 무료) — app_config로 조정. null=OFF.
   free_launch_until: string | null;
   free_launch_token_limit: number | null;
-  subscription_launch?: { enabled: boolean; existing_user_cutoff: string | null };
+  subscription_launch?: {
+    enabled: boolean;
+    existing_user_cutoff: string | null;
+    legacy_offer_expires_at?: string | null;
+  };
 };
 
 /** app_config 미설정 시 임의 기본값(TBD) — moly-backend app/config.py와 동일 값. */
@@ -76,7 +80,11 @@ export function parseSubscriptionLaunch(value: unknown) {
   const cutoff = typeof data.existing_user_cutoff === "string"
     && Number.isFinite(Date.parse(data.existing_user_cutoff))
     ? data.existing_user_cutoff : null;
-  return { enabled: data.enabled === true && cutoff !== null, existing_user_cutoff: cutoff };
+  const offerExpiry = typeof data.legacy_offer_expires_at === "string"
+    && Number.isFinite(Date.parse(data.legacy_offer_expires_at))
+    ? data.legacy_offer_expires_at : null;
+  return { enabled: data.enabled === true && cutoff !== null,
+    existing_user_cutoff: cutoff, legacy_offer_expires_at: offerExpiry };
 }
 
 /** 런칭 종료 시각 파싱 — 실패/미설정 = null(런칭 OFF, fail-safe). JS Date는 오프셋 aware. */

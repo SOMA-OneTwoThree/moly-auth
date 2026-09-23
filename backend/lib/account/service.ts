@@ -224,9 +224,12 @@ export async function getMe(admin: SupabaseClient, user: User) {
   const entitlement = deriveEntitlement(profile, sub, tokensUsed, config, now);
   const enabled = config.subscription_launch?.enabled === true;
   const cutoff = config.subscription_launch?.existing_user_cutoff;
+  const offerExpiry = config.subscription_launch?.legacy_offer_expires_at;
   const hasStartedTrial = Boolean(profile.app_trial_started_at);
   const available = enabled && profile.nickname !== null && sub === null && !hasStartedTrial;
-  const legacyOfferEligible = enabled && sub === null && Boolean(cutoff)
+  const legacyOfferEligible = enabled && sub === null && Boolean(cutoff) && Boolean(offerExpiry)
+    && now.getTime() < Date.parse(offerExpiry!)
+    && Date.parse(cutoff!) < Date.parse(offerExpiry!)
     && Date.parse(user.created_at) < Date.parse(cutoff!);
   const offerStatus = legacyOfferEligible
     ? await loadSubscriptionOfferStatus(admin, user.id)

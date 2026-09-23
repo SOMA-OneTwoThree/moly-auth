@@ -1,5 +1,5 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getMe } from "../service";
 
 /**
@@ -111,7 +111,10 @@ describe("GET /me 응답 계약 — 신규 가입 신호", () => {
 
 
 describe("GET /me subscription rollout eligibility", () => {
-  const config = { subscription_launch: { enabled: true, existing_user_cutoff: "2026-09-23T00:00:00Z" } };
+  beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-24T00:00:00Z")); });
+  afterEach(() => vi.useRealTimers());
+  const config = { subscription_launch: { enabled: true, existing_user_cutoff: "2026-09-23T00:00:00Z",
+    legacy_offer_expires_at: "2026-10-23T00:00:00Z" } };
   it("fails closed by default", async () => {
     const me = await getMe(admin("user"), user("2026-01-01T00:00:00Z"));
     expect(me.subscription_rollout).toEqual({ enabled: false, should_show_paywall: false,
@@ -126,6 +129,26 @@ describe("GET /me subscription rollout eligibility", () => {
     expect(old.subscription_rollout.self_trial_available).toBe(true);
     expect(next.subscription_rollout.self_trial_available).toBe(true);
     expect(old.subscription_rollout.ios_offer_ready).toBe(false);
+  });
+  it.each([undefined, null, "invalid", "infinity", "2026-09-24T00:00:00Z", "2026-09-23T23:59:59Z"])(
+    "missing, invalid or elapsed offer deadline disables store claims only: %s", async (deadline) => {
+      const me = await getMe(admin("user", { subscription_launch: {
+        ...config.subscription_launch, legacy_offer_expires_at: deadline,
+      } }), user("2026-01-01T00:00:00Z"));
+      expect(me.subscription_rollout.enabled).toBe(true);
+      expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
+      expect(me.subscription_rollout.ios_offer_ready).toBe(false);
+      expect(me.subscription_rollout.android_offer_ready).toBe(false);
+      expect(me.subscription_rollout.self_trial_available).toBe(true);
+    },
+  );
+  it("deadline does not shorten an already started 48-hour app trial", async () => {
+    const me = await getMe(admin("user", { subscription_launch: {
+      ...config.subscription_launch, legacy_offer_expires_at: "2026-09-24T00:00:00Z",
+    } }, "2026-09-23T12:00:00Z"), user("2026-01-01T00:00:00Z"));
+    expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
+    expect(me.entitlement.plan).toBe("trial");
+    expect(me.entitlement.trial_ends_at).toBe("2026-09-25T12:00:00.000Z");
   });
   it("expired app trial cannot prompt or start again", async () => {
     const me = await getMe(admin("user", config, "2026-01-01T00:00:00Z"), user("2026-01-01T00:00:00Z"));
