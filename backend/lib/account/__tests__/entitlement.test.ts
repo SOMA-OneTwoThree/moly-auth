@@ -21,7 +21,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
     expect(e.plan).toBe(plan);
     expect(e.is_subscriber).toBe(true);
     expect(e.trial_ends_at).toBeNull();
-    expect(e.ads_removed).toBe(false);
+    expect(e.ads_removed).toBe(true);
     expect(e.subscriber_theme_unlocked).toBe(true);
   });
 
@@ -36,7 +36,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
     expect(e.plan).toBe("trial");
     expect(e.is_subscriber).toBe(false);
     expect(e.trial_ends_at).toBe("2026-07-10T00:00:00Z");
-    expect(e.ads_removed).toBe(false);
+    expect(e.ads_removed).toBe(true);
     expect(e.subscriber_theme_unlocked).toBe(false);
     expect(e.daily_token_limit).toBe(CONFIG.daily_token_limit.trial);
   });
@@ -57,6 +57,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
   it("trial_ends_at null(구 데이터) = free", () => {
     const e = deriveEntitlement({ trial_ends_at: null }, null, 0, CONFIG, NOW);
     expect(e.plan).toBe("free");
+    expect(e.ads_removed).toBe(false);
   });
 
   it("tokens_remaining은 0으로 클램프(음수 노출 금지 — API_SPEC 1장)", () => {
@@ -115,7 +116,7 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
     const e = deriveEntitlement({ trial_ends_at: null }, null, 10_000, LAUNCH, NOW);
     expect(e.plan).toBe("trial");
     expect(e.is_subscriber).toBe(false);
-    expect(e.ads_removed).toBe(false);
+    expect(e.ads_removed).toBe(true);
     expect(e.daily_token_limit).toBe(30_000); // moly-backend와 같은 런칭 한도
     expect(e.tokens_remaining).toBe(20_000);
     expect(e.trial_ends_at).toBe("2026-10-01T04:00:00+09:00");
@@ -140,5 +141,54 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
     const e = deriveEntitlement({ trial_ends_at: null }, null, 500, bad, NOW);
     expect(e.plan).toBe("free");
     expect(e.daily_token_limit).toBe(DEFAULT_TOKEN_CONFIG.daily_token_limit.free);
+  });
+});
+
+describe("subscription rollout replaces historical grants", () => {
+  const rollout = { ...CONFIG, free_launch_until: "2099-01-01T00:00:00Z",
+    subscription_launch: { enabled: true, existing_user_cutoff: "2026-09-23T00:00:00Z" } };
+  it("preserves old clients until first dismissal starts the new trial", () => {
+    const e = deriveEntitlement({ trial_ends_at: "2099-01-01T00:00:00Z" }, null, 0, rollout, NOW);
+    expect(e.plan).toBe("trial");
+    expect(e.daily_token_limit).toBe(rollout.free_launch_token_limit);
+  });
+  it("grants full benefits only inside the account's new 48-hour interval", () => {
+    const profile = { trial_ends_at: "2099-01-01T00:00:00Z", app_trial_started_at: NOW.toISOString(),
+      app_trial_ends_at: "2026-07-11T12:00:00Z" };
+    const active = deriveEntitlement(profile, null, 0, rollout, NOW);
+    expect(active.plan).toBe("trial");
+    expect(active.subscriber_theme_unlocked).toBe(true);
+    expect(active.ads_removed).toBe(true);
+    expect(active.daily_token_limit).toBe(CONFIG.daily_token_limit.trial);
+    const expired = deriveEntitlement(profile, null, 0, rollout, new Date(profile.app_trial_ends_at));
+    expect(expired.plan).toBe("free");
+    expect(expired.ads_removed).toBe(false);
+    expect(deriveEntitlement(profile, null, 0, { ...rollout, subscription_launch: { enabled: false, existing_user_cutoff: null } }, new Date(profile.app_trial_ends_at)).plan).toBe("free");
+  });
+  it("actual subscription wins and exposes actual store trial expiry", () => {
+    const end = "2026-08-09T12:00:00Z";
+    const e = deriveEntitlement({ trial_ends_at: null }, { plan: "yearly", store_trial_ends_at: end }, 0, rollout, NOW);
+    expect(e.plan).toBe("yearly");
+    expect(e.is_subscriber).toBe(true);
+    expect(e.trial_ends_at).toBe(end);
+  });
+  it("missing or malformed activation fails closed, explicit null disables old global grant", () => {
+    expect(effectiveTokenConfig({ subscription_launch: { enabled: "true" } }).subscription_launch?.enabled).toBe(false);
+    expect(effectiveTokenConfig({ subscription_launch: { enabled: true, existing_user_cutoff: "bad" } }).subscription_launch?.existing_user_cutoff).toBeNull();
+    expect(effectiveTokenConfig({ free_launch_until: null }).free_launch_until).toBeNull();
+  });
+});
+
+
+describe("광고 정책 — 무료 플랜만 광고 표시", () => {
+  it.each([
+    { plan: "monthly" as const, store_trial_ends_at: null },
+    { plan: "yearly" as const, store_trial_ends_at: null },
+    { plan: "monthly" as const, store_trial_ends_at: "2026-08-09T12:00:00Z" },
+    { plan: "yearly" as const, store_trial_ends_at: "2026-08-09T12:00:00Z" },
+  ])("유효 구독은 유료/스토어 체험 모두 광고 제거: %j", (subscription) => {
+    const e = deriveEntitlement({ trial_ends_at: null }, subscription, 0, CONFIG, NOW);
+    expect(e.plan).toBe(subscription.plan);
+    expect(e.ads_removed).toBe(true);
   });
 });

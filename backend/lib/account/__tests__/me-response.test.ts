@@ -8,6 +8,7 @@ import { getMe } from "../service";
  */
 function fakeAdmin(tables: Record<string, { data: unknown; error: null }>): SupabaseClient {
   return {
+    rpc: async () => ({ data: { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null }, error: null }),
     from(table: string) {
       const result = tables[table];
       if (result === undefined) throw new Error(`스텁에 없는 테이블: ${table}`);
@@ -27,7 +28,7 @@ function fakeAdmin(tables: Record<string, { data: unknown; error: null }>): Supa
   } as unknown as SupabaseClient;
 }
 
-function admin(nickname: string | null): SupabaseClient {
+function admin(nickname: string | null, config: Record<string, unknown> = {}, appTrialStartedAt: string | null = null): SupabaseClient {
   return fakeAdmin({
     profiles: {
       data: {
@@ -38,12 +39,14 @@ function admin(nickname: string | null): SupabaseClient {
         hay_balance: 40,
         trial_ends_at: null,
         review_prompted_at: null,
+        app_trial_started_at: appTrialStartedAt,
+        app_trial_ends_at: appTrialStartedAt ? new Date(Date.parse(appTrialStartedAt) + 48 * 60 * 60 * 1000).toISOString() : null,
       },
       error: null,
     },
     subscriptions: { data: [], error: null },
     user_daily_stats: { data: null, error: null },
-    app_config: { data: [], error: null },
+    app_config: { data: Object.entries(config).map(([key, value]) => ({ key, value })), error: null },
     user_items: {
       data: [
         {
@@ -69,7 +72,7 @@ describe("GET /me 응답 계약 — 신규 가입 신호", () => {
   it("응답 블록 구성은 그대로 유지된다", async () => {
     const me = await getMe(admin("지우"), user(JUST_NOW()));
 
-    expect(Object.keys(me)).toEqual(["profile", "entitlement", "wallet", "equipment"]);
+    expect(Object.keys(me)).toEqual(["profile", "entitlement", "wallet", "equipment", "subscription_rollout"]);
     expect(me.wallet).toEqual({ balance: 40 });
   });
 
@@ -103,5 +106,31 @@ describe("GET /me 응답 계약 — 신규 가입 신호", () => {
 
     expect(me.profile.is_new_signup).toBe(false);
     expect(me.profile.onboarded).toBe(false);
+  });
+});
+
+
+describe("GET /me subscription rollout eligibility", () => {
+  const config = { subscription_launch: { enabled: true, existing_user_cutoff: "2026-09-23T00:00:00Z" } };
+  it("fails closed by default", async () => {
+    const me = await getMe(admin("user"), user("2026-01-01T00:00:00Z"));
+    expect(me.subscription_rollout).toEqual({ enabled: false, should_show_paywall: false,
+      legacy_offer_eligible: false, self_trial_available: false, has_started_trial: false,
+      ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false });
+  });
+  it("old and new users can start once, only pre-cutoff users qualify for store offer", async () => {
+    const old = await getMe(admin("user", config), user("2026-09-22T23:59:59Z"));
+    const next = await getMe(admin("user", config), user("2026-09-23T00:00:00Z"));
+    expect(old.subscription_rollout.legacy_offer_eligible).toBe(true);
+    expect(next.subscription_rollout.legacy_offer_eligible).toBe(false);
+    expect(old.subscription_rollout.self_trial_available).toBe(true);
+    expect(next.subscription_rollout.self_trial_available).toBe(true);
+    expect(old.subscription_rollout.ios_offer_ready).toBe(false);
+  });
+  it("expired app trial cannot prompt or start again", async () => {
+    const me = await getMe(admin("user", config, "2026-01-01T00:00:00Z"), user("2026-01-01T00:00:00Z"));
+    expect(me.subscription_rollout.has_started_trial).toBe(true);
+    expect(me.subscription_rollout.self_trial_available).toBe(false);
+    expect(me.subscription_rollout.should_show_paywall).toBe(false);
   });
 });
