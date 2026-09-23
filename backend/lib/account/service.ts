@@ -12,6 +12,7 @@ import { isNewSignup } from "./signup";
 import {
   deriveEntitlement,
   effectiveTokenConfig,
+  subscriptionPolicyActive,
   type ActiveSubscription,
   type Entitlement,
   type ProfileRow,
@@ -21,7 +22,7 @@ import {
 const NOTIF_TYPES = ["morning_diary", "evening_chat"] as const; // 알림 2종 고정
 
 const PROFILE_COLUMNS =
-  "id, nickname, language, timezone, hay_balance, trial_ends_at, review_prompted_at";
+  "id, nickname, language, timezone, hay_balance, trial_ends_at, review_prompted_at, app_trial_started_at, app_trial_ends_at";
 
 function notFound(message: string): ApiException {
   return new ApiException("NOT_FOUND", 404, message);
@@ -97,7 +98,7 @@ async function loadActiveSubscription(
 ): Promise<ActiveSubscription | null> {
   const { data, error } = await admin
     .from("subscriptions")
-    .select("plan, expires_at")
+    .select("plan, expires_at, store_trial_ends_at")
     .eq("user_id", userId)
     .in("status", ["active", "grace_period"])
     .gt("expires_at", now.toISOString())
@@ -137,6 +138,7 @@ async function loadTokenConfig(admin: SupabaseClient): Promise<TokenConfig> {
       "diary_llm_min_tokens",
       "free_launch_until",
       "free_launch_token_limit",
+      "subscription_launch",
     ]);
   if (error) {
     console.error("[app_config select]", error);
@@ -153,10 +155,10 @@ async function buildEntitlement(
   now: Date,
 ): Promise<Entitlement> {
   const activityDate = activityDateFor(now, profile.timezone);
-  const [sub, tokensUsed, config] = await Promise.all([
+  const config = await loadTokenConfig(admin);
+  const [sub, tokensUsed] = await Promise.all([
     loadActiveSubscription(admin, profile.id, now),
     loadTokensUsed(admin, profile.id, activityDate),
-    loadTokenConfig(admin),
   ]);
   return deriveEntitlement(profile, sub, tokensUsed, config, now);
 }
@@ -214,16 +216,56 @@ export function legacyEquipmentBlock(equipment: Record<string, string>) {
 export async function getMe(admin: SupabaseClient, user: User) {
   const profile = await ensureProfile(admin, user);
   const now = new Date();
-  const [entitlement, equipment] = await Promise.all([
-    buildEntitlement(admin, profile, now),
+  const config = await loadTokenConfig(admin);
+  const [sub, tokensUsed, equipment, launchAccess] = await Promise.all([
+    loadActiveSubscription(admin, user.id, now),
+    loadTokensUsed(admin, user.id, activityDateFor(now, profile.timezone)),
     loadEquipment(admin, user.id),
+    loadSubscriptionLaunchAccess(admin, user.id),
   ]);
+  const entitlement = deriveEntitlement(profile, sub, tokensUsed, config, now);
+  const enabled = subscriptionPolicyActive(config, now) && launchAccess.enabled;
+  const cutoff = config.subscription_launch?.existing_user_cutoff;
+  const offerExpiry = config.subscription_launch?.legacy_offer_expires_at;
+  const hasStartedTrial = Boolean(profile.app_trial_started_at);
+  const available = enabled && profile.nickname !== null && sub === null && !hasStartedTrial
+    && Boolean(cutoff) && Date.parse(user.created_at) >= Date.parse(cutoff!)
+    && now.getTime() < Date.parse(user.created_at) + 48 * 60 * 60 * 1000;
+  const legacyOfferEligible = enabled && sub === null && Boolean(cutoff) && Boolean(offerExpiry)
+    && now.getTime() < Date.parse(offerExpiry!)
+    && Date.parse(cutoff!) < Date.parse(offerExpiry!)
+    && Date.parse(user.created_at) < Date.parse(cutoff!);
+  const offerStatus = legacyOfferEligible
+    ? await loadSubscriptionOfferStatus(admin, user.id)
+    : { legacy_offer_eligible: false, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
   return {
     profile: profileBlock(profile, user, now),
     entitlement,
     wallet: { balance: profile.hay_balance },
     equipment: legacyEquipmentBlock(equipment),
+    subscription_rollout: {
+      enabled,
+      should_show_paywall: available || offerStatus.legacy_offer_eligible,
+      self_trial_available: available,
+      has_started_trial: hasStartedTrial,
+      ...offerStatus,
+    },
   };
+}
+
+
+/** Records the original signup interval; retries never restart the 48-hour clock. */
+export async function startSubscriptionTrial(admin: SupabaseClient, user: User) {
+  await ensureProfile(admin, user);
+  const { error } = await admin.rpc("start_subscription_trial", { p_user_id: user.id });
+  if (error) {
+    if (error.code === "P0001") {
+      throw new ApiException("TRIAL_UNAVAILABLE", 409, "지금은 체험을 시작할 수 없어요.");
+    }
+    console.error("[start_subscription_trial]", error.code);
+    throw internal("체험 시작에 실패했어요. 잠시 후 다시 시도해 주세요.");
+  }
+  return getMe(admin, user);
 }
 
 export type OnboardingInput = {
@@ -413,4 +455,68 @@ async function deleteMemories(
     // 탈퇴 자체는 완료 — mem0 정리 실패만 로그(런북 따라 수동 정리 대상).
     console.warn("[mem0 cleanup failed]", userId, e);
   }
+}
+
+
+export type SubscriptionOfferSelection = {
+  platform: "ios" | "android";
+  plan: "monthly" | "yearly";
+};
+
+type SubscriptionOfferStatus = {
+  legacy_offer_eligible: boolean;
+  ios_offer_ready: boolean;
+  android_offer_ready: boolean;
+  claimed_offer: SubscriptionOfferSelection | null;
+  offer_redeemed: boolean;
+};
+
+async function loadSubscriptionLaunchAccess(admin: SupabaseClient, userId: string) {
+  const { data, error } = await admin.rpc("subscription_launch_access", { p_user_id: userId });
+  if (error) {
+    // Account access survives unavailable enrollment configuration; purchase stays closed.
+    console.error("[subscription_launch_access]", error.code);
+    return { enabled: false, legacy_offer_eligible: false };
+  }
+  return { enabled: data?.enabled === true, legacy_offer_eligible: data?.legacy_offer_eligible === true };
+}
+
+async function loadSubscriptionOfferStatus(admin: SupabaseClient, userId: string): Promise<SubscriptionOfferStatus> {
+  const { data, error } = await admin.rpc("subscription_offer_status", { p_user_id: userId });
+  if (error) {
+    // Missing/unready inventory must not prevent account access or advertise an offer.
+    console.error("[subscription_offer_status]", error.code);
+    return { legacy_offer_eligible: false, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
+  }
+  return {
+    legacy_offer_eligible: data?.legacy_offer_eligible === true,
+    ios_offer_ready: data?.ios_offer_ready === true,
+    android_offer_ready: data?.android_offer_ready === true,
+    claimed_offer: data?.claimed_offer ?? null,
+    offer_redeemed: data?.offer_redeemed === true,
+  };
+}
+
+export async function claimSubscriptionOffer(
+  admin: SupabaseClient, user: User, selection: SubscriptionOfferSelection,
+) {
+  await ensureProfile(admin, user);
+  const { data, error } = await admin.rpc("claim_subscription_offer", {
+    p_user_id: user.id, p_platform: selection.platform, p_plan: selection.plan,
+  });
+  if (error || !data) {
+    if (error?.code === "P0001") {
+      throw new ApiException("OFFER_UNAVAILABLE", 409, "선택한 체험을 지금 신청할 수 없어요. 기존 신청 상태를 확인해 주세요.");
+    }
+    console.error("[claim_subscription_offer]", error?.code);
+    throw internal("체험 신청에 실패했어요. 잠시 후 다시 시도해 주세요.");
+  }
+  if (selection.platform === "ios") {
+    if (typeof data.apple_app_id !== "string" || !/^\d+$/.test(data.apple_app_id) || typeof data.code !== "string" || !data.code) {
+      throw internal("체험 코드를 확인하지 못했어요.");
+    }
+    return { ...selection,
+      redemption_url: `https://apps.apple.com/redeem?ctx=offercodes&id=${encodeURIComponent(data.apple_app_id)}&code=${encodeURIComponent(data.code)}` };
+  }
+  return { ...selection, product_id: data.product_id, base_plan_id: data.base_plan_id, offer_id: data.offer_id };
 }
