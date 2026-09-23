@@ -87,7 +87,7 @@ describe("effectiveTokenConfig — app_config 우선, 없으면 기본값", () =
     const c = effectiveTokenConfig({ daily_token_limit: "broken" });
     expect(c.daily_token_limit).toEqual(DEFAULT_TOKEN_CONFIG.daily_token_limit);
     expect(c.diary_llm_min_tokens).toBe(DEFAULT_TOKEN_CONFIG.diary_llm_min_tokens);
-    expect(c.free_launch_token_limit).toBe(30_000);
+    expect(c.free_launch_token_limit).toBe(150_000);
   });
 
   it("trial 한도 미지정 시 subscriber 한도로 폴백(ERD §6.1)", () => {
@@ -147,23 +147,25 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
 describe("subscription rollout replaces historical grants", () => {
   const rollout = { ...CONFIG, free_launch_until: "2099-01-01T00:00:00Z",
     subscription_launch: { enabled: true, existing_user_cutoff: "2026-09-23T00:00:00Z" } };
-  it("preserves old clients until first dismissal starts the new trial", () => {
+  it("preserves old clients before the scheduled rollout", () => {
     const e = deriveEntitlement({ trial_ends_at: "2099-01-01T00:00:00Z" }, null, 0, rollout, NOW);
     expect(e.plan).toBe("trial");
     expect(e.daily_token_limit).toBe(rollout.free_launch_token_limit);
   });
   it("grants full benefits only inside the account's new 48-hour interval", () => {
+    const live = { ...rollout, subscription_launch: { enabled: true, existing_user_cutoff: NOW.toISOString() } };
     const profile = { trial_ends_at: "2099-01-01T00:00:00Z", app_trial_started_at: NOW.toISOString(),
       app_trial_ends_at: "2026-07-11T12:00:00Z" };
-    const active = deriveEntitlement(profile, null, 0, rollout, NOW);
+    const active = deriveEntitlement(profile, null, 0, live, NOW);
     expect(active.plan).toBe("trial");
     expect(active.subscriber_theme_unlocked).toBe(true);
     expect(active.ads_removed).toBe(true);
-    expect(active.daily_token_limit).toBe(CONFIG.daily_token_limit.trial);
-    const expired = deriveEntitlement(profile, null, 0, rollout, new Date(profile.app_trial_ends_at));
+    expect(active.daily_token_limit).toBe(300_000);
+    const expired = deriveEntitlement(profile, null, 0, live, new Date(profile.app_trial_ends_at));
     expect(expired.plan).toBe("free");
     expect(expired.ads_removed).toBe(false);
-    expect(deriveEntitlement(profile, null, 0, { ...rollout, subscription_launch: { enabled: false, existing_user_cutoff: null } }, new Date(profile.app_trial_ends_at)).plan).toBe("free");
+    // Explicit pre-release mode keeps test accounts in launch without rewriting trial history.
+    expect(deriveEntitlement(profile, null, 0, { ...rollout, subscription_launch: { enabled: false, existing_user_cutoff: null } }, new Date(profile.app_trial_ends_at)).entitlement_source).toBe("launch");
   });
   it("actual subscription wins and exposes actual store trial expiry", () => {
     const end = "2026-08-09T12:00:00Z";
@@ -173,7 +175,7 @@ describe("subscription rollout replaces historical grants", () => {
     expect(e.trial_ends_at).toBe(end);
   });
   it("missing or malformed activation fails closed, explicit null disables old global grant", () => {
-    expect(effectiveTokenConfig({ subscription_launch: { enabled: "true" } }).subscription_launch?.enabled).toBe(false);
+    expect(effectiveTokenConfig({ subscription_launch: { enabled: "true" } }).subscription_launch).toBeUndefined();
     expect(effectiveTokenConfig({ subscription_launch: { enabled: true, existing_user_cutoff: "bad" } }).subscription_launch?.existing_user_cutoff).toBeNull();
     expect(effectiveTokenConfig({ free_launch_until: null }).free_launch_until).toBeNull();
   });

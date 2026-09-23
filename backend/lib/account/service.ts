@@ -12,6 +12,7 @@ import { isNewSignup } from "./signup";
 import {
   deriveEntitlement,
   effectiveTokenConfig,
+  subscriptionPolicyActive,
   type ActiveSubscription,
   type Entitlement,
   type ProfileRow,
@@ -223,13 +224,20 @@ export async function getMe(admin: SupabaseClient, user: User) {
     loadSubscriptionLaunchAccess(admin, user.id),
   ]);
   const entitlement = deriveEntitlement(profile, sub, tokensUsed, config, now);
-  const enabled = launchAccess.enabled;
+  const enabled = subscriptionPolicyActive(config, now) && launchAccess.enabled;
+  const cutoff = config.subscription_launch?.existing_user_cutoff;
+  const offerExpiry = config.subscription_launch?.legacy_offer_expires_at;
   const hasStartedTrial = Boolean(profile.app_trial_started_at);
-  const available = enabled && profile.nickname !== null && sub === null && !hasStartedTrial;
-  const legacyOfferEligible = enabled && sub === null && launchAccess.legacy_offer_eligible;
+  const available = enabled && profile.nickname !== null && sub === null && !hasStartedTrial
+    && Boolean(cutoff) && Date.parse(user.created_at) >= Date.parse(cutoff!)
+    && now.getTime() < Date.parse(user.created_at) + 48 * 60 * 60 * 1000;
+  const legacyOfferEligible = enabled && sub === null && Boolean(cutoff) && Boolean(offerExpiry)
+    && now.getTime() < Date.parse(offerExpiry!)
+    && Date.parse(cutoff!) < Date.parse(offerExpiry!)
+    && Date.parse(user.created_at) < Date.parse(cutoff!);
   const offerStatus = legacyOfferEligible
     ? await loadSubscriptionOfferStatus(admin, user.id)
-    : { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
+    : { legacy_offer_eligible: false, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
   return {
     profile: profileBlock(profile, user, now),
     entitlement,
@@ -237,8 +245,7 @@ export async function getMe(admin: SupabaseClient, user: User) {
     equipment: legacyEquipmentBlock(equipment),
     subscription_rollout: {
       enabled,
-      should_show_paywall: available,
-      legacy_offer_eligible: legacyOfferEligible && !offerStatus.offer_redeemed,
+      should_show_paywall: available || offerStatus.legacy_offer_eligible,
       self_trial_available: available,
       has_started_trial: hasStartedTrial,
       ...offerStatus,
@@ -247,7 +254,7 @@ export async function getMe(admin: SupabaseClient, user: User) {
 }
 
 
-/** Paywall dismissal starts one account-wide 48-hour trial; RPC owns concurrency/time. */
+/** Records the original signup interval; retries never restart the 48-hour clock. */
 export async function startSubscriptionTrial(admin: SupabaseClient, user: User) {
   await ensureProfile(admin, user);
   const { error } = await admin.rpc("start_subscription_trial", { p_user_id: user.id });
@@ -457,6 +464,7 @@ export type SubscriptionOfferSelection = {
 };
 
 type SubscriptionOfferStatus = {
+  legacy_offer_eligible: boolean;
   ios_offer_ready: boolean;
   android_offer_ready: boolean;
   claimed_offer: SubscriptionOfferSelection | null;
@@ -478,9 +486,10 @@ async function loadSubscriptionOfferStatus(admin: SupabaseClient, userId: string
   if (error) {
     // Missing/unready inventory must not prevent account access or advertise an offer.
     console.error("[subscription_offer_status]", error.code);
-    return { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
+    return { legacy_offer_eligible: false, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
   }
   return {
+    legacy_offer_eligible: data?.legacy_offer_eligible === true,
     ios_offer_ready: data?.ios_offer_ready === true,
     android_offer_ready: data?.android_offer_ready === true,
     claimed_offer: data?.claimed_offer ?? null,

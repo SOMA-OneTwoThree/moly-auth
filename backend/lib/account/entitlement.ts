@@ -42,7 +42,7 @@ export const DEFAULT_TOKEN_CONFIG: TokenConfig = {
   daily_token_limit: { free: 20_000, trial: 100_000, subscriber: 100_000 },
   diary_llm_min_tokens: 2_000,
   free_launch_until: "2026-10-01T04:00:00+09:00",
-  free_launch_token_limit: 30_000,
+  free_launch_token_limit: 150_000,
 };
 
 /** app_config rows(key→value)에서 유효 설정 해석 — 값이 있으면 우선, 없으면 기본값. */
@@ -77,14 +77,36 @@ export function effectiveTokenConfig(
 export function parseSubscriptionLaunch(value: unknown) {
   const data = value !== null && typeof value === "object" && !Array.isArray(value)
     ? value as Record<string, unknown> : {};
+  if (data.enabled !== true && data.enabled !== false) return undefined;
   const cutoff = typeof data.existing_user_cutoff === "string"
+    && /(?:Z|[+-]\d{2}:\d{2})$/.test(data.existing_user_cutoff)
     && Number.isFinite(Date.parse(data.existing_user_cutoff))
     ? data.existing_user_cutoff : null;
   const offerExpiry = typeof data.legacy_offer_expires_at === "string"
     && Number.isFinite(Date.parse(data.legacy_offer_expires_at))
     ? data.legacy_offer_expires_at : null;
-  return { enabled: data.enabled === true && cutoff !== null,
+  return { enabled: data.enabled === true,
     existing_user_cutoff: cutoff, legacy_offer_expires_at: offerExpiry };
+}
+
+/** Matches the backend rollout clock; preparing a future cutoff has no early effect. */
+export function subscriptionPolicyActive(config: TokenConfig, now: Date): boolean {
+  const rollout = config.subscription_launch;
+  return rollout?.enabled === true && rollout.existing_user_cutoff !== null
+    && now.getTime() >= Date.parse(rollout.existing_user_cutoff);
+}
+
+// Same weighted allowance as moly-backend, selected from persisted profile language.
+const ROLLOUT_LIMITS = {
+  en: { free: 40_000, subscriber: 300_000 },
+  ko: { free: 50_000, subscriber: 400_000 },
+  ja: { free: 60_000, subscriber: 550_000 },
+} as const;
+
+function rolloutLimit(language: string | null | undefined, plan: string): number {
+  const base = (language ?? "en").split("-", 1)[0].toLowerCase();
+  const locale = base === "ko" || base === "ja" ? base : "en";
+  return ROLLOUT_LIMITS[locale][plan === "free" ? "free" : "subscriber"];
 }
 
 /** 런칭 종료 시각 파싱 — 실패/미설정 = null(런칭 OFF, fail-safe). JS Date는 오프셋 aware. */
@@ -103,6 +125,8 @@ function limitFor(plan: string, limits: TokenConfig["daily_token_limit"]): numbe
 }
 
 export type Entitlement = {
+  entitlement_source: "launch" | "signup_trial" | "store_trial" | "subscription" | "free";
+  personal_diary_eligible: boolean;
   plan: "trial" | "free" | "monthly" | "yearly";
   is_subscriber: boolean;
   trial_ends_at: string | null;
@@ -119,7 +143,7 @@ export type Entitlement = {
  * activeSub은 '유효한(active/grace_period + 미만료)' 구독만 넘어옴(없으면 null).
  */
 export function deriveEntitlement(
-  profile: Pick<ProfileRow, "trial_ends_at" | "app_trial_started_at" | "app_trial_ends_at">,
+  profile: Pick<ProfileRow, "trial_ends_at" | "app_trial_started_at" | "app_trial_ends_at"> & { language?: string | null },
   activeSub: ActiveSubscription | null,
   tokensUsed: number,
   config: TokenConfig,
@@ -131,9 +155,21 @@ export function deriveEntitlement(
   let subscriberThemeUnlocked: boolean;
 
   // 런칭 무료 기간: 구독 없이 전원 무료(구독급 표시 + 런칭 토큰 한도). 실제 구독자는 항상 우선.
-  const launchUntil = parseLaunchDate(config.free_launch_until);
+  const converted = subscriptionPolicyActive(config, now);
+  const cutoff = config.subscription_launch?.enabled === true
+    ? parseLaunchDate(config.subscription_launch.existing_user_cutoff) : null;
+  const awaitingRollout = config.subscription_launch?.enabled === false
+    || (cutoff !== null && now < cutoff);
+  let launchUntil = converted ? null : parseLaunchDate(config.free_launch_until);
+  if (awaitingRollout) {
+    launchUntil = cutoff ?? (launchUntil !== null && now < launchUntil ? launchUntil : null);
+  }
+  const signupTrialEnd = parseLaunchDate(profile.trial_ends_at);
+  const signupTrialAllowed = !converted || (signupTrialEnd !== null
+    && signupTrialEnd.getTime() - 48 * 60 * 60 * 1000 >= Date.parse(config.subscription_launch!.existing_user_cutoff!));
   const hasAppTrial = Boolean(profile.app_trial_started_at);
-  const inLaunch = !hasAppTrial && activeSub === null && launchUntil !== null && now < launchUntil;
+  const inLaunch = activeSub === null && (awaitingRollout
+    || (!hasAppTrial && launchUntil !== null && now < launchUntil));
 
   if (activeSub !== null) {
     plan = activeSub.plan;
@@ -142,7 +178,7 @@ export function deriveEntitlement(
     trialEndsAt = storeTrialEnd !== null && now < storeTrialEnd
       ? activeSub.store_trial_ends_at ?? null : null;
     subscriberThemeUnlocked = true;
-  } else if (hasAppTrial) {
+  } else if (hasAppTrial && !inLaunch) {
     const end = parseLaunchDate(profile.app_trial_ends_at ?? null);
     const inTrial = Boolean(profile.app_trial_started_at) && end !== null && now < end;
     plan = inTrial ? "trial" : "free";
@@ -153,11 +189,12 @@ export function deriveEntitlement(
     // plan은 클라 호환 위해 'trial' 재사용. trial_ends_at=런칭 종료로 "무료 ~까지" 표시.
     plan = "trial";
     isSubscriber = false;
-    trialEndsAt = config.free_launch_until;
+    trialEndsAt = awaitingRollout && cutoff !== null
+      ? config.subscription_launch!.existing_user_cutoff
+      : launchUntil !== null ? config.free_launch_until : null;
     subscriberThemeUnlocked = false;
   } else if (
-    profile.trial_ends_at !== null &&
-    now < new Date(profile.trial_ends_at)
+    signupTrialAllowed && signupTrialEnd !== null && now < signupTrialEnd
   ) {
     plan = "trial";
     isSubscriber = false;
@@ -171,7 +208,7 @@ export function deriveEntitlement(
   }
 
   // 런칭 중엔 런칭 전용 한도(구독 100k와 독립). 값 없으면 trial 수준으로 fail-safe.
-  const limit = inLaunch
+  const limit = converted ? rolloutLimit(profile.language, plan) : inLaunch
     ? typeof config.free_launch_token_limit === "number"
       ? config.free_launch_token_limit
       : limitFor("trial", config.daily_token_limit)
@@ -179,6 +216,9 @@ export function deriveEntitlement(
   const tokensRemaining = limit !== null ? Math.max(0, limit - tokensUsed) : null;
 
   return {
+    entitlement_source: isSubscriber ? (trialEndsAt !== null ? "store_trial" : "subscription")
+      : inLaunch ? "launch" : plan === "trial" ? "signup_trial" : "free",
+    personal_diary_eligible: !converted || plan !== "free",
     plan,
     is_subscriber: isSubscriber,
     trial_ends_at: trialEndsAt,

@@ -14,10 +14,10 @@ function fakeAdmin(tables: Record<string, { data: unknown; error: null }>): Supa
         const launch = rows.find(row => row.key === "subscription_launch")?.value as Record<string, unknown> | undefined;
         const cutoff = typeof launch?.existing_user_cutoff === "string" ? Date.parse(launch.existing_user_cutoff) : NaN;
         const expiry = typeof launch?.legacy_offer_expires_at === "string" ? Date.parse(launch.legacy_offer_expires_at) : NaN;
-        return { data: { enabled: launch?.enabled === true && Number.isFinite(cutoff),
+        return { data: { enabled: launch?.enabled === true && Number.isFinite(cutoff) && Date.now() >= cutoff,
           legacy_offer_eligible: Date.parse(createdByUser.get(args.p_user_id) ?? "") < cutoff && expiry > Date.now() && expiry > cutoff }, error: null };
       }
-      return { data: { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null }, error: null };
+      return { data: { legacy_offer_eligible: true, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null }, error: null };
     },
     from(table: string) {
       const result = tables[table];
@@ -133,12 +133,12 @@ describe("GET /me subscription rollout eligibility", () => {
       legacy_offer_eligible: false, self_trial_available: false, has_started_trial: false,
       ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false });
   });
-  it("old and new users can start once, only pre-cutoff users qualify for store offer", async () => {
+  it("only post-cutoff users within 48h can acknowledge signup trial; pre-cutoff users get store offer", async () => {
     const old = await getMe(admin("user", config), user("2026-09-22T23:59:59Z"));
     const next = await getMe(admin("user", config), user("2026-09-23T00:00:00Z"));
     expect(old.subscription_rollout.legacy_offer_eligible).toBe(true);
     expect(next.subscription_rollout.legacy_offer_eligible).toBe(false);
-    expect(old.subscription_rollout.self_trial_available).toBe(true);
+    expect(old.subscription_rollout.self_trial_available).toBe(false);
     expect(next.subscription_rollout.self_trial_available).toBe(true);
     expect(old.subscription_rollout.ios_offer_ready).toBe(false);
   });
@@ -151,7 +151,7 @@ describe("GET /me subscription rollout eligibility", () => {
       expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
       expect(me.subscription_rollout.ios_offer_ready).toBe(false);
       expect(me.subscription_rollout.android_offer_ready).toBe(false);
-      expect(me.subscription_rollout.self_trial_available).toBe(true);
+      expect(me.subscription_rollout.self_trial_available).toBe(false);
     },
   );
   it("deadline does not shorten an already started 48-hour app trial", async () => {
@@ -162,17 +162,18 @@ describe("GET /me subscription rollout eligibility", () => {
     expect(me.entitlement.plan).toBe("trial");
     expect(me.entitlement.trial_ends_at).toBe("2026-09-25T12:00:00.000Z");
   });
-  it("expired app trial cannot prompt or start again", async () => {
+  it("expired app trial cannot restart, but an eligible legacy store offer is separate", async () => {
     const me = await getMe(admin("user", config, "2026-01-01T00:00:00Z"), user("2026-01-01T00:00:00Z"));
     expect(me.subscription_rollout.has_started_trial).toBe(true);
     expect(me.subscription_rollout.self_trial_available).toBe(false);
-    expect(me.subscription_rollout.should_show_paywall).toBe(false);
+    expect(me.subscription_rollout.legacy_offer_eligible).toBe(true);
+    expect(me.subscription_rollout.should_show_paywall).toBe(true);
   });
 });
 
 
-describe("GET /me account-scoped enrollment RPC", () => {
-  it.each([false, true])("uses server test mode without a production cutoff (legacy=%s)", async (legacy) => {
+describe("GET /me global rollout gate", () => {
+  it.each([false, true])("stale test access never bypasses the global cutoff (legacy=%s)", async (legacy) => {
     const db = admin("tester");
     vi.spyOn(db, "rpc").mockImplementation((async (name: string) => ({
       data: name === "subscription_launch_access"
@@ -181,9 +182,10 @@ describe("GET /me account-scoped enrollment RPC", () => {
       error: null,
     })) as never);
     const me = await getMe(db, user("2026-09-24T00:00:00Z"));
-    expect(me.subscription_rollout.enabled).toBe(true);
-    expect(me.subscription_rollout.self_trial_available).toBe(true);
-    expect(me.subscription_rollout.legacy_offer_eligible).toBe(legacy);
+    expect(me.subscription_rollout.enabled).toBe(false);
+    expect(me.subscription_rollout.self_trial_available).toBe(false);
+    expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
+    expect(me.subscription_rollout.should_show_paywall).toBe(false);
     expect(me.subscription_rollout.ios_offer_ready).toBe(false);
     expect(me.subscription_rollout.android_offer_ready).toBe(false);
     expect(db.rpc).toHaveBeenCalledWith("subscription_launch_access", { p_user_id: "11111111-1111-1111-1111-111111111111" });
