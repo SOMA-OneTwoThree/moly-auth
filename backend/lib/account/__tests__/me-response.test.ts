@@ -207,3 +207,24 @@ describe("GET /me global rollout gate", () => {
     expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
   });
 });
+
+
+describe("GET /me bounded preview without global activation", () => {
+  it.each(["regular", "legacy_offer"])("listed %s account receives existing build-6 DTO", async mode => {
+    const db = admin("tester", {
+      subscription_launch: { enabled: false },
+      subscription_launch_test: { expires_at: "2099-01-01T00:00:00Z", campaign_id: "preview-test",
+        accounts: { "11111111-1111-1111-1111-111111111111": mode } },
+    });
+    vi.spyOn(db, "rpc").mockImplementation((async (name: string) => ({ data: name === "subscription_launch_access"
+      ? { enabled: true, legacy_offer_eligible: mode === "legacy_offer" }
+      : { legacy_offer_eligible: true, ios_offer_ready: true, android_offer_ready: false, claimed_offer: null, offer_redeemed: false }, error: null })) as never);
+    const me = await getMe(db, user("2020-01-01T00:00:00Z"));
+    expect(me.subscription_rollout.enabled).toBe(true);
+    expect(me.subscription_rollout.should_show_paywall).toBe(true);
+    expect(me.subscription_rollout.self_trial_available).toBe(true);
+    expect(me.subscription_rollout.legacy_offer_eligible).toBe(mode === "legacy_offer");
+    expect(me.subscription_rollout.ios_offer_ready).toBe(mode === "legacy_offer");
+    expect(me.entitlement.plan).toBe("free");
+  });
+});
