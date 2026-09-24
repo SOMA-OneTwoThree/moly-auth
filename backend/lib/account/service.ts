@@ -13,6 +13,7 @@ import {
   deriveEntitlement,
   effectiveTokenConfig,
   subscriptionPolicyActive,
+  subscriptionPreviewMode,
   type ActiveSubscription,
   type Entitlement,
   type ProfileRow,
@@ -139,6 +140,7 @@ async function loadTokenConfig(admin: SupabaseClient): Promise<TokenConfig> {
       "free_launch_until",
       "free_launch_token_limit",
       "subscription_launch",
+      "subscription_launch_test",
     ]);
   if (error) {
     console.error("[app_config select]", error);
@@ -224,17 +226,18 @@ export async function getMe(admin: SupabaseClient, user: User) {
     loadSubscriptionLaunchAccess(admin, user.id),
   ]);
   const entitlement = deriveEntitlement(profile, sub, tokensUsed, config, now);
-  const enabled = subscriptionPolicyActive(config, now) && launchAccess.enabled;
+  const preview = subscriptionPreviewMode(config, user.id, now);
+  const enabled = (preview !== null || subscriptionPolicyActive(config, now)) && launchAccess.enabled;
   const cutoff = config.subscription_launch?.existing_user_cutoff;
   const offerExpiry = config.subscription_launch?.legacy_offer_expires_at;
   const hasStartedTrial = Boolean(profile.app_trial_started_at);
   const available = enabled && profile.nickname !== null && sub === null && !hasStartedTrial
-    && Boolean(cutoff) && Date.parse(user.created_at) >= Date.parse(cutoff!)
-    && now.getTime() < Date.parse(user.created_at) + 48 * 60 * 60 * 1000;
-  const legacyOfferEligible = enabled && sub === null && Boolean(cutoff) && Boolean(offerExpiry)
-    && now.getTime() < Date.parse(offerExpiry!)
-    && Date.parse(cutoff!) < Date.parse(offerExpiry!)
-    && Date.parse(user.created_at) < Date.parse(cutoff!);
+    && (preview !== null || (Boolean(cutoff) && Date.parse(user.created_at) >= Date.parse(cutoff!)
+    && now.getTime() < Date.parse(user.created_at) + 48 * 60 * 60 * 1000));
+  const legacyOfferEligible = enabled && sub === null && (preview !== null
+    ? preview === "legacy_offer" && launchAccess.legacy_offer_eligible
+    : Boolean(cutoff) && Boolean(offerExpiry) && now.getTime() < Date.parse(offerExpiry!)
+      && Date.parse(cutoff!) < Date.parse(offerExpiry!) && Date.parse(user.created_at) < Date.parse(cutoff!));
   const offerStatus = legacyOfferEligible
     ? await loadSubscriptionOfferStatus(admin, user.id)
     : { legacy_offer_eligible: false, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
