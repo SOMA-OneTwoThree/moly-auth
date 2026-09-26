@@ -12,8 +12,6 @@ import { isNewSignup } from "./signup";
 import {
   deriveEntitlement,
   effectiveTokenConfig,
-  subscriptionPolicyActive,
-  subscriptionPreviewMode,
   type ActiveSubscription,
   type Entitlement,
   type ProfileRow,
@@ -139,8 +137,6 @@ async function loadTokenConfig(admin: SupabaseClient): Promise<TokenConfig> {
       "diary_llm_min_tokens",
       "free_launch_until",
       "free_launch_token_limit",
-      "subscription_launch",
-      "subscription_launch_test",
     ]);
   if (error) {
     console.error("[app_config select]", error);
@@ -219,26 +215,14 @@ export async function getMe(admin: SupabaseClient, user: User) {
   const profile = await ensureProfile(admin, user);
   const now = new Date();
   const config = await loadTokenConfig(admin);
-  const [sub, tokensUsed, equipment, launchAccess] = await Promise.all([
+  const [sub, tokensUsed, equipment, access] = await Promise.all([
     loadActiveSubscription(admin, user.id, now),
     loadTokensUsed(admin, user.id, activityDateFor(now, profile.timezone)),
     loadEquipment(admin, user.id),
     loadSubscriptionLaunchAccess(admin, user.id),
   ]);
   const entitlement = deriveEntitlement(profile, sub, tokensUsed, config, now);
-  const preview = subscriptionPreviewMode(config, user.id, now);
-  const enabled = (preview !== null || subscriptionPolicyActive(config, now)) && launchAccess.enabled;
-  const cutoff = config.subscription_launch?.existing_user_cutoff;
-  const offerExpiry = config.subscription_launch?.legacy_offer_expires_at;
-  const hasStartedTrial = Boolean(profile.app_trial_started_at);
-  const available = enabled && profile.nickname !== null && sub === null && !hasStartedTrial
-    && (preview !== null || (Boolean(cutoff) && Date.parse(user.created_at) >= Date.parse(cutoff!)
-    && now.getTime() < Date.parse(user.created_at) + 48 * 60 * 60 * 1000));
-  const legacyOfferEligible = enabled && sub === null && (preview !== null
-    ? preview === "legacy_offer" && launchAccess.legacy_offer_eligible
-    : Boolean(cutoff) && Boolean(offerExpiry) && now.getTime() < Date.parse(offerExpiry!)
-      && Date.parse(cutoff!) < Date.parse(offerExpiry!) && Date.parse(user.created_at) < Date.parse(cutoff!));
-  const offerStatus = legacyOfferEligible
+  const offerStatus = access.legacy_offer_eligible
     ? await loadSubscriptionOfferStatus(admin, user.id)
     : { legacy_offer_eligible: false, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false };
   return {
@@ -247,10 +231,10 @@ export async function getMe(admin: SupabaseClient, user: User) {
     wallet: { balance: profile.hay_balance },
     equipment: legacyEquipmentBlock(equipment),
     subscription_rollout: {
-      enabled,
-      should_show_paywall: available || offerStatus.legacy_offer_eligible,
-      self_trial_available: available,
-      has_started_trial: hasStartedTrial,
+      enabled: access.enabled,
+      should_show_paywall: access.self_trial_available || offerStatus.legacy_offer_eligible,
+      self_trial_available: access.self_trial_available,
+      has_started_trial: Boolean(profile.app_trial_started_at),
       ...offerStatus,
     },
   };
@@ -479,9 +463,10 @@ async function loadSubscriptionLaunchAccess(admin: SupabaseClient, userId: strin
   if (error) {
     // Account access survives unavailable enrollment configuration; purchase stays closed.
     console.error("[subscription_launch_access]", error.code);
-    return { enabled: false, legacy_offer_eligible: false };
+    return { enabled: false, self_trial_available: false, legacy_offer_eligible: false };
   }
-  return { enabled: data?.enabled === true, legacy_offer_eligible: data?.legacy_offer_eligible === true };
+  return { enabled: data?.enabled === true, self_trial_available: data?.self_trial_available === true,
+    legacy_offer_eligible: data?.legacy_offer_eligible === true };
 }
 
 async function loadSubscriptionOfferStatus(admin: SupabaseClient, userId: string): Promise<SubscriptionOfferStatus> {
@@ -493,7 +478,7 @@ async function loadSubscriptionOfferStatus(admin: SupabaseClient, userId: string
   }
   return {
     legacy_offer_eligible: data?.legacy_offer_eligible === true,
-    ios_offer_ready: data?.ios_offer_ready === true,
+    ios_offer_ready: false,
     android_offer_ready: data?.android_offer_ready === true,
     claimed_offer: data?.claimed_offer ?? null,
     offer_redeemed: data?.offer_redeemed === true,
@@ -503,6 +488,9 @@ async function loadSubscriptionOfferStatus(admin: SupabaseClient, userId: string
 export async function claimSubscriptionOffer(
   admin: SupabaseClient, user: User, selection: SubscriptionOfferSelection,
 ) {
+  if (selection.platform === "ios") {
+    throw new ApiException("OFFER_UNAVAILABLE", 409, "선택한 체험을 지금 신청할 수 없어요.");
+  }
   await ensureProfile(admin, user);
   const { data, error } = await admin.rpc("claim_subscription_offer", {
     p_user_id: user.id, p_platform: selection.platform, p_plan: selection.plan,
@@ -513,13 +501,6 @@ export async function claimSubscriptionOffer(
     }
     console.error("[claim_subscription_offer]", error?.code);
     throw internal("체험 신청에 실패했어요. 잠시 후 다시 시도해 주세요.");
-  }
-  if (selection.platform === "ios") {
-    if (typeof data.apple_app_id !== "string" || !/^\d+$/.test(data.apple_app_id) || typeof data.code !== "string" || !data.code) {
-      throw internal("체험 코드를 확인하지 못했어요.");
-    }
-    return { ...selection,
-      redemption_url: `https://apps.apple.com/redeem?ctx=offercodes&id=${encodeURIComponent(data.apple_app_id)}&code=${encodeURIComponent(data.code)}` };
   }
   return { ...selection, product_id: data.product_id, base_plan_id: data.base_plan_id, offer_id: data.offer_id };
 }

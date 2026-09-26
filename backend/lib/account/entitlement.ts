@@ -30,13 +30,6 @@ export type TokenConfig = {
   // 런칭 무료 기간(2026-10-01T04:00+09:00까지 전원 무료) — app_config로 조정. null=OFF.
   free_launch_until: string | null;
   free_launch_token_limit: number | null;
-  subscription_launch_test?: unknown;
-  subscription_launch?: {
-    enabled: boolean;
-    campaign_id?: unknown;
-    existing_user_cutoff: string | null;
-    legacy_offer_expires_at?: string | null;
-  };
 };
 
 /** app_config 미설정 시 임의 기본값(TBD) — moly-backend app/config.py와 동일 값. */
@@ -68,55 +61,11 @@ export function effectiveTokenConfig(
       launchUntil === null || typeof launchUntil === "string"
         ? launchUntil
         : DEFAULT_TOKEN_CONFIG.free_launch_until,
-    subscription_launch_test: configValues["subscription_launch_test"],
-    subscription_launch: parseSubscriptionLaunch(configValues["subscription_launch"]),
     free_launch_token_limit:
       typeof launchLimit === "number"
         ? launchLimit
         : DEFAULT_TOKEN_CONFIG.free_launch_token_limit,
   };
-}
-
-export function parseSubscriptionLaunch(value: unknown) {
-  const data = value !== null && typeof value === "object" && !Array.isArray(value)
-    ? value as Record<string, unknown> : {};
-  if (data.enabled !== true && data.enabled !== false) return undefined;
-  const cutoff = typeof data.existing_user_cutoff === "string"
-    && /(?:Z|[+-]\d{2}:\d{2})$/.test(data.existing_user_cutoff)
-    && Number.isFinite(Date.parse(data.existing_user_cutoff))
-    ? data.existing_user_cutoff : null;
-  const offerExpiry = typeof data.legacy_offer_expires_at === "string"
-    && Number.isFinite(Date.parse(data.legacy_offer_expires_at))
-    ? data.legacy_offer_expires_at : null;
-  return { enabled: data.enabled === true, campaign_id: data.campaign_id,
-    existing_user_cutoff: cutoff, legacy_offer_expires_at: offerExpiry };
-}
-
-/** Server-owned preview membership; never treats a missing/live-enabled config as OFF. */
-export function subscriptionPreviewMode(config: TokenConfig, userId: string | undefined, now: Date): "regular" | "legacy_offer" | null {
-  if (config.subscription_launch?.enabled !== false || !userId) return null;
-  const value = config.subscription_launch_test;
-  if (value === null || typeof value !== "object" || Array.isArray(value)) return null;
-  const test = value as Record<string, unknown>;
-  const accounts = test.accounts;
-  if (accounts === null || typeof accounts !== "object" || Array.isArray(accounts)) return null;
-  const mode = (accounts as Record<string, unknown>)[userId];
-  if (mode !== "regular" && mode !== "legacy_offer") return null;
-  const expiry = test.expires_at;
-  if (typeof expiry !== "string" || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]+)?Z$/.test(expiry)) return null;
-  const time = Date.parse(expiry);
-  if (!Number.isFinite(time) || time <= now.getTime() || expiry.startsWith("0000")
-    || new Date(time).toISOString().slice(0, 19) !== expiry.slice(0, 19)) return null;
-  if (mode === "legacy_offer" && (typeof test.campaign_id !== "string" || test.campaign_id.length === 0
-    || test.campaign_id === config.subscription_launch.campaign_id)) return null;
-  return mode;
-}
-
-/** Matches the backend rollout clock; preparing a future cutoff has no early effect. */
-export function subscriptionPolicyActive(config: TokenConfig, now: Date): boolean {
-  const rollout = config.subscription_launch;
-  return rollout?.enabled === true && rollout.existing_user_cutoff !== null
-    && now.getTime() >= Date.parse(rollout.existing_user_cutoff);
 }
 
 // Same weighted allowance as moly-backend, selected from persisted profile language.
@@ -166,7 +115,7 @@ export type Entitlement = {
  * activeSub은 '유효한(active/grace_period + 미만료)' 구독만 넘어옴(없으면 null).
  */
 export function deriveEntitlement(
-  profile: Pick<ProfileRow, "trial_ends_at" | "app_trial_started_at" | "app_trial_ends_at"> & { id?: string; language?: string | null },
+  profile: Pick<ProfileRow, "trial_ends_at" | "app_trial_started_at" | "app_trial_ends_at"> & { language?: string | null },
   activeSub: ActiveSubscription | null,
   tokensUsed: number,
   config: TokenConfig,
@@ -178,22 +127,14 @@ export function deriveEntitlement(
   let subscriberThemeUnlocked: boolean;
 
   // 런칭 무료 기간: 구독 없이 전원 무료(구독급 표시 + 런칭 토큰 한도). 실제 구독자는 항상 우선.
-  const preview = subscriptionPreviewMode(config, profile.id, now) !== null;
-  const converted = preview || subscriptionPolicyActive(config, now);
-  const cutoff = config.subscription_launch?.enabled === true
-    ? parseLaunchDate(config.subscription_launch.existing_user_cutoff) : null;
-  const awaitingRollout = !preview && (config.subscription_launch?.enabled === false
-    || (cutoff !== null && now < cutoff));
-  let launchUntil = converted ? null : parseLaunchDate(config.free_launch_until);
-  if (awaitingRollout) {
-    launchUntil = cutoff ?? (launchUntil !== null && now < launchUntil ? launchUntil : null);
-  }
-  const signupTrialEnd = parseLaunchDate(profile.trial_ends_at);
-  const signupTrialAllowed = !preview && (!converted || (signupTrialEnd !== null
-    && signupTrialEnd.getTime() - 48 * 60 * 60 * 1000 >= Date.parse(config.subscription_launch!.existing_user_cutoff!)));
+  // 앱 체험은 새 앱에서만 시작하므로 시작한 계정은 출시 전에도 체험 정책을 따른다.
+  const launchUntil = parseLaunchDate(config.free_launch_until);
   const hasAppTrial = Boolean(profile.app_trial_started_at);
-  const inLaunch = activeSub === null && (awaitingRollout
-    || (!hasAppTrial && launchUntil !== null && now < launchUntil));
+  const inLaunch = activeSub === null && !hasAppTrial && launchUntil !== null && now < launchUntil;
+  const signupTrialEnd = parseLaunchDate(profile.trial_ends_at);
+  // bootstrap_user writes the original signup + 48h; accounts created before launch get the store offer.
+  const signupTrialAllowed = launchUntil === null || (signupTrialEnd !== null
+    && signupTrialEnd.getTime() - 48 * 60 * 60 * 1000 >= launchUntil.getTime());
 
   if (activeSub !== null) {
     plan = activeSub.plan;
@@ -202,7 +143,7 @@ export function deriveEntitlement(
     trialEndsAt = storeTrialEnd !== null && now < storeTrialEnd
       ? activeSub.store_trial_ends_at ?? null : null;
     subscriberThemeUnlocked = true;
-  } else if (hasAppTrial && !inLaunch) {
+  } else if (hasAppTrial) {
     const end = parseLaunchDate(profile.app_trial_ends_at ?? null);
     const inTrial = Boolean(profile.app_trial_started_at) && end !== null && now < end;
     plan = inTrial ? "trial" : "free";
@@ -213,9 +154,7 @@ export function deriveEntitlement(
     // plan은 클라 호환 위해 'trial' 재사용. trial_ends_at=런칭 종료로 "무료 ~까지" 표시.
     plan = "trial";
     isSubscriber = false;
-    trialEndsAt = awaitingRollout && cutoff !== null
-      ? config.subscription_launch!.existing_user_cutoff
-      : launchUntil !== null ? config.free_launch_until : null;
+    trialEndsAt = config.free_launch_until;
     subscriberThemeUnlocked = false;
   } else if (
     signupTrialAllowed && signupTrialEnd !== null && now < signupTrialEnd
@@ -231,18 +170,18 @@ export function deriveEntitlement(
     subscriberThemeUnlocked = false;
   }
 
-  // 런칭 중엔 런칭 전용 한도(구독 100k와 독립). 값 없으면 trial 수준으로 fail-safe.
-  const limit = converted ? rolloutLimit(profile.language, plan) : inLaunch
+  // 런칭 중엔 런칭 전용 한도(구독 한도와 독립). 값 없으면 trial 수준으로 fail-safe.
+  const limit = inLaunch
     ? typeof config.free_launch_token_limit === "number"
       ? config.free_launch_token_limit
       : limitFor("trial", config.daily_token_limit)
-    : limitFor(plan, config.daily_token_limit);
+    : rolloutLimit(profile.language, plan);
   const tokensRemaining = limit !== null ? Math.max(0, limit - tokensUsed) : null;
 
   return {
     entitlement_source: isSubscriber ? (trialEndsAt !== null ? "store_trial" : "subscription")
       : inLaunch ? "launch" : plan === "trial" ? "signup_trial" : "free",
-    personal_diary_eligible: !converted || plan !== "free",
+    personal_diary_eligible: plan !== "free",
     plan,
     is_subscriber: isSubscriber,
     trial_ends_at: trialEndsAt,
