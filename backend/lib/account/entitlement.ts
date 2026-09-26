@@ -185,7 +185,8 @@ export function deriveEntitlement(
     plan,
     is_subscriber: isSubscriber,
     trial_ends_at: trialEndsAt,
-    ads_removed: plan !== "free",
+    // Launch access keeps banner ads; released apps have no banners and never read this.
+    ads_removed: plan !== "free" && !inLaunch,
     subscriber_theme_unlocked: subscriberThemeUnlocked, // 실제 구독 및 새 48시간 체험
     daily_token_limit: limit,
     tokens_used: tokensUsed,

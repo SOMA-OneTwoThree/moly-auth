@@ -107,11 +107,11 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
     free_launch_token_limit: 30_000,
   };
 
-  it("종료일 이전 + 구독/체험 없음 = 런칭 무료(구독급 표시 + 런칭 한도)", () => {
+  it("종료일 이전 + 구독/체험 없음 = 런칭 무료(런칭 한도, 배너 광고 유지)", () => {
     const e = deriveEntitlement({ trial_ends_at: null }, null, 10_000, LAUNCH, NOW);
     expect(e.plan).toBe("trial");
     expect(e.is_subscriber).toBe(false);
-    expect(e.ads_removed).toBe(true);
+    expect(e.ads_removed).toBe(false); // 배너 광고는 새 앱에만 있다
     expect(e.daily_token_limit).toBe(30_000); // moly-backend와 같은 런칭 한도
     expect(e.tokens_remaining).toBe(20_000);
     expect(e.trial_ends_at).toBe("2026-10-01T04:00:00+09:00");
