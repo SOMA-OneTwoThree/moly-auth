@@ -32,16 +32,11 @@ describe("subscription offer claim API", () => {
     expect((await POST(req({ platform: "ios", plan: "monthly", user_id: "victim" }))).status).toBe(422);
     expect(rpc).not.toHaveBeenCalled();
   });
-  it("returns an encoded Apple URL without separately exposing the raw code", async () => {
-    rpc.mockResolvedValue({ data: { apple_app_id: "12345", code: "ONE+TIME" }, error: null });
+  it("refuses iOS offer claims without allocating or exposing a code", async () => {
     const response = await POST(req({ platform: "ios", plan: "monthly" }));
-    expect(response.status).toBe(200);
-    expect(response.headers.get("cache-control")).toBe("private, no-store");
-    expect(await response.json()).toEqual({ platform: "ios", plan: "monthly",
-      redemption_url: "https://apps.apple.com/redeem?ctx=offercodes&id=12345&code=ONE%2BTIME" });
-    expect(rpc).toHaveBeenCalledWith("claim_subscription_offer", {
-      p_user_id: user.id, p_platform: "ios", p_plan: "monthly",
-    });
+    expect(response.status).toBe(409);
+    expect(rpc).not.toHaveBeenCalled();
+    expect(await response.text()).not.toContain("redemption_url");
   });
   it("returns the exact Play option selectors, never a longest-trial default", async () => {
     rpc.mockResolvedValue({ data: { product_id: "pro.yearly", base_plan_id: "yearly", offer_id: "legacy-month" }, error: null });

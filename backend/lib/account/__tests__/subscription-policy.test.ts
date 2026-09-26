@@ -1,30 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { deriveEntitlement, effectiveTokenConfig, subscriptionPolicyActive } from "../entitlement";
+import { deriveEntitlement, effectiveTokenConfig } from "../entitlement";
 
+// free_launch_until is the store release moment T.
 const cutoff = "2026-10-01T00:00:00Z";
 const t = Date.parse(cutoff);
 const config = effectiveTokenConfig({
-  subscription_launch: { enabled: true, existing_user_cutoff: cutoff },
-  free_launch_until: "2026-11-01T00:00:00Z", free_launch_token_limit: 150_000,
+  free_launch_until: cutoff, free_launch_token_limit: 150_000,
   daily_token_limit: { free: 20_000, trial: 100_000, subscriber: 100_000 },
 });
 const profile = { trial_ends_at: null };
 
 describe("subscription policy matches backend boundaries", () => {
-  it.each([false, true])("prepared policy holds launch past its old deadline (scheduled=%s)", (scheduled) => {
-    const cfg = effectiveTokenConfig({ subscription_launch: { enabled: scheduled, existing_user_cutoff: cutoff },
-      free_launch_until: "2026-09-01T00:00:00Z" });
-    for (const prior of [false, true]) {
-      const p = { ...profile, language: "ja", ...(prior ? {
-        app_trial_started_at: "2026-08-01T00:00:00Z", app_trial_ends_at: "2026-08-03T00:00:00Z",
-      } : {}) };
-      const e = deriveEntitlement(p, null, 12_000, cfg, new Date(t - 1));
-      expect(e.entitlement_source).toBe("launch");
-      expect(e.daily_token_limit).toBe(150_000);
-      expect(e.tokens_remaining).toBe(138_000);
-      expect(e.personal_diary_eligible).toBe(true);
-      expect(e.trial_ends_at).toBe(scheduled ? cutoff : null);
-    }
+  it("before release, only an app trial started on the new app leaves launch", () => {
+    const before = new Date(t - 1);
+    const launch = deriveEntitlement({ ...profile, language: "ja" }, null, 12_000, config, before);
+    expect(launch.entitlement_source).toBe("launch");
+    expect(launch.daily_token_limit).toBe(150_000);
+    expect(launch.personal_diary_eligible).toBe(true);
+    expect(launch.trial_ends_at).toBe(cutoff);
+    const trialEnd = new Date(t + 3600_000).toISOString();
+    const trial = { ...profile, language: "ja", app_trial_started_at: "2026-09-29T00:00:00Z", app_trial_ends_at: trialEnd };
+    expect(deriveEntitlement(trial, null, 12_000, config, before).entitlement_source).toBe("signup_trial");
+    expect(deriveEntitlement(trial, null, 12_000, config, before).daily_token_limit).toBe(550_000);
+    expect(deriveEntitlement(trial, null, 12_000, config, new Date(trialEnd)).entitlement_source).toBe("free");
   });
   it.each([
     ["en", 40_000, 300_000], ["ko", 50_000, 400_000], ["ja", 60_000, 550_000],
@@ -85,12 +83,8 @@ describe("subscription policy matches backend boundaries", () => {
       expect(e.personal_diary_eligible).toBe(true);
     }
   });
-  it.each([null, {}, { enabled: false, existing_user_cutoff: cutoff },
-    { enabled: true, existing_user_cutoff: "invalid" },
-    { enabled: true, existing_user_cutoff: "2026-09-01T00:00:00" },
-  ])("invalid/disabled setting keeps old policy: %j", (rollout) => {
-    const cfg = effectiveTokenConfig({ subscription_launch: rollout, free_launch_until: "2026-11-01T00:00:00Z" });
-    expect(subscriptionPolicyActive(cfg, new Date(t))).toBe(false);
-    expect(deriveEntitlement(profile, null, 0, cfg, new Date(t)).daily_token_limit).toBe(150_000);
+  it.each([null, "invalid"])("missing or invalid release time ends launch (fail-safe): %s", (value) => {
+    const cfg = effectiveTokenConfig({ free_launch_until: value });
+    expect(deriveEntitlement(profile, null, 0, cfg, new Date(t)).entitlement_source).toBe("free");
   });
 });

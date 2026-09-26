@@ -8,17 +8,11 @@ import { getMe } from "../service";
  */
 function fakeAdmin(tables: Record<string, { data: unknown; error: null }>): SupabaseClient {
   return {
-    rpc: async (name: string, args: { p_user_id: string }) => {
-      if (name === "subscription_launch_access") {
-        const rows = tables.app_config.data as { key: string; value: unknown }[];
-        const launch = rows.find(row => row.key === "subscription_launch")?.value as Record<string, unknown> | undefined;
-        const cutoff = typeof launch?.existing_user_cutoff === "string" ? Date.parse(launch.existing_user_cutoff) : NaN;
-        const expiry = typeof launch?.legacy_offer_expires_at === "string" ? Date.parse(launch.legacy_offer_expires_at) : NaN;
-        return { data: { enabled: launch?.enabled === true && Number.isFinite(cutoff) && Date.now() >= cutoff,
-          legacy_offer_eligible: Date.parse(createdByUser.get(args.p_user_id) ?? "") < cutoff && expiry > Date.now() && expiry > cutoff }, error: null };
-      }
-      return { data: { legacy_offer_eligible: true, ios_offer_ready: false, android_offer_ready: false, claimed_offer: null }, error: null };
-    },
+    // The DB function owns member classification; /me only maps its result.
+    rpc: async (name: string) => ({
+      data: name === "subscription_launch_access" ? access : offerStatus,
+      error: null,
+    }),
     from(table: string) {
       const result = tables[table];
       if (result === undefined) throw new Error(`스텁에 없는 테이블: ${table}`);
@@ -69,9 +63,10 @@ function admin(nickname: string | null, config: Record<string, unknown> = {}, ap
   });
 }
 
-const createdByUser = new Map<string, string>();
+let access: Record<string, unknown> = { enabled: true, self_trial_available: false, legacy_offer_eligible: false };
+const offerStatus: Record<string, unknown> = { legacy_offer_eligible: true, ios_offer_ready: false,
+  android_offer_ready: true, claimed_offer: null, offer_redeemed: false };
 function user(createdAt: string): User {
-  createdByUser.set("11111111-1111-1111-1111-111111111111", createdAt);
   return {
     id: "11111111-1111-1111-1111-111111111111",
     created_at: createdAt,
@@ -122,75 +117,55 @@ describe("GET /me 응답 계약 — 신규 가입 신호", () => {
 });
 
 
-describe("GET /me subscription rollout eligibility", () => {
+describe("GET /me subscription rollout", () => {
   beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-24T00:00:00Z")); });
-  afterEach(() => vi.useRealTimers());
-  const config = { subscription_launch: { enabled: true, existing_user_cutoff: "2026-09-23T00:00:00Z",
-    legacy_offer_expires_at: "2026-10-23T00:00:00Z" } };
-  it("fails closed by default", async () => {
-    const me = await getMe(admin("user"), user("2026-01-01T00:00:00Z"));
-    expect(me.subscription_rollout).toEqual({ enabled: false, should_show_paywall: false,
-      legacy_offer_eligible: false, self_trial_available: false, has_started_trial: false,
+  afterEach(() => {
+    vi.useRealTimers();
+    access = { enabled: true, self_trial_available: false, legacy_offer_eligible: false };
+  });
+  it("new member sees the signup trial without the store offer", async () => {
+    access = { enabled: true, self_trial_available: true, legacy_offer_eligible: false };
+    const db = admin("user");
+    const rpc = vi.spyOn(db, "rpc");
+    const me = await getMe(db, user("2026-09-23T12:00:00Z"));
+    expect(me.subscription_rollout).toEqual({ enabled: true, should_show_paywall: true,
+      self_trial_available: true, has_started_trial: false, legacy_offer_eligible: false,
       ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false });
+    expect(rpc).not.toHaveBeenCalledWith("subscription_offer_status", expect.anything());
   });
-  it("only post-cutoff users within 48h can acknowledge signup trial; pre-cutoff users get store offer", async () => {
-    const old = await getMe(admin("user", config), user("2026-09-22T23:59:59Z"));
-    const next = await getMe(admin("user", config), user("2026-09-23T00:00:00Z"));
-    expect(old.subscription_rollout.legacy_offer_eligible).toBe(true);
-    expect(next.subscription_rollout.legacy_offer_eligible).toBe(false);
-    expect(old.subscription_rollout.self_trial_available).toBe(false);
-    expect(next.subscription_rollout.self_trial_available).toBe(true);
-    expect(old.subscription_rollout.ios_offer_ready).toBe(false);
-  });
-  it.each([undefined, null, "invalid", "infinity", "2026-09-24T00:00:00Z", "2026-09-23T23:59:59Z"])(
-    "missing, invalid or elapsed offer deadline disables store claims only: %s", async (deadline) => {
-      const me = await getMe(admin("user", { subscription_launch: {
-        ...config.subscription_launch, legacy_offer_expires_at: deadline,
-      } }), user("2026-01-01T00:00:00Z"));
-      expect(me.subscription_rollout.enabled).toBe(true);
-      expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
-      expect(me.subscription_rollout.ios_offer_ready).toBe(false);
-      expect(me.subscription_rollout.android_offer_ready).toBe(false);
-      expect(me.subscription_rollout.self_trial_available).toBe(false);
-    },
-  );
-  it("deadline does not shorten an already started 48-hour app trial", async () => {
-    const me = await getMe(admin("user", { subscription_launch: {
-      ...config.subscription_launch, legacy_offer_expires_at: "2026-09-24T00:00:00Z",
-    } }, "2026-09-23T12:00:00Z"), user("2026-01-01T00:00:00Z"));
-    expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
-    expect(me.entitlement.plan).toBe("trial");
-    expect(me.entitlement.trial_ends_at).toBe("2026-09-25T12:00:00.000Z");
-  });
-  it("expired app trial cannot restart, but an eligible legacy store offer is separate", async () => {
-    const me = await getMe(admin("user", config, "2026-01-01T00:00:00Z"), user("2026-01-01T00:00:00Z"));
-    expect(me.subscription_rollout.has_started_trial).toBe(true);
+  it("existing member sees the store offer from the offer status", async () => {
+    access = { enabled: true, self_trial_available: false, legacy_offer_eligible: true };
+    const me = await getMe(admin("user"), user("2026-01-01T00:00:00Z"));
+    expect(me.subscription_rollout.enabled).toBe(true);
+    expect(me.subscription_rollout.should_show_paywall).toBe(true);
     expect(me.subscription_rollout.self_trial_available).toBe(false);
     expect(me.subscription_rollout.legacy_offer_eligible).toBe(true);
-    expect(me.subscription_rollout.should_show_paywall).toBe(true);
+    expect(me.subscription_rollout.android_offer_ready).toBe(true);
+    expect(me.subscription_rollout.ios_offer_ready).toBe(false);
+  });
+  it("paywall stays reachable after both offers are gone", async () => {
+    const me = await getMe(admin("user"), user("2026-09-20T00:00:00Z"));
+    expect(me.subscription_rollout.enabled).toBe(true);
+    expect(me.subscription_rollout.should_show_paywall).toBe(false);
+    expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
+  });
+  it("an app trial started before release follows the trial, not launch", async () => {
+    const me = await getMe(admin("user", {}, "2026-09-23T12:00:00Z"), user("2026-09-23T12:00:00Z"));
+    expect(me.subscription_rollout.has_started_trial).toBe(true);
+    expect(me.entitlement.plan).toBe("trial");
+    expect(me.entitlement.entitlement_source).toBe("signup_trial");
+    expect(me.entitlement.trial_ends_at).toBe("2026-09-25T12:00:00.000Z");
+  });
+  it("accounts without an app trial keep launch until release", async () => {
+    const me = await getMe(admin("user", { free_launch_until: "2026-10-01T04:00:00+09:00" }), user("2026-01-01T00:00:00Z"));
+    expect(me.entitlement.entitlement_source).toBe("launch");
+    expect(me.entitlement.daily_token_limit).toBe(150_000);
   });
 });
 
 
-describe("GET /me global rollout gate", () => {
-  it.each([false, true])("stale test access never bypasses the global cutoff (legacy=%s)", async (legacy) => {
-    const db = admin("tester");
-    vi.spyOn(db, "rpc").mockImplementation((async (name: string) => ({
-      data: name === "subscription_launch_access"
-        ? { enabled: true, legacy_offer_eligible: legacy }
-        : { ios_offer_ready: false, android_offer_ready: false, claimed_offer: null, offer_redeemed: false },
-      error: null,
-    })) as never);
-    const me = await getMe(db, user("2026-09-24T00:00:00Z"));
-    expect(me.subscription_rollout.enabled).toBe(false);
-    expect(me.subscription_rollout.self_trial_available).toBe(false);
-    expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
-    expect(me.subscription_rollout.should_show_paywall).toBe(false);
-    expect(me.subscription_rollout.ios_offer_ready).toBe(false);
-    expect(me.subscription_rollout.android_offer_ready).toBe(false);
-    expect(db.rpc).toHaveBeenCalledWith("subscription_launch_access", { p_user_id: "11111111-1111-1111-1111-111111111111" });
-  });
-  it("unlisted or expired test access leaves purchases closed", async () => {
+describe("GET /me rollout failures", () => {
+  it("closed access leaves purchases closed", async () => {
     const db = admin("tester");
     vi.spyOn(db, "rpc").mockResolvedValue({ data: { enabled: false, legacy_offer_eligible: false }, error: null } as never);
     const me = await getMe(db, user(JUST_NOW()));
@@ -205,26 +180,5 @@ describe("GET /me global rollout gate", () => {
     expect(me.profile.onboarded).toBe(true);
     expect(me.subscription_rollout.enabled).toBe(false);
     expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
-  });
-});
-
-
-describe("GET /me bounded preview without global activation", () => {
-  it.each(["regular", "legacy_offer"])("listed %s account receives existing build-6 DTO", async mode => {
-    const db = admin("tester", {
-      subscription_launch: { enabled: false },
-      subscription_launch_test: { expires_at: "2099-01-01T00:00:00Z", campaign_id: "preview-test",
-        accounts: { "11111111-1111-1111-1111-111111111111": mode } },
-    });
-    vi.spyOn(db, "rpc").mockImplementation((async (name: string) => ({ data: name === "subscription_launch_access"
-      ? { enabled: true, legacy_offer_eligible: mode === "legacy_offer" }
-      : { legacy_offer_eligible: true, ios_offer_ready: true, android_offer_ready: false, claimed_offer: null, offer_redeemed: false }, error: null })) as never);
-    const me = await getMe(db, user("2020-01-01T00:00:00Z"));
-    expect(me.subscription_rollout.enabled).toBe(true);
-    expect(me.subscription_rollout.should_show_paywall).toBe(true);
-    expect(me.subscription_rollout.self_trial_available).toBe(true);
-    expect(me.subscription_rollout.legacy_offer_eligible).toBe(mode === "legacy_offer");
-    expect(me.subscription_rollout.ios_offer_ready).toBe(mode === "legacy_offer");
-    expect(me.entitlement.plan).toBe("free");
   });
 });
