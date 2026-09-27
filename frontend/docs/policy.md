@@ -2,7 +2,7 @@
 
 **Service:** BeCappy
 **Effective Date:** September 9, 2026
-**Last Revised:** September 9, 2026
+**Last Revised:** September 27, 2026
 
 Rho changjun (the "Operator") complies with the Personal Information Protection Act of the Republic of Korea and other applicable laws and regulations to protect the freedom and rights of data subjects, and processes personal information lawfully and manages it safely. In accordance with Article 30 of the Personal Information Protection Act, the Operator establishes and discloses this Privacy Policy to inform data subjects of the procedures and standards for processing personal information and to handle related complaints promptly and smoothly.
 
@@ -108,7 +108,7 @@ Fortune results are calculated on the Service's servers. If you start a fortune-
 
 The Operator processes personal information only within the scope specified in Article 1 (Purposes of Processing Personal Information), and provides personal information to third parties only where it falls under Articles 17 and 18 of the Personal Information Protection Act, such as with the data subject's consent or under special legal provisions.
 
-The Operator does not currently provide users' personal information to third parties.
+The Operator does not sell personal information. The Service does share information with external service providers that process it on the Operator's behalf, including AI providers, as described in Articles 5 and 6. This entrusted processing is distinct from providing information to an independent third party for that party's own purposes.
 
 ---
 
@@ -135,6 +135,18 @@ When concluding entrustment contracts, the Operator specifies, in accordance wit
 
 If the content of the entrusted tasks or the processor changes, the Operator will disclose it through this Privacy Policy without delay.
 
+### AI processing and permission
+
+**Recipient and purpose.** BeCappy uses OpenAI's API to process conversations, generate Cappy's replies and diaries, and summarize or retrieve conversation memories. The AI processors listed above receive relevant content for the tasks they perform, rather than direct access to the user's account database.
+
+**Information sent.** Depending on the feature, requests include messages entered by the user, relevant previous messages and Cappy replies, conversation summaries and memories, the user's nickname, language and contextual time information, and relevant fortune result text when a fortune conversation is started. Personal information included by the user in a message may therefore be included in an AI request. The stored fortune date of birth and gender are not automatically included in this conversation context.
+
+**Separate permission for conversations.** The updated mobile app identifies OpenAI and explains the transfer and processing of conversations before the user proceeds with the AI conversation feature. Tapping "Continue" records agreement; simply swiping past the introduction does not. Users who have completed onboarding but have no recorded agreement are also asked before proceeding with a conversation. Declining prevents starting a conversation through that flow. This permission is separate from advertising consent and iOS App Tracking Transparency permission. Previously submitted information remains subject to the retention and deletion provisions in this Policy.
+
+**Protection and control.** The Operator requires entrusted processors to provide protection at least equivalent to that described in this Policy, including purpose-limited processing, confidentiality, appropriate security measures, and applicable retention and deletion obligations. OpenAI's API data is not used to train its models by default; its retention rules depend on the API feature and data controls, and may include abuse-monitoring logs retained for up to 30 days, subject to legal or safety exceptions. These provider retention rules are separate from BeCappy's own storage described in Article 3. See [OpenAI's API data controls](https://developers.openai.com/api/docs/guides/your-data) and [Data Processing Addendum](https://openai.com/policies/data-processing-addendum/).
+
+Users may request access, deletion, or suspension of processing using the contact in Article 12, or delete their account as described in Article 8. Do not enter information that you do not wish to share with an AI processor.
+
 ---
 
 ## Article 6 (Cross-Border Transfer of Personal Information)
@@ -147,7 +159,7 @@ The Operator transfers personal information abroad as follows to provide the Ser
 | Vercel | USA | Account-related request data | Transmitted over the network during use | Account server hosting | Until the purpose of processing is achieved |
 | Amazon Web Services | USA | Service data such as conversations, diaries, memory information, and fortune profiles and results | Transmitted over the network during use | Server infrastructure operation | See Article 3 above |
 | Anthropic | USA | Conversation text and related context | Transmitted in real time when generating conversations/diaries | AI responses and diary generation | Retained up to 30 days under the processor's policy, then destroyed |
-| OpenAI | USA | Conversation text and related context, including fortune result text when the user starts a fortune-related conversation, and information for processing conversation memory | Transmitted in real time when generating conversations/diaries or processing memory information | AI responses, diary generation, and memory processing | Retained up to 30 days under the processor's policy, then destroyed |
+| OpenAI | USA | Messages, relevant conversation history, summaries and memories, nickname, language and contextual time information, and relevant fortune result text as described in Article 5 | Transmitted over encrypted network connections when generating conversations/diaries or processing memory information | AI responses, diary generation, and memory processing | Depends on the API feature and configured data controls; abuse-monitoring logs may be retained for up to 30 days, subject to legal or safety exceptions. See Article 5 and the provider's data controls. |
 | RevenueCat | USA | Member identifier, purchase status information | Transmitted over the network at the time of purchase | In-app purchase status management | Until account deletion |
 | Apple | USA | Push notification delivery information, payment processing information | Transmitted over the network when sending notifications and at the time of purchase | Push notification delivery (APNs), App Store in-app purchase processing | Until the purpose of processing is achieved |
 | Google | USA | Device information, app usage event logs, crash diagnostics and the member identifier, push notification device token (FCM), payment processing information, and member/ad session/transaction identifiers for rewarded-ad verification | Transmitted over the network during use, when verifying rewarded ads, when a crash occurs, when sending notifications, and at the time of purchase | App configuration and usage analytics, crash diagnostics and stability improvement, push notification delivery (FCM), ad serving and verification of Hay or detailed-fortune access rewards, Google Play in-app purchase and refund processing | Until the purpose of processing is achieved |
@@ -156,6 +168,8 @@ The Operator transfers personal information abroad as follows to provide the Ser
 | LY Corporation | Japan | LINE account identifier, email address (only when authorized by the user), and authentication request information | Transmitted over the network when using LINE Login | LINE Login authentication | Until the purpose of processing is achieved or in accordance with the recipient's policy |
 
 By agreeing to this Privacy Policy at sign-up, users are deemed to have consented to the cross-border transfer of personal information described above. Users have the right to refuse consent; however, refusal may restrict use of the Service.
+
+Agreement to this Policy at sign-up does not replace the separate in-app permission for OpenAI conversation processing described in Article 5, or any other consent required by applicable law.
 
 ---
 
