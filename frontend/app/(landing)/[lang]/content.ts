@@ -48,6 +48,9 @@ export type LandingContent = {
   htmlLang: string;
   /** Open Graph의 og:locale — `en`이 아니라 `en_US` 형식이어야 한다. */
   ogLocale: string;
+  /** 검색 결과 및 브라우저 탭용. 공유 카드 문구와 별도로 관리한다. */
+  searchMeta: { title: string; description: string };
+  /** 기존 링크 공유 카드 문구. */
   meta: { title: string; description: string };
   tagline: string;
   badges: {
@@ -78,6 +81,11 @@ export const CONTENT: Record<Lang, LandingContent> = {
     langLabel: "한국어",
     htmlLang: "ko",
     ogLocale: "ko_KR",
+    searchMeta: {
+      title: "BeCappy | 카피바라 AI 친구와 대화하는 셀프케어 앱",
+      description:
+        "카피바라 AI 친구 캐피에게 오늘 하루를 들려주세요. 캐피와 대화하고, 캐피의 일기를 읽고, 오늘의 감정을 기록해보세요. 작은 루틴을 실천하고 캐피를 꾸미며 함께 일상을 만들어가요.",
+    },
     meta: {
       title: "BeCappy — 하루의 무게를 덜어주는 느긋한 친구",
       description:
@@ -109,6 +117,11 @@ export const CONTENT: Record<Lang, LandingContent> = {
     langLabel: "English",
     htmlLang: "en",
     ogLocale: "en_US",
+    searchMeta: {
+      title: "BeCappy | Your Capybara AI Friend for Self-Care",
+      description:
+        "Share your day with Cappy, your capybara AI friend. Read Cappy’s journal, track your mood, build little routines, and dress up Cappy.",
+    },
     meta: {
       title: "BeCappy — An easygoing friend who makes your day feel less heavy",
       description:
@@ -140,6 +153,11 @@ export const CONTENT: Record<Lang, LandingContent> = {
     langLabel: "日本語",
     htmlLang: "ja",
     ogLocale: "ja_JP",
+    searchMeta: {
+      title: "BeCappy | カピバラのAI友だちとセルフケア",
+      description:
+        "カピバラのAI友だち、キャピーに今日のことを話してみませんか。おしゃべりやキャピーの日記、気分の記録で一日を振り返りましょう。小さな習慣を続けながら、着せ替えも楽しめます。",
+    },
     meta: {
       title: "BeCappy — 日の重さを軽くしてくれる、のんびり屋の友だち",
       description:

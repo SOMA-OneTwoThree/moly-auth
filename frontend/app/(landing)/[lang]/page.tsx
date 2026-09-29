@@ -47,8 +47,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
      * metadataBase가 있어야 아래 상대경로들이 절대 URL로 직렬화된다.
      */
     metadataBase: SITE_URL,
-    title: c.meta.title,
-    description: c.meta.description,
+    title: c.searchMeta.title,
+    description: c.searchMeta.description,
     alternates: {
       canonical: `/${lang}`,
       languages: {
