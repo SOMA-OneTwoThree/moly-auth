@@ -82,7 +82,7 @@ export const CONTENT: Record<Lang, LandingContent> = {
     htmlLang: "ko",
     ogLocale: "ko_KR",
     searchMeta: {
-      title: "BeCappy | 카피바라 AI 친구와 대화하는 셀프케어 앱",
+      title: "BeCappy | AI 친구, 대화, 루틴, 일기, 감정 기록",
       description:
         "카피바라 AI 친구 캐피에게 오늘 하루를 들려주세요. 캐피와 대화하고, 캐피의 일기를 읽고, 오늘의 감정을 기록해보세요. 작은 루틴을 실천하고 캐피를 꾸미며 함께 일상을 만들어가요.",
     },
