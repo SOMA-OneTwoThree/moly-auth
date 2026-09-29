@@ -182,6 +182,7 @@
 
 .wordmarkBig {
   display: block;
+  margin: 0;
   font-weight: 700;
   font-size: 1em;
   line-height: 1;

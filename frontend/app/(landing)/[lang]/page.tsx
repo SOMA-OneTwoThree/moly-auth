@@ -103,7 +103,7 @@ export default async function LandingPage({ params }: Props) {
       <main>
         <section className={styles.hero}>
           <div className={styles.wordmarkStack}>
-            <span className={styles.wordmarkBig}>BeCappy</span>
+            <h1 className={styles.wordmarkBig}>BeCappy</h1>
             <Image
               src={cappyLying}
               alt=""
@@ -148,7 +148,7 @@ export default async function LandingPage({ params }: Props) {
               <li key={i} className={styles.shot}>
                 <Image
                   src={shot}
-                  alt={c.shotAlt(i + 1)}
+                  alt={c.shotAlts[i]}
                   className={styles.shotImage}
                   sizes="(max-width: 1023px) 240px, (max-width: 1440px) 20vw, 264px"
                 />
