@@ -36,6 +36,28 @@ export function generateStaticParams() {
 
 type Props = { params: Promise<{ lang: string }> };
 
+// Every language destination describes the same site and team, not a separate site.
+const siteIdentity = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": new URL("/#organization", SITE_URL).href,
+      name: "BeCappy",
+      url: SITE_URL.href,
+      logo: new URL("/icon.png", SITE_URL).href,
+      sameAs: LANGS.map((lang) => CONTENT[lang].instagram.href),
+    },
+    {
+      "@type": "WebSite",
+      "@id": new URL("/#website", SITE_URL).href,
+      name: "BeCappy",
+      url: SITE_URL.href,
+      publisher: { "@id": new URL("/#organization", SITE_URL).href },
+    },
+  ],
+};
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang } = await params;
   if (!isLang(lang)) return {};
@@ -81,6 +103,12 @@ export default async function LandingPage({ params }: Props) {
 
   return (
     <div className={`${styles.page} ${quicksand.variable}`} data-lang={lang}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(siteIdentity).replace(/</g, "\\u003c"),
+        }}
+      />
       {/* Pretendard는 동적 서브셋(CDN) — 자체 호스팅 시 웨이트당 ~720KB라 과하다. */}
       <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="" />
       <link rel="stylesheet" href={pretendardHref(lang)} />
