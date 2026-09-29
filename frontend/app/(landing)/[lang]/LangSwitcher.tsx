@@ -50,32 +50,30 @@ export default function LangSwitcher({ current }: { current: Lang }) {
         <ChevronIcon open={open} />
       </button>
 
-      {open && (
-        <ul className={styles.langMenu} role="menu">
-          {LANGS.map((lang) => (
-            <li key={lang} role="none">
-              <Link
-                role="menuitem"
-                href={`/${lang}`}
-                hrefLang={lang}
-                lang={CONTENT[lang].htmlLang}
-                aria-current={lang === current ? "true" : undefined}
-                className={
-                  lang === current
-                    ? `${styles.langOption} ${styles.langOptionActive}`
-                    : styles.langOption
-                }
-                onClick={() => {
-                  rememberLang(lang);
-                  setOpen(false);
-                }}
-              >
-                {CONTENT[lang].langLabel}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className={styles.langMenu} role="menu" hidden={!open}>
+        {LANGS.map((lang) => (
+          <li key={lang} role="none">
+            <Link
+              role="menuitem"
+              href={`/${lang}`}
+              hrefLang={lang}
+              lang={CONTENT[lang].htmlLang}
+              aria-current={lang === current ? "true" : undefined}
+              className={
+                lang === current
+                  ? `${styles.langOption} ${styles.langOptionActive}`
+                  : styles.langOption
+              }
+              onClick={() => {
+                rememberLang(lang);
+                setOpen(false);
+              }}
+            >
+              {CONTENT[lang].langLabel}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
