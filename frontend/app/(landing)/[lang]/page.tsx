@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: c.meta.title,
     description: c.meta.description,
     alternates: {
-      canonical: "/",
+      canonical: `/${lang}`,
       languages: {
         ko: "/ko",
         en: "/en",
