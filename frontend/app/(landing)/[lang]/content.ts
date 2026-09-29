@@ -60,7 +60,7 @@ export type LandingContent = {
     playAlt: string;
   };
   shots: StaticImageData[];
-  shotAlt: (index: number) => string;
+  shotAlts: string[];
   langSwitchLabel: string;
   instagram: { label: string; href: string };
   footerLinks: FooterLink[];
@@ -99,7 +99,13 @@ export const CONTENT: Record<Lang, LandingContent> = {
       playAlt: "Google Play에서 다운로드하기",
     },
     shots: [ko1, ko2, ko3, ko4, ko5],
-    shotAlt: (i) => `BeCappy 앱 화면 ${i}`,
+    shotAlts: [
+      "캐피와 함께 자라나는 나의 일상 — 아늑한 방에서 쉬고 있는 카피바라 캐피",
+      "오늘 있었던 일과 마음속 이야기를 캐피에게 털어놓는 대화 화면",
+      "이불 정리하기와 물 마시기 등 매일의 루틴을 확인하는 화면",
+      "캐피의 시선으로 하루를 돌아보는 캐피의 일기",
+      "모자와 안경, 목걸이 등 캐피 꾸미기 아이템을 고르는 상점",
+    ],
     langSwitchLabel: "언어 선택",
     instagram: {
       label: "Instagram",
@@ -135,7 +141,13 @@ export const CONTENT: Record<Lang, LandingContent> = {
       playAlt: "Get it on Google Play",
     },
     shots: [en1, en2, en3, en4, en5],
-    shotAlt: (i) => `BeCappy app screen ${i}`,
+    shotAlts: [
+      "Grow together with Cappy — your capybara resting in a cozy room",
+      "A chat with Cappy about your day and what is on your mind",
+      "Daily routines such as making the bed and drinking water",
+      "Cappy’s journal reflecting on your day from a friend’s perspective",
+      "The shop with hats, glasses, and necklaces to customize Cappy",
+    ],
     langSwitchLabel: "Choose a language",
     instagram: {
       label: "Instagram",
@@ -171,7 +183,13 @@ export const CONTENT: Record<Lang, LandingContent> = {
       playAlt: "Google Play で手に入れよう",
     },
     shots: [ja1, ja2, ja3, ja4, ja5],
-    shotAlt: (i) => `BeCappy アプリ画面 ${i}`,
+    shotAlts: [
+      "キャピーと一緒に成長しよう — 居心地のいいお部屋でくつろぐカピバラのキャピー",
+      "今日の出来事や気持ちをキャピーに話すチャット画面",
+      "布団を整える、水を飲むなど、毎日のルーティンを確認する画面",
+      "キャピーの目線で一日を振り返る「キャピーの日記」",
+      "帽子やメガネ、ネックレスなど、キャピーの着せ替えアイテムを選ぶショップ",
+    ],
     langSwitchLabel: "言語を選択",
     instagram: {
       label: "Instagram",
