@@ -82,8 +82,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: c.meta.title,
-      description: c.meta.description,
+      title: c.searchMeta.title,
+      description: c.searchMeta.description,
       url: `/${lang}`,
       siteName: "BeCappy",
       locale: c.ogLocale,
@@ -142,7 +142,7 @@ export default async function LandingPage({ params }: Props) {
 
           <p className={styles.tagline}>{c.tagline}</p>
 
-          <div className={styles.badges}>
+          <div className={styles.badges} data-nosnippet>
             <a
               className={styles.badge}
               href={APP_STORE_URL}
@@ -203,8 +203,12 @@ export default async function LandingPage({ params }: Props) {
             </Link>
           ))}
         </nav>
-        <p className={styles.footerBusiness}>{c.businessInfo}</p>
-        <p className={styles.footerCopyright}>{c.copyright}</p>
+        <p className={styles.footerBusiness}>
+          <span data-nosnippet>{c.businessInfo}</span>
+        </p>
+        <p className={styles.footerCopyright}>
+          <span data-nosnippet>{c.copyright}</span>
+        </p>
       </footer>
     </div>
   );
