@@ -4,6 +4,7 @@ import {
   isValidNickname,
   isValidPlatform,
   isValidTimezone,
+  normalizeTimezone,
   normalizeLanguage,
 } from "../validation";
 
@@ -58,5 +59,20 @@ describe("계정 필드 검증 — moly-backend 스키마와 동일 규칙", () 
     expect(isValidTimezone("UTC")).toBe(true);
     expect(isValidTimezone("Mars/Olympus")).toBe(false);
     expect(isValidTimezone("")).toBe(false);
+  });
+
+  it("normalizes legacy IANA aliases to current identifiers and keeps canonical names", () => {
+    // 운영 DB 실재값(2026-10-01): Android Asia/Calcutta 39명, iOS US/Eastern 1명, US/Pacific 1명
+    expect(normalizeTimezone("Asia/Calcutta")).toBe("Asia/Kolkata");
+    expect(normalizeTimezone("US/Eastern")).toBe("America/New_York");
+    expect(normalizeTimezone("US/Pacific")).toBe("America/Los_Angeles");
+    expect(normalizeTimezone("Europe/Kiev")).toBe("Europe/Kyiv");
+    // 현행 이름은 그대로 — ICU가 Asia/Kolkata를 Calcutta로 되돌리는 함정을 밟지 않는다
+    expect(normalizeTimezone("Asia/Kolkata")).toBe("Asia/Kolkata");
+    expect(normalizeTimezone("Asia/Seoul")).toBe("Asia/Seoul");
+    expect(normalizeTimezone("UTC")).toBe("UTC");
+    expect(normalizeTimezone("Mars/Olympus")).toBeNull();
+    expect(normalizeTimezone("")).toBeNull();
+    expect(normalizeTimezone(42)).toBeNull();
   });
 });

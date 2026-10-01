@@ -11,7 +11,7 @@ import {
 } from "@/lib/account/service";
 import {
   isValidNickname,
-  isValidTimezone,
+  normalizeTimezone,
   normalizeLanguage,
 } from "@/lib/account/validation";
 
@@ -50,12 +50,13 @@ export const PATCH = withAuth(
       input.language = language; // BCP 47 정규화된 값 저장(온보딩과 동일 결과)
     }
     if (body.timezone !== undefined) {
-      if (!isValidTimezone(body.timezone)) {
+      const timezone = normalizeTimezone(body.timezone);
+      if (timezone === null) {
         throw new ApiException("VALIDATION", 422, "유효하지 않은 타임존이에요.", {
           field: "timezone",
         });
       }
-      input.timezone = body.timezone;
+      input.timezone = timezone; // 온보딩과 동일하게 정규화된 값 저장
     }
 
     const admin = createSupabaseAdminClient();
