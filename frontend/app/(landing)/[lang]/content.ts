@@ -48,10 +48,8 @@ export type LandingContent = {
   htmlLang: string;
   /** Open Graph의 og:locale — `en`이 아니라 `en_US` 형식이어야 한다. */
   ogLocale: string;
-  /** 검색 결과 및 브라우저 탭용. 공유 카드 문구와 별도로 관리한다. */
+  /** 검색 결과·브라우저 탭·공유 카드에서 일관되게 사용하는 소개. */
   searchMeta: { title: string; description: string };
-  /** 기존 링크 공유 카드 문구. */
-  meta: { title: string; description: string };
   tagline: string;
   badges: {
     appStore: StaticImageData;
@@ -82,14 +80,9 @@ export const CONTENT: Record<Lang, LandingContent> = {
     htmlLang: "ko",
     ogLocale: "ko_KR",
     searchMeta: {
-      title: "비캐피 BeCappy | AI 친구 캐피, 대화, 루틴, 일기, 감정 기록",
+      title: "비캐피 BeCappy — 내 이야기를 들어주는 AI 친구 캐피",
       description:
-        "할 말은 많은데, 편하게 털어놓을 곳이 없었다면. 비캐피(BeCappy)의 카피바라 AI 친구 캐피에게 오늘 하루를 들려주세요. 캐피와 대화하고, 캐피의 일기를 읽고, 오늘의 감정을 기록하며 작은 루틴을 함께 실천해보세요.",
-    },
-    meta: {
-      title: "BeCappy — 하루의 무게를 덜어주는 느긋한 친구",
-      description:
-        "별것 아닌 얘기라도 괜찮아요. 캐피는 조언하지 않고, 그냥 들어요.",
+        "기쁜 일도, 말 못 한 고민도, 별것 아닌 이야기도 좋아요. 카피바라 AI 친구 캐피와 대화하고, 캐피의 일기를 읽고, 감정과 작은 루틴을 기록해보세요.",
     },
     tagline: "하루의 무게를 덜어주는 느긋한 친구",
     badges: {
@@ -124,14 +117,9 @@ export const CONTENT: Record<Lang, LandingContent> = {
     htmlLang: "en",
     ogLocale: "en_US",
     searchMeta: {
-      title: "BeCappy | Your Capybara AI Friend for Self-Care",
+      title: "BeCappy — Your Capybara AI Friend",
       description:
-        "Share your day with Cappy, your capybara AI friend. Read Cappy’s journal, track your mood, build little routines, and dress up Cappy.",
-    },
-    meta: {
-      title: "BeCappy — An easygoing friend who makes your day feel less heavy",
-      description:
-        "Even if it's nothing special. Cappy doesn't give advice — Cappy just listens.",
+        "Share your day with Cappy, your capybara AI friend. Read Cappy's journal, track your mood, and build little routines for everyday self-care.",
     },
     tagline: "An easygoing friend who makes your day feel less heavy",
     badges: {
@@ -166,14 +154,9 @@ export const CONTENT: Record<Lang, LandingContent> = {
     htmlLang: "ja",
     ogLocale: "ja_JP",
     searchMeta: {
-      title: "BeCappy | カピバラのAI友だちとセルフケア",
+      title: "BeCappy — カピバラのAI友だち、キャピー",
       description:
-        "カピバラのAI友だち、キャピーに今日のことを話してみませんか。おしゃべりやキャピーの日記、気分の記録で一日を振り返りましょう。小さな習慣を続けながら、着せ替えも楽しめます。",
-    },
-    meta: {
-      title: "BeCappy — 日の重さを軽くしてくれる、のんびり屋の友だち",
-      description:
-        "何気ない話でも大丈夫。キャピーはアドバイスをしません。ただ聞くだけ。",
+        "うれしいことも、ちょっとした悩みも。カピバラのAI友だち、キャピーに話してみませんか。キャピーの日記を読んだり、気分を記録したり。小さな習慣から、気軽にセルフケアを始めましょう。",
     },
     tagline: "日の重さを軽くしてくれる、のんびり屋の友だち",
     badges: {
