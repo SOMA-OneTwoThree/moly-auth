@@ -6,7 +6,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { onboard } from "@/lib/account/service";
 import {
   isValidNickname,
-  isValidTimezone,
+  normalizeTimezone,
   normalizeLanguage,
 } from "@/lib/account/validation";
 
@@ -26,7 +26,8 @@ export const POST = withAuth(
         field: "nickname",
       });
     }
-    if (!isValidTimezone(body.timezone)) {
+    const timezone = normalizeTimezone(body.timezone);
+    if (timezone === null) {
       throw new ApiException("VALIDATION", 422, "유효하지 않은 타임존이에요.", {
         field: "timezone",
       });
@@ -41,7 +42,7 @@ export const POST = withAuth(
     const admin = createSupabaseAdminClient();
     const result = await onboard(admin, user, {
       nickname: body.nickname,
-      timezone: body.timezone,
+      timezone, // 레거시 별칭(Asia/Calcutta 등)은 현행 식별자로 정규화해 저장
       language, // BCP 47 정규화된 값 저장(온보딩·프로필 변경 동일 결과)
     });
     return NextResponse.json(result);
