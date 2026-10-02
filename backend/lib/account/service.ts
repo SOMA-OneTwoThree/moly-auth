@@ -12,6 +12,7 @@ import { isNewSignup } from "./signup";
 import {
   deriveEntitlement,
   effectiveTokenConfig,
+  launchConfigProblem,
   type ActiveSubscription,
   type Entitlement,
   type ProfileRow,
@@ -22,6 +23,8 @@ const NOTIF_TYPES = ["morning_diary", "evening_chat"] as const; // 알림 2종 �
 
 const PROFILE_COLUMNS =
   "id, nickname, language, timezone, hay_balance, trial_ends_at, review_prompted_at, app_trial_started_at, app_trial_ends_at";
+
+const warnedLaunchConfig = new Set<string>(); // free_launch_until 해석 경고(인스턴스당 문구별 1회)
 
 function notFound(message: string): ApiException {
   return new ApiException("NOT_FOUND", 404, message);
@@ -144,6 +147,12 @@ async function loadTokenConfig(admin: SupabaseClient): Promise<TokenConfig> {
   }
   const values: Record<string, unknown> = {};
   for (const row of data ?? []) values[row.key] = row.value;
+  const problem = launchConfigProblem(values);
+  if (problem !== null && !warnedLaunchConfig.has(problem)) {
+    // 요청마다 읽으므로 인스턴스당 같은 문구는 한 번만 남긴다.
+    warnedLaunchConfig.add(problem);
+    console.warn("[app_config free_launch_until]", problem);
+  }
   return effectiveTokenConfig(values);
 }
 

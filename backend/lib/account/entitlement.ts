@@ -88,6 +88,26 @@ function parseLaunchDate(value: string | null): Date | null {
   return Number.isNaN(dt.getTime()) ? null : dt;
 }
 
+/**
+ * free_launch_until 설정이 조용히 다르게 해석되는 경우의 설명 — 동작은 바꾸지 않고 호출측이 경고로만 남긴다.
+ * 행 없음·잘못된 타입은 코드 기본값으로, 해석 못 한 문자열은 런칭 OFF(fail-safe)로 떨어진다.
+ * null은 명시적 OFF라 문제로 보지 않는다. moly-backend(entitlement.py·limits.py)의 경고와 짝이다.
+ */
+export function launchConfigProblem(configValues: Record<string, unknown>): string | null {
+  if (!("free_launch_until" in configValues)) {
+    return `app_config.free_launch_until 행 없음 → 코드 기본값 ${DEFAULT_TOKEN_CONFIG.free_launch_until} 사용(지난 날짜면 런칭 즉시 종료)`;
+  }
+  const value = configValues["free_launch_until"];
+  if (value === null) return null;
+  if (typeof value !== "string") {
+    return `free_launch_until 타입 오류(${typeof value}) → 코드 기본값 ${DEFAULT_TOKEN_CONFIG.free_launch_until} 사용`;
+  }
+  if (parseLaunchDate(value) === null) {
+    return `free_launch_until 파싱 실패 → 런칭 종료(fail-safe)로 판정 value=${JSON.stringify(value).slice(0, 120)}`;
+  }
+  return null;
+}
+
 function limitFor(plan: string, limits: TokenConfig["daily_token_limit"]): number | null {
   let v: number | undefined;
   if (plan === "free") v = limits.free;

@@ -3,6 +3,7 @@ import {
   DEFAULT_TOKEN_CONFIG,
   deriveEntitlement,
   effectiveTokenConfig,
+  launchConfigProblem,
 } from "../entitlement";
 
 const NOW = new Date("2026-07-09T12:00:00Z");
@@ -183,5 +184,30 @@ describe("광고 정책 — 무료 플랜만 광고 표시", () => {
     const e = deriveEntitlement({ trial_ends_at: null }, subscription, 0, CONFIG, NOW);
     expect(e.plan).toBe(subscription.plan);
     expect(e.ads_removed).toBe(true);
+  });
+});
+
+describe("launchConfigProblem — free_launch_until 해석 경고(판정은 그대로)", () => {
+  it("행이 없으면 코드 기본값으로 떨어진다는 것을 알린다", () => {
+    expect(launchConfigProblem({})).toContain("행 없음");
+  });
+
+  it("명시적 null(OFF)과 해석되는 날짜는 문제가 아니다", () => {
+    expect(launchConfigProblem({ free_launch_until: null })).toBeNull();
+    expect(launchConfigProblem({ free_launch_until: "2099-01-01T00:00:00+09:00" })).toBeNull();
+  });
+
+  it.each([20991231, { until: "x" }])("문자열이 아니면 타입 오류(%s)", (value) => {
+    expect(launchConfigProblem({ free_launch_until: value })).toContain("타입 오류");
+  });
+
+  it.each(["", "not-a-date"])("해석 못 하는 문자열은 파싱 실패(%j)", (value) => {
+    expect(launchConfigProblem({ free_launch_until: value })).toContain("파싱 실패");
+  });
+
+  it("해석 못 한 값은 지금처럼 런칭 종료(fail-safe)로 판정된다", () => {
+    const config = effectiveTokenConfig({ free_launch_until: "not-a-date" });
+    const e = deriveEntitlement({ trial_ends_at: null }, null, 0, config, NOW);
+    expect(e.plan).toBe("free");
   });
 });
