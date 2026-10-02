@@ -48,7 +48,7 @@ Moly의 **계정 서버**. 로그인 검증·회원가입 확정(profiles)·프�
 | GET/PATCH | `/me/notifications` | 알림 2종(morning_diary·evening_chat) on/off. 행 없으면 기본 on |
 | POST | `/me/push-token` | FCM 푸시 토큰 upsert(`platform: ios\|android`, 생략 시 ios 하위호환. 토큰 UNIQUE — 기기 이전 시 재귀속) → 204 |
 | POST | `/auth/logout` | 해당 push_token 행만 삭제(멀티 기기 안전) → 204. 세션 종료는 클라 signOut |
-| DELETE | `/me` | 탈퇴: `auth.admin.deleteUser`(전 테이블 CASCADE) + mem0 행 정리(실패해도 204 — 최종적 정리) → 204 |
+| DELETE | `/me` | 탈퇴: 삭제 장벽 RPC `begin_subject_deletion`(3초 제한) → `auth.admin.deleteUser`(전 테이블 CASCADE) → mem0 정리 RPC `delete_user_memories` → 204. 장벽·mem0 정리는 실패해도 204(최종적 정리는 moly-backend sweep), 계정 삭제 실패 시 `abort_subject_deletion` 후 500 |
 
 경로는 `/api` 프리픽스 없음(iOS가 `/me` 형태로 호출). 새 라우트 추가 시: `withAuth(handle(...))` 래핑 + `middleware.ts` matcher + (공개면) `lib/auth/public-paths.ts` + 이 표 갱신.
 
@@ -104,6 +104,6 @@ Google OAuth → Authorized redirect URIs에는 Supabase 콜백만: `https://<pr
 ## 8. 런북
 
 - **검증 3종**: `npm run typecheck` · `npm run lint` · `npm test` (+ `npm run build`)
-- **탈퇴했는데 mem0 잔존 의심**: Vercel 함수 로그에서 `[mem0 cleanup failed]` 검색 → 해당 user_id의 `memories` 행을 SQL로 수동 정리
+- **탈퇴 정리 로그**: `[begin_subject_deletion failed]`·`[mem0 cleanup failed]`는 탈퇴를 막지 않는다 — moly-backend의 `privacy_residual_sweep`이 남은 벡터를 지우고 장벽을 닫는다(moly-backend docs/OPERATIONS.md "계정 삭제 장벽"). `[abort_subject_deletion failed]`는 계정 삭제가 실패했는데 장벽이 남은 경우라 그 계정의 moly-backend 요청이 409로 막힌다 — 같은 런북으로 되돌린다
 - **모든 계정 요청 401**: Vercel env의 `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY`가 프로덕션 프로젝트인지 확인
 - **profiles 안 생김 의심**: 트리거 확인 쿼리(`pg_trigger`에서 `on_auth_user_created`) — 없어도 self-heal이 커버하지만 트리거 복구 필요(`moly-backend/db/seed_and_triggers.sql` §1)
