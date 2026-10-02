@@ -64,7 +64,7 @@ export const PATCH = withAuth(
   }),
 );
 
-/** DELETE /me — 회원탈퇴. auth.users 삭제(CASCADE) + mem0 정리 후 204. */
+/** DELETE /me — 회원탈퇴. 삭제 장벽 → auth.users 삭제(CASCADE) → mem0 정리 후 204. */
 export const DELETE = withAuth(
   handle(async (req, user) => {
     const admin = createSupabaseAdminClient();

@@ -5,6 +5,7 @@
  * 데이터 접근은 전부 admin(service_role) 클라이언트 — RLS를 우회하므로
  * 모든 쿼리는 반드시 검증된 `user.id`로만 스코프한다(IDOR 방지).
  */
+import { randomUUID } from "node:crypto";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { ApiException } from "@/lib/http/api-exception";
 import { activityDateFor } from "./time";
@@ -405,21 +406,67 @@ export async function logoutDevice(
 // ── 탈퇴 ────────────────────────────────────────────────────────────
 
 /**
- * 회원탈퇴(US-106): auth.users 삭제 → 전 테이블 CASCADE.
- * mem0 기억은 FK 밖이라 별도 정리(ERD §7) — 실패해도 탈퇴는 완료.
- * 자동 재시도는 없다(서버리스): 실패는 로그(`[mem0 cleanup failed]`)로 남고
- * 런북(ARCHITECTURE §8)에 따라 수동/배치 정리한다.
+ * 회원탈퇴(US-106): 삭제 장벽 → auth.users 삭제(전 테이블 CASCADE) → mem0 기억 정리.
+ *
+ * 장벽(moly-backend DB 함수 `begin_subject_deletion`, API_SPEC §2 `DELETE /me`)은 계정을 지우기
+ * 전에 세운다. 이후 moly-backend는 이 계정의 요청을 막고 응답 사본·작업 payload를 비운다.
+ * 장벽 호출이 실패하거나 3초 안에 끝나지 않아도 탈퇴는 진행한다 — mem0 정리와 같은
+ * "실패해도 탈퇴는 완료" 의미론이고, 남은 정리는 moly-backend sweep이 장벽 행을 보고 끝낸다.
+ * 계정 삭제가 실패하면 장벽을 되돌린다(`abort_subject_deletion`). 같은 operation일 때만
+ * 적용되므로 장벽 호출이 실패했던 경우에도 그대로 부른다(시간 초과로 포기한 장벽이 서버에서는
+ * 세워졌을 수 있다).
  */
 export async function deleteAccount(
   admin: SupabaseClient,
   userId: string,
 ): Promise<void> {
+  const operationId = randomUUID();
+  await beginSubjectDeletion(admin, userId, operationId);
   const { error } = await admin.auth.admin.deleteUser(userId);
   if (error) {
     console.error("[auth deleteUser]", error);
+    await abortSubjectDeletion(admin, userId, operationId);
     throw internal("탈퇴 처리에 실패했어요. 잠시 후 다시 시도해 주세요.");
   }
   await deleteMemories(admin, userId);
+}
+
+// 장벽 RPC가 이보다 오래 걸리면 실패로 본다. 느린 장벽이 탈퇴 응답을 붙잡지 않게 한다.
+const FENCE_RPC_TIMEOUT_MS = 3000;
+
+async function beginSubjectDeletion(
+  admin: SupabaseClient,
+  userId: string,
+  operationId: string,
+): Promise<void> {
+  try {
+    const { error } = await admin
+      .rpc("begin_subject_deletion", { p_user_id: userId, p_operation_id: operationId })
+      .abortSignal(AbortSignal.timeout(FENCE_RPC_TIMEOUT_MS));
+    if (error) throw error;
+  } catch (e) {
+    // 탈퇴는 계속한다 — 장벽 없이 지워진 계정은 moly-backend sweep이 승격해 정리한다.
+    // 오류의 details에는 스택이 들어 있어 코드와 메시지만 남긴다.
+    const { code, message } = (e ?? {}) as { code?: string; message?: string };
+    console.warn("[begin_subject_deletion failed]", userId, code, message);
+  }
+}
+
+async function abortSubjectDeletion(
+  admin: SupabaseClient,
+  userId: string,
+  operationId: string,
+): Promise<void> {
+  try {
+    const { error } = await admin
+      .rpc("abort_subject_deletion", { p_user_id: userId, p_operation_id: operationId })
+      .abortSignal(AbortSignal.timeout(FENCE_RPC_TIMEOUT_MS));
+    if (error) throw error;
+  } catch (e) {
+    // 장벽이 남으면 moly-backend가 이 계정의 요청을 409로 막는다(sweep이 경고를 남긴다).
+    const { code, message } = (e ?? {}) as { code?: string; message?: string };
+    console.error("[abort_subject_deletion failed]", userId, code, message);
+  }
 }
 
 /**
