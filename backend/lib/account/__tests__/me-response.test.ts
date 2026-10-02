@@ -182,3 +182,37 @@ describe("GET /me rollout failures", () => {
     expect(me.subscription_rollout.legacy_offer_eligible).toBe(false);
   });
 });
+
+
+describe("GET /me free_launch_until 경고", () => {
+  // 경고 기록은 모듈 상태라 위 테스트들의 /me 호출이 이미 남겼다. 매번 새 모듈로 센다.
+  async function launchWarnings(...configs: Record<string, unknown>[]): Promise<number> {
+    vi.resetModules();
+    const { getMe: freshGetMe } = await import("../service");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      for (const config of configs) {
+        for (let i = 0; i < 3; i += 1) await freshGetMe(admin("user", config), user(JUST_NOW()));
+      }
+      return warn.mock.calls.filter(([tag]) => tag === "[app_config free_launch_until]").length;
+    } finally {
+      warn.mockRestore();
+    }
+  }
+
+  it("유효한 날짜와 명시적 null(OFF)은 경고하지 않는다", async () => {
+    expect(await launchWarnings({ free_launch_until: "2099-01-01T00:00:00+09:00" })).toBe(0);
+    expect(await launchWarnings({ free_launch_until: null })).toBe(0);
+  });
+
+  it("행이 없으면 세 번 읽어도 한 번만 경고한다", async () => {
+    expect(await launchWarnings({})).toBe(1);
+  });
+
+  it("해석 못 하는 값은 값별로 한 번씩 경고한다", async () => {
+    expect(await launchWarnings(
+      { free_launch_until: "not-a-date" },
+      { free_launch_until: "still-not-a-date" },
+    )).toBe(2);
+  });
+});
