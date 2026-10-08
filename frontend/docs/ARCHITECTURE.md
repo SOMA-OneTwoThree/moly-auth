@@ -62,7 +62,7 @@ Pencil 디자인 파일 `frontend/design/DESIGN.pen`의 `Landing — *`(1440) / 
 > `design/`은 원본 에셋 20MB라 **git에 추적하지 않는다**(루트 `.gitignore`). 랜딩이 실제로 쓰는 이미지만 `images/landing/`으로 복사해 추적한다. .pen 원본은 디자인 담당자에게 받는다.
 
 - `app/(landing)/[lang]/page.tsx` — 서버 컴포넌트 + `force-static` + `generateStaticParams()`로 세 언어를 빌드 타임 프리렌더. `dynamicParams = false`.
-- `app/(landing)/[lang]/content.ts` — **언어별 카피·링크·에셋의 단일 출처**(`CONTENT: Record<Lang, LandingContent>`). 스토어 URL(`APP_STORE_URL`/`PLAY_STORE_URL`)도 여기 상수.
+- `app/(landing)/[lang]/content.ts` — **언어별 카피·링크·에셋의 단일 출처**(`CONTENT: Record<Lang, LandingContent>`). `storeLinks`도 언어별로 정의한다. App Store는 ko→`/kr`+`l=ko`, en→`/us`+`l=en-US`, ja→`/jp`+`l=ja`로 연결하며 기존 캠페인 파라미터(`pt`·`ct`·`mt`)를 보존한다. Google Play는 `hl=ko/en/ja`로 웹 표시 언어를 지정한다. 실제 설치 시 스토어 앱은 사용자 계정 국가·기기 언어의 영향을 받을 수 있다.
 - `app/(landing)/[lang]/LangSwitcher.tsx` — 유일한 클라이언트 컴포넌트. 언어 pill 드롭다운(바깥 클릭·Escape로 닫힘, `role="menu"`).
 - `app/(landing)/[lang]/landing.module.css` — 두 아트보드 사이를 `clamp()`로 선형 보간한다. **1440 초과 구간은 상한으로 고정하지 않고** 1440에서의 비율(vw)로 계속 확장해, 넓은 화면에서도 히어로·스크린샷이 화면을 채운다.
 - 이미지는 `images/landing/`(로고·캐피·배지·스크린샷 15장)에서 정적 import → `next/image`.
