@@ -9,10 +9,8 @@ import logo from "@/images/landing/logo.png";
 import { SITE_URL } from "@/lib/site-url";
 
 import {
-  APP_STORE_URL,
   CONTENT,
   LANGS,
-  PLAY_STORE_URL,
   isLang,
   type Lang,
 } from "./content";
@@ -145,7 +143,7 @@ export default async function LandingPage({ params }: Props) {
           <div className={styles.badges} data-nosnippet>
             <a
               className={styles.badge}
-              href={APP_STORE_URL}
+              href={c.storeLinks.appStore}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -157,7 +155,7 @@ export default async function LandingPage({ params }: Props) {
             </a>
             <a
               className={styles.badge}
-              href={PLAY_STORE_URL}
+              href={c.storeLinks.play}
               target="_blank"
               rel="noopener noreferrer"
             >

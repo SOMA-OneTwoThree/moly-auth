@@ -33,12 +33,6 @@ import ko5 from "@/images/landing/shots/ko_5.png";
 export { DEFAULT_LANG, LANG_COOKIE, LANGS, isLang } from "@/lib/lang";
 export type { Lang } from "@/lib/lang";
 
-/** 스토어 링크는 언어 공통(단일 링크 운영). */
-export const APP_STORE_URL =
-  "https://apps.apple.com/app/apple-store/id6784125709?pt=129069274&ct=page&mt=8";
-export const PLAY_STORE_URL =
-  "https://play.google.com/store/apps/details?id=com.geniusjun.moly";
-
 type FooterLink = { label: string; href: string };
 
 export type LandingContent = {
@@ -51,6 +45,8 @@ export type LandingContent = {
   /** 검색 결과·브라우저 탭·공유 카드에서 일관되게 사용하는 소개. */
   searchMeta: { title: string; description: string };
   tagline: string;
+  /** 페이지 언어에 맞는 스토어 웹 소개로 연결한다. */
+  storeLinks: { appStore: string; play: string };
   badges: {
     appStore: StaticImageData;
     appStoreAlt: string;
@@ -85,6 +81,11 @@ export const CONTENT: Record<Lang, LandingContent> = {
         "기쁜 일도, 말 못 한 고민도, 별것 아닌 이야기도 좋아요. 카피바라 AI 친구 캐피와 대화하고, 캐피의 일기를 읽고, 감정과 작은 루틴을 기록해보세요.",
     },
     tagline: "하루의 무게를 덜어주는 느긋한 친구",
+    storeLinks: {
+      appStore:
+        "https://apps.apple.com/kr/app/id6784125709?l=ko&pt=129069274&ct=page&mt=8",
+      play: "https://play.google.com/store/apps/details?id=com.geniusjun.moly&hl=ko",
+    },
     badges: {
       appStore: appstoreKo,
       appStoreAlt: "App Store에서 다운로드하기",
@@ -122,6 +123,11 @@ export const CONTENT: Record<Lang, LandingContent> = {
         "Share your day with Cappy, your capybara AI friend. Read Cappy's journal, track your mood, and build little routines for everyday self-care.",
     },
     tagline: "An easygoing friend who makes your day feel less heavy",
+    storeLinks: {
+      appStore:
+        "https://apps.apple.com/us/app/id6784125709?l=en-US&pt=129069274&ct=page&mt=8",
+      play: "https://play.google.com/store/apps/details?id=com.geniusjun.moly&hl=en",
+    },
     badges: {
       appStore: appstoreEn,
       appStoreAlt: "Download on the App Store",
@@ -159,6 +165,11 @@ export const CONTENT: Record<Lang, LandingContent> = {
         "うれしいことも、ちょっとした悩みも。カピバラのAI友だち、キャピーに話してみませんか。キャピーの日記を読んだり、気分を記録したり。小さな習慣から、気軽にセルフケアを始めましょう。",
     },
     tagline: "日の重さを軽くしてくれる、のんびり屋の友だち",
+    storeLinks: {
+      appStore:
+        "https://apps.apple.com/jp/app/id6784125709?l=ja&pt=129069274&ct=page&mt=8",
+      play: "https://play.google.com/store/apps/details?id=com.geniusjun.moly&hl=ja",
+    },
     badges: {
       appStore: appstoreJa,
       appStoreAlt: "App Store でダウンロード",
