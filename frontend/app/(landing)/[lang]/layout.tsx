@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { DEFAULT_LANG, isLang } from "@/lib/lang";
 
 import { CONTENT } from "./content";
+import styles from "./landing.module.css";
 
 /*
  * 랜딩 전용 루트 레이아웃. `(site)` 그룹(policy/support/account-deletion)과
@@ -25,8 +26,8 @@ export default async function LandingLayout({
     : CONTENT[DEFAULT_LANG].htmlLang;
 
   return (
-    <html lang={htmlLang}>
-      <body style={{ margin: 0 }}>{children}</body>
+    <html lang={htmlLang} className={styles.root}>
+      <body className={styles.body}>{children}</body>
     </html>
   );
 }

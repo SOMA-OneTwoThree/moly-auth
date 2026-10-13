@@ -1,74 +1,167 @@
 /*
- * BeCappy 랜딩 — design/DESIGN.pen의 `Landing — *` (1440) / `Landing — * (Mobile)`
- * (390) 두 아트보드를 그대로 옮긴 스타일.
+ * BeCappy 랜딩. App Store 스크린샷(app-store-design `screens/base.css`)과 같은
+ * 크림 배경, 갈색 글자, 주황 제목, 같은 폰 프레임을 쓴다.
  *
- * 두 아트보드 사이 값은 clamp()로 390px↔1440px 구간을 선형 보간한다. 각 clamp의
- * 기울기/절편은 `min + (max-min) * (100vw-390px)/1050px`를 전개한 값이라, 디자인
- * 수치를 고칠 때는 min/max만 보고 다시 계산하면 된다.
- *
+ * 제목 서체(ko/en 여기어때 잘난체2, ja M PLUS Rounded 1c)는 page.tsx가 언어별
+ * 서브셋 하나만 @font-face로 선언한다(`npm run fonts`).
  * 전역 다크 토큰(globals.css)은 policy/support 전용이라 여기서는 쓰지 않는다.
  */
-.page {
-  --bg-room: #d5a181;
-  --navbar: #5a4032;
-  --cream: #fff9ed;
-  --ink: #353535;
-  --footer-ink: #4a3428a6;
-  --footer-ink-hover: #3a2820;
 
+/* <html>, <body> */
+.root {
+  scroll-behavior: smooth;
+  background: #faf3e4;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    scroll-behavior: auto;
+  }
+}
+
+.body {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------- 토큰 */
+.page {
+  --bg: #faf3e4;
+  --panel: #f2e7d4;
+  --surface: #fff9ed;
+  --line: #e8dcc6;
+  --ink: #4a3526;
+  --ink-2: #776052;
+  --ink-3: #806a5a;
+  --brown: #5a4032;
+  /* App Store 첫 장의 제목색(#E46E14)을 크림 배경 위 큰 글씨 대비 3:1 이상으로 조금 내렸다. */
+  --orange: #d96510;
+
+  --font-head: "Jalnan2 Landing", "M PLUS Rounded 1c Landing",
+    "Pretendard Variable", Pretendard, system-ui, sans-serif;
   --font-display: var(--font-quicksand), "Quicksand", sans-serif;
   --font-body: "Pretendard Variable", Pretendard, system-ui, -apple-system,
     "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 
-  /* 좌우 여백: 20px(390) → 64px(1440). 워드마크 최대 크기 계산에도 쓰인다. */
-  --pad-x: clamp(20px, 4.19vw + 3.66px, 64px);
-  --hero-gap: clamp(16px, 0.571vw + 13.77px, 22px);
+  --max: 1080px;
+  --pad-x: clamp(20px, 5vw, 48px);
 
   min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  background: var(--bg-room);
+  overflow-x: clip;
+  background: var(--bg);
   color: var(--ink);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .page[data-lang="ja"] {
   --font-body: "Pretendard JP Variable", "Pretendard JP", system-ui,
     -apple-system, "Hiragino Sans", "Yu Gothic", sans-serif;
+  /* 문절 단위 줄바꿈(Chrome). 지원하지 않는 브라우저는 normal로 감싼다. */
+  word-break: normal;
+  word-break: auto-phrase;
+  line-break: strict;
 }
 
-/* ---------------------------------------------------------------- 네비게이션 */
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+.page img {
+  display: block;
+  height: auto;
+}
+
+.page :focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.h2 {
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 400;
+  font-size: clamp(28px, 1.6vw + 21px, 42px);
+  line-height: 1.3;
+  color: var(--brown);
+  text-wrap: balance;
+}
+
+.page[data-lang="en"] .h2 {
+  font-size: clamp(27px, 1.4vw + 20px, 40px);
+}
+
+.page[data-lang="ja"] .h2 {
+  font-weight: 900;
+  font-size: clamp(25px, 1.4vw + 19px, 38px);
+  line-height: 1.38;
+}
+
+.center {
+  text-align: center;
+}
+
+/* ------------------------------------------------------------- 네비게이션 */
 .nav {
-  height: clamp(56px, 1.524vw + 50.06px, 72px);
-  padding: 0 clamp(18px, 4.381vw + 0.91px, 64px);
-  background: var(--navbar);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgb(250 243 228 / 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgb(74 53 38 / 0.08);
+}
+
+.navInner {
+  max-width: calc(var(--max) + 2 * var(--pad-x));
+  margin: 0 auto;
+  padding: 0 var(--pad-x);
+  height: 64px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 8px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: clamp(8px, 0.19vw + 7.26px, 10px);
+  gap: 10px;
+  margin-right: auto;
   text-decoration: none;
 }
 
 .brandIcon {
-  width: clamp(24px, 1.143vw + 19.55px, 36px);
-  height: auto;
-  border-radius: clamp(6px, 0.286vw + 4.89px, 9px);
+  width: 32px;
+  border-radius: 8px;
 }
 
 .brandName {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(17px, 0.476vw + 15.14px, 22px);
-  color: var(--cream);
-  letter-spacing: 0;
+  font-size: 21px;
+  color: var(--ink);
+}
+
+.navCta {
+  display: inline-flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: var(--brown);
+  color: var(--surface);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.navCta:hover {
+  background: #4a3426;
 }
 
 /* ------------------------------------------------------------- 언어 스위치 */
@@ -79,21 +172,22 @@
 .langPill {
   display: flex;
   align-items: center;
-  gap: 0.46em;
-  padding: 0.5em 0.9em;
-  border: 2px solid #fff9ed55;
+  gap: 0.4em;
+  height: 38px;
+  padding: 0 0.8em;
+  border: 1px solid rgb(74 53 38 / 0.16);
   border-radius: 999px;
-  background: #fff9ed22;
-  color: var(--cream);
+  background: transparent;
+  color: var(--ink);
   font-family: var(--font-body);
-  font-weight: 700;
-  font-size: clamp(13px, 0.19vw + 12.26px, 15px);
-  line-height: 1.2;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
   cursor: pointer;
 }
 
 .langPill:hover {
-  background: #fff9ed33;
+  background: var(--surface);
 }
 
 .langCurrent {
@@ -104,13 +198,14 @@
   width: 1.1em;
   height: 1.1em;
   flex: none;
+  color: var(--ink-2);
 }
 
 .langChevron {
   width: 0.95em;
   height: 0.95em;
   flex: none;
-  color: #fff9edaa;
+  color: var(--ink-3);
   transition: transform 120ms ease;
 }
 
@@ -128,93 +223,151 @@
   list-style: none;
   min-width: 100%;
   border-radius: 14px;
-  background: var(--navbar);
-  border: 2px solid #fff9ed33;
-  box-shadow: 0 12px 28px #2e211944;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 28px -12px rgb(74 53 38 / 0.35);
 }
 
 .langOption {
   display: block;
-  padding: 8px 14px;
+  padding: 9px 14px;
   border-radius: 9px;
-  color: #fff9edcc;
-  font-size: clamp(13px, 0.19vw + 12.26px, 15px);
+  color: var(--ink-2);
+  font-size: 14px;
   font-weight: 500;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .langOption:hover {
-  background: #fff9ed1f;
-  color: var(--cream);
+  background: var(--panel);
+  color: var(--ink);
 }
 
 .langOptionActive {
-  color: var(--cream);
+  color: var(--ink);
   font-weight: 700;
 }
 
-/* --------------------------------------------------------------------- 히어로 */
+/* 좁은 화면에서는 지구본과 화살표만 남긴다(현재 언어는 aria-label과 메뉴로 알 수 있다). */
+@media (max-width: 420px) {
+  .langCurrent {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------- 히어로 */
 .hero {
-  padding: clamp(104px, 6.857vw + 77.26px, 176px) var(--pad-x)
-    clamp(44px, 3.81vw + 29.14px, 84px);
-  display: flex;
-  flex-direction: column;
+  max-width: calc(var(--max) + 2 * var(--pad-x));
+  margin: 0 auto;
+  padding: clamp(40px, 6vw, 88px) var(--pad-x) clamp(56px, 7vw, 112px);
+  display: grid;
+  gap: 48px;
   align-items: center;
-  gap: var(--hero-gap);
 }
 
-/*
- * 워드마크 + 그 위에 걸터앉은 캐피. 캐피 위치는 폰트 크기 기준 em이라
- * (디자인의 desktop 215px / mobile 82px 두 값이 같은 비율) 어떤 폭에서도
- * 같은 글자 위에 얹힌다.
- */
-.wordmarkStack {
-  position: relative;
-  font-family: var(--font-display);
-  /* 80px(390) → 215px(1440). 뒤의 min()은 좌우 여백 안에 반드시 들어오게 하는 상한. */
-  font-size: min(
-    clamp(80px, 12.857vw + 29.86px, 215px),
-    calc((100vw - 2 * var(--pad-x)) / 4.4)
-  );
-  line-height: 1;
-}
-
-.wordmarkBig {
-  display: block;
-  margin: 0;
-  font-weight: 700;
-  font-size: 1em;
-  line-height: 1;
-  color: var(--ink);
-}
-
-.cappyLying {
-  position: absolute;
-  left: 2.223em;
-  top: -0.087em;
-  width: 1.071em;
-  height: auto;
-}
-
-.tagline {
-  margin: 0;
-  max-width: min(780px, 100%);
-  font-weight: 700;
-  font-size: clamp(17px, 0.857vw + 13.66px, 26px);
-  line-height: 1.5;
+.heroCopy {
   text-align: center;
-  text-wrap: balance;
-  color: var(--ink);
 }
 
+/* App Store 첫 장의 기울어진 갈색 배지와 그 위에 앉은 새. */
+.eyebrow {
+  position: relative;
+  display: inline-block;
+  margin: 44px 0 22px;
+  padding: 0.6em 1.05em;
+  border-radius: 16px;
+  background: var(--brown);
+  color: var(--surface);
+  font-family: var(--font-head);
+  font-weight: 400;
+  font-size: clamp(15px, 0.3vw + 14px, 18px);
+  line-height: 1.25;
+  rotate: -2deg;
+}
+
+.page[data-lang="ja"] .eyebrow {
+  font-weight: 900;
+}
+
+.eyebrowBird {
+  position: absolute;
+  left: -4px;
+  bottom: calc(100% - 10px);
+  width: 60px;
+  rotate: 2deg;
+}
+
+.heroTitle {
+  margin: 0;
+  font-family: var(--font-head);
+  font-weight: 400;
+  font-size: clamp(40px, 3.6vw + 18px, 68px);
+  line-height: 1.18;
+  color: var(--orange);
+}
+
+.page[data-lang="en"] .heroTitle {
+  font-size: clamp(38px, 3vw + 18px, 60px);
+}
+
+.page[data-lang="ja"] .heroTitle {
+  font-weight: 900;
+  font-size: clamp(32px, 2.8vw + 16px, 54px);
+  line-height: 1.28;
+}
+
+.heroLead {
+  margin: 20px auto 0;
+  max-width: 28em;
+  font-size: clamp(16.5px, 0.3vw + 15.5px, 19px);
+  line-height: 1.7;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+.heroBadges {
+  margin-top: 32px;
+}
+
+.heroArt {
+  width: min(70%, 280px);
+  margin: 0 auto;
+}
+
+.heroCappy {
+  width: 100%;
+}
+
+@media (min-width: 960px) {
+  .hero {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 64px;
+  }
+
+  .heroCopy {
+    text-align: left;
+  }
+
+  .heroLead {
+    margin-left: 0;
+  }
+
+  .heroCopy .heroBadges {
+    justify-content: flex-start;
+  }
+
+  .heroArt {
+    width: min(100%, 340px);
+  }
+}
+
+/* -------------------------------------------------------------- 스토어 배지 */
 .badges {
-  /* 디자인상 태그라인↔배지 간격은 hero gap + 6px 스페이서다. */
-  margin-top: calc(var(--hero-gap) + 6px);
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 .badge {
@@ -222,176 +375,304 @@
 }
 
 .badgeImage {
-  width: auto;
-  /*
-   * .pen은 전 구간 56px 고정이지만, 넓은 화면에서 배지가 눈에 띄게 작아 보여
-   * 참고 사이트(takeabook.app, 뷰포트 대비 약 6.3vw) 수준으로 같이 키운다.
-   * 모바일은 디자인값 56px를 하한으로 유지한다.
-   */
-  height: clamp(56px, 6.11vw, 104px);
+  width: auto !important;
+  height: clamp(46px, 0.6vw + 43px, 54px) !important;
 }
 
-@media (min-width: 480px) {
-  .badges {
-    flex-direction: row;
-    gap: clamp(18px, 1.53vw, 28px);
+/* -------------------------------------------------------------- 기능 섹션 */
+.feature {
+  max-width: calc(var(--max) + 2 * var(--pad-x));
+  margin: 0 auto;
+  padding: clamp(40px, 5vw, 72px) var(--pad-x);
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  scroll-margin-top: 64px;
+}
+
+.featureBody {
+  margin: 18px 0 0;
+  max-width: 30em;
+  font-size: clamp(16.5px, 0.25vw + 15.6px, 18.5px);
+  line-height: 1.75;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* 앱 화면: 색 판 위에 폰을 세우고 아래는 판 밖으로 잘라 낸다. */
+.panel {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  justify-self: center;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 32px;
+  background: var(--panel);
+  container-type: inline-size;
+}
+
+.panelPhone {
+  left: 50%;
+  top: 10cqw;
+  translate: -50% 0;
+}
+
+@media (min-width: 960px) {
+  .feature {
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+  }
+
+  .feature[data-flip] .featureText {
+    order: 2;
   }
 }
 
-/* ------------------------------------------------------------------ 스크린샷 */
-.features {
-  padding: 24px 0 25px;
+/* 폰 프레임: App Store 스크린샷의 `.phone`과 같은 비율. `--pw`는 폰 폭(부모 폭의 %). */
+.phone {
+  --pw: 54;
+  position: absolute;
+  width: calc(var(--pw) * 1cqw);
+  padding: calc(var(--pw) * 0.026cqw);
+  border-radius: calc(var(--pw) * 0.15cqw);
+  background: #241d19;
+  box-shadow: 0 0 0 1.5px #4a3f38 inset, 0 24px 48px -20px rgb(74 53 38 / 0.45);
 }
 
-.featureRow {
-  display: flex;
-  gap: 32px;
-  margin: 0;
-  padding: 0 var(--pad-x);
+.phoneScreen {
+  overflow: hidden;
+  border-radius: calc(var(--pw) * 0.126cqw);
+  background: #000;
+}
+
+.phoneImage {
+  display: block;
+  width: 100% !important;
+  height: auto;
+}
+
+/* --------------------------------------------------------------------- 후기 */
+.reviews {
+  max-width: calc(var(--max) + 2 * var(--pad-x));
+  margin: 0 auto;
+  padding: clamp(64px, 8vw, 112px) var(--pad-x) clamp(48px, 6vw, 80px);
+}
+
+.reviewsSource {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 15px;
+  color: var(--ink-3);
+}
+
+.reviewList {
+  margin: 40px 0 0;
+  padding: 0;
   list-style: none;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
+  display: grid;
+  gap: 16px;
 }
 
-.featureRow::-webkit-scrollbar {
+@media (min-width: 880px) {
+  .reviewList {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: start;
+  }
+}
+
+.review {
+  padding: 28px;
+  border-radius: 24px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.stars {
+  margin: 0 0 12px;
+  font-size: 17px;
+  letter-spacing: 2px;
+  color: #f2a51a;
+}
+
+.reviewText {
+  margin: 0;
+}
+
+.reviewText p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink);
+}
+
+.reviewName {
+  margin: 16px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-3);
+}
+
+/* ---------------------------------------------------------------------- FAQ */
+.faq {
+  max-width: calc(760px + 2 * var(--pad-x));
+  margin: 0 auto;
+  padding: clamp(48px, 6vw, 80px) var(--pad-x);
+}
+
+.faqList {
+  margin-top: 36px;
+  border-top: 1px solid var(--line);
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--line);
+}
+
+.faqQ {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 4px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.faqQ::-webkit-details-marker {
   display: none;
 }
 
-.shot {
+/* 펼침 표시: 아래쪽 화살표, 열리면 위로. */
+.faqQ::after {
+  content: "";
   flex: none;
-  /* 좁은 화면에서 폰이 너무 커 보이지 않게 화면 폭의 절반 정도로 잡는다. */
-  width: clamp(200px, 50vw, 300px);
-  scroll-snap-align: center;
-  border-radius: 22px;
-  overflow: hidden;
-  box-shadow: 0 14px 34px #2e211944;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-right: 2px solid var(--ink-3);
+  border-bottom: 2px solid var(--ink-3);
+  rotate: 45deg;
+  translate: 0 -3px;
 }
 
-.shotImage {
-  display: block;
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1000 / 2164;
-  object-fit: cover;
+.faqItem[open] .faqQ::after {
+  rotate: 225deg;
+  translate: 0 2px;
 }
 
-/* 넓은 화면에서는 5장이 한 줄에 균등 배치된다(디자인 1440 아트보드). */
-@media (min-width: 1024px) {
-  .features {
-    padding: 0 clamp(24px, 2.5vw, 64px) clamp(56px, 5.56vw, 128px);
-  }
-
-  .featureRow {
-    /* 고정 상한을 두지 않는다. 넓은 화면일수록 5장이 같이 커져 화면을 채운다. */
-    margin: 0 auto;
-    padding: 14px 0 34px;
-    gap: clamp(12px, 1.11vw, 26px);
-    justify-content: center;
-    overflow-x: visible;
-    scroll-snap-type: none;
-  }
-
-  .shot {
-    flex: 1 1 0;
-    width: auto;
-    /* 초대형 화면에서 폰이 지나치게 커지는 것만 막는다(높이 = 폭 x 2.16). */
-    max-width: 420px;
-  }
+.faqQ h3 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: var(--ink);
 }
 
-/* --------------------------------------------------------------------- 푸터 */
-.footer {
-  padding: clamp(56px, 3.81vw + 41.14px, 96px) var(--pad-x)
-    clamp(72px, 3.81vw + 57.14px, 112px);
+.faqA {
+  margin: 0;
+  padding: 0 4px 24px;
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink-2);
+}
+
+/* --------------------------------------------------------------------- CTA */
+.cta {
+  max-width: var(--max);
+  margin: clamp(32px, 4vw, 56px) var(--pad-x) 0;
+  padding: clamp(56px, 7vw, 88px) clamp(12px, 3vw, 40px);
+  border-radius: clamp(28px, 4vw, 40px);
+  background: var(--panel);
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
+  scroll-margin-top: 64px;
+}
+
+@media (min-width: 1176px) {
+  .cta {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.ctaTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(40px, 4vw + 20px, 76px);
+  line-height: 1.05;
+  color: var(--brown);
+}
+
+.ctaBody {
+  margin: 18px 0 30px;
+  font-size: clamp(16.5px, 0.3vw + 15.5px, 19px);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+/* ------------------------------------------------------------------- 푸터 */
+.footer {
+  padding: clamp(48px, 5vw, 72px) var(--pad-x) clamp(56px, 6vw, 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--ink-3);
 }
 
 .footerWordmark {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: clamp(26px, 0.571vw + 23.77px, 32px);
-  color: var(--footer-ink);
-  margin-bottom: clamp(28px, 0.762vw + 25.03px, 36px);
+  font-size: 26px;
+  color: var(--ink-2);
 }
 
 .footerLinks {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: clamp(16px, 0.571vw + 13.77px, 22px);
-  margin-top: clamp(12px, 0.19vw + 11.26px, 14px);
+  gap: 8px 22px;
+  margin-top: 18px;
 }
 
-.footerLink {
-  color: var(--footer-ink);
-  font-weight: 500;
-  font-size: clamp(14px, 0.19vw + 13.26px, 16px);
+.footerLinks a {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-2);
   text-decoration: none;
 }
 
-.footer > .footerLink {
-  font-size: clamp(15px, 0.095vw + 14.63px, 16px);
+.footerLinks a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
-.footerLink:hover {
-  color: var(--footer-ink-hover);
-}
-
-/* 사업자 정보 · 저작권 — 링크보다 한 톤 작게, 같은 잉크 계열로 가라앉힌다. */
 .footerBusiness,
 .footerCopyright {
   margin: 0;
   max-width: min(880px, 100%);
-  color: var(--footer-ink);
-  text-align: center;
   text-wrap: balance;
   line-height: 1.6;
 }
 
 .footerBusiness {
-  margin-top: clamp(24px, 0.762vw + 21.03px, 32px);
-  font-weight: 400;
-  font-size: clamp(12px, 0.19vw + 11.26px, 14px);
+  margin-top: 26px;
+  font-size: 13px;
 }
 
 .footerCopyright {
-  margin-top: clamp(10px, 0.19vw + 9.26px, 12px);
+  margin-top: 8px;
+  font-size: 13.5px;
   font-weight: 500;
-  font-size: clamp(13px, 0.19vw + 12.26px, 15px);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .langChevron {
     transition: none;
-  }
-}
-
-/*
- * 1440 아트보드보다 넓은 화면. 디자인 수치에서 바로 멈추면 화면 대비 히어로가
- * 작아 보이므로 1440에서의 비율(예: 워드마크 215/1440 = 14.931vw)로 이어서
- * 키우되, 무한정 커지지 않게 min()으로 상한을 둔다. 상한은 대략 1750~1800px
- * 부근에서 걸리고 그 이상에서는 크기가 고정된다.
- * 네비/푸터는 화면 크롬이라 확대하지 않는다.
- */
-@media (min-width: 1440px) {
-  .page {
-    --pad-x: min(4.444vw, 90px);
-    --hero-gap: min(1.528vw, 28px);
-  }
-
-  .hero {
-    padding: min(12.222vw, 220px) var(--pad-x) min(5.833vw, 105px);
-  }
-
-  .wordmarkStack {
-    font-size: min(14.931vw, 260px);
-  }
-
-  .tagline {
-    max-width: min(54.17vw, 900px);
-    font-size: min(1.806vw, 32px);
   }
 }

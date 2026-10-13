@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start -p 3001",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "fonts": "node scripts/subset-display-fonts.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",
@@ -23,6 +24,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^15.5.0",
+    "subset-font": "^2.9.0",
     "typescript": "^5"
   }
 }
