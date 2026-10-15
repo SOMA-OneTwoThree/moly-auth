@@ -10,7 +10,7 @@ import type { StaticImageData } from "next/image";
 import type { Lang } from "@/lib/lang";
 
 import birdHello from "@/images/landing/art/bird-hello.webp";
-import cappyFront from "@/images/landing/art/cappy-front.svg";
+import cappyFront from "@/images/landing/art/cappy-front.png";
 import appstoreEn from "@/images/landing/badges/appstore_en.png";
 import appstoreJa from "@/images/landing/badges/appstore_ja.png";
 import appstoreKo from "@/images/landing/badges/appstore_ko.png";
