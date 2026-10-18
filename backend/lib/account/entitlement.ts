@@ -7,6 +7,8 @@
  * 읽으므로, 기본값 하드코딩 불일치가 무해해진다(app_config이 항상 우선).
  */
 
+import { activityDateFor } from "./time";
+
 export type ProfileRow = {
   id: string;
   nickname: string | null;
@@ -17,6 +19,7 @@ export type ProfileRow = {
   review_prompted_at: string | null;
   app_trial_started_at?: string | null;
   app_trial_ends_at?: string | null;
+  created_at?: string | null;
 };
 
 export type ActiveSubscription = {
@@ -135,7 +138,8 @@ export type Entitlement = {
  * activeSub은 '유효한(active/grace_period + 미만료)' 구독만 넘어옴(없으면 null).
  */
 export function deriveEntitlement(
-  profile: Pick<ProfileRow, "trial_ends_at" | "app_trial_started_at" | "app_trial_ends_at"> & { language?: string | null },
+  profile: Pick<ProfileRow, "trial_ends_at" | "app_trial_started_at" | "app_trial_ends_at" | "created_at">
+    & { language?: string | null; timezone?: string },
   activeSub: ActiveSubscription | null,
   tokensUsed: number,
   config: TokenConfig,
@@ -190,18 +194,26 @@ export function deriveEntitlement(
     subscriberThemeUnlocked = false;
   }
 
+  // 무료라도 가입한 활동일(04:00 경계) 하루는 무료 한도 1.5배와 개인 일기를 준다.
+  const createdAt = parseLaunchDate(profile.created_at ?? null);
+  const timeZone = profile.timezone ?? "Asia/Seoul";
+  const signupDay = plan === "free" && createdAt !== null
+    && activityDateFor(createdAt, timeZone) === activityDateFor(now, timeZone);
+
   // 런칭 중엔 런칭 전용 한도(구독 한도와 독립). 값 없으면 trial 수준으로 fail-safe.
   const limit = inLaunch
     ? typeof config.free_launch_token_limit === "number"
       ? config.free_launch_token_limit
       : limitFor("trial", config.daily_token_limit)
-    : rolloutLimit(profile.language, plan);
+    : signupDay
+      ? Math.floor(rolloutLimit(profile.language, plan) * 3 / 2)
+      : rolloutLimit(profile.language, plan);
   const tokensRemaining = limit !== null ? Math.max(0, limit - tokensUsed) : null;
 
   return {
     entitlement_source: isSubscriber ? (trialEndsAt !== null ? "store_trial" : "subscription")
       : inLaunch ? "launch" : plan === "trial" ? "signup_trial" : "free",
-    personal_diary_eligible: plan !== "free",
+    personal_diary_eligible: plan !== "free" || signupDay,
     plan,
     is_subscriber: isSubscriber,
     trial_ends_at: trialEndsAt,

@@ -211,3 +211,23 @@ describe("launchConfigProblem — free_launch_until 해석 경고(판정은 그�
     expect(e.plan).toBe("free");
   });
 });
+
+describe("deriveEntitlement — 가입한 활동일", () => {
+  // 2026-10-03 10:00 KST 가입 → 가입 활동일은 10/04 04:00 KST 직전까지.
+  const createdAt = "2026-10-03T01:00:00Z";
+
+  it.each([
+    ["en", 60_000],
+    ["ko", 75_000],
+    ["ja", 90_000],
+  ])("무료 %s 사용자는 그날만 무료 한도 1.5배와 개인 일기를 받는다", (language, limit) => {
+    const profile = { trial_ends_at: null, created_at: createdAt, timezone: "Asia/Seoul", language };
+    const first = deriveEntitlement(profile, null, 0, CONFIG, new Date("2026-10-03T18:59:59.999Z"));
+    const second = deriveEntitlement(profile, null, 0, CONFIG, new Date("2026-10-03T19:00:00Z"));
+    expect(first.entitlement_source).toBe("free");
+    expect(first.daily_token_limit).toBe(limit);
+    expect(first.personal_diary_eligible).toBe(true);
+    expect(second.daily_token_limit).toBe((limit * 2) / 3);
+    expect(second.personal_diary_eligible).toBe(false);
+  });
+});
