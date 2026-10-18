@@ -23,7 +23,7 @@ import {
 const NOTIF_TYPES = ["morning_diary", "evening_chat"] as const; // 알림 2종 고정
 
 const PROFILE_COLUMNS =
-  "id, nickname, language, timezone, hay_balance, trial_ends_at, review_prompted_at, app_trial_started_at, app_trial_ends_at";
+  "id, nickname, language, timezone, hay_balance, trial_ends_at, review_prompted_at, app_trial_started_at, app_trial_ends_at, created_at";
 
 const warnedLaunchConfig = new Set<string>(); // free_launch_until 해석 경고(인스턴스당 문구별 1회)
 
