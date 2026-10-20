@@ -73,9 +73,9 @@ export function effectiveTokenConfig(
 
 // Same weighted allowance as moly-backend, selected from persisted profile language.
 const ROLLOUT_LIMITS = {
-  en: { free: 40_000, subscriber: 300_000 },
-  ko: { free: 50_000, subscriber: 400_000 },
-  ja: { free: 60_000, subscriber: 550_000 },
+  en: { free: 35_000, subscriber: 300_000 },
+  ko: { free: 40_000, subscriber: 400_000 },
+  ja: { free: 45_000, subscriber: 550_000 },
 } as const;
 
 function rolloutLimit(language: string | null | undefined, plan: string): number {
@@ -194,7 +194,7 @@ export function deriveEntitlement(
     subscriberThemeUnlocked = false;
   }
 
-  // 무료라도 가입한 활동일(04:00 경계) 하루는 무료 한도 1.5배와 개인 일기를 준다.
+  // 무료라도 가입한 활동일(04:00 경계) 하루는 무료 한도 1.25배와 개인 일기를 준다.
   const createdAt = parseLaunchDate(profile.created_at ?? null);
   const timeZone = profile.timezone ?? "Asia/Seoul";
   const signupDay = plan === "free" && createdAt !== null
@@ -206,7 +206,7 @@ export function deriveEntitlement(
       ? config.free_launch_token_limit
       : limitFor("trial", config.daily_token_limit)
     : signupDay
-      ? Math.floor(rolloutLimit(profile.language, plan) * 3 / 2)
+      ? Math.floor(rolloutLimit(profile.language, plan) * 5 / 4)
       : rolloutLimit(profile.language, plan);
   const tokensRemaining = limit !== null ? Math.max(0, limit - tokensUsed) : null;
 

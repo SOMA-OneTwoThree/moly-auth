@@ -52,7 +52,7 @@ describe("deriveEntitlement — ERD §6.1 티어 판정", () => {
     );
     expect(e.plan).toBe("free");
     expect(e.ads_removed).toBe(false);
-    expect(e.daily_token_limit).toBe(40_000);
+    expect(e.daily_token_limit).toBe(35_000);
   });
 
   it("trial_ends_at null(구 데이터) = free", () => {
@@ -129,14 +129,14 @@ describe("런칭 무료 기간 — free_launch_until 스위치", () => {
     const after = new Date("2026-10-02T00:00:00Z");
     const e = deriveEntitlement({ trial_ends_at: null }, null, 500, LAUNCH, after);
     expect(e.plan).toBe("free");
-    expect(e.daily_token_limit).toBe(40_000);
+    expect(e.daily_token_limit).toBe(35_000);
   });
 
   it("잘못된 날짜 = OFF(정상 등급, fail-safe)", () => {
     const bad = { ...LAUNCH, free_launch_until: "not-a-date" };
     const e = deriveEntitlement({ trial_ends_at: null }, null, 500, bad, NOW);
     expect(e.plan).toBe("free");
-    expect(e.daily_token_limit).toBe(40_000);
+    expect(e.daily_token_limit).toBe(35_000);
   });
 });
 
@@ -159,7 +159,7 @@ describe("subscription rollout replaces historical grants", () => {
     const expired = deriveEntitlement(profile, null, 0, live, new Date(profile.app_trial_ends_at));
     expect(expired.plan).toBe("free");
     expect(expired.ads_removed).toBe(false);
-    expect(expired.daily_token_limit).toBe(40_000);
+    expect(expired.daily_token_limit).toBe(35_000);
   });
   it("actual subscription wins and exposes actual store trial expiry", () => {
     const end = "2026-08-09T12:00:00Z";
@@ -217,17 +217,17 @@ describe("deriveEntitlement — 가입한 활동일", () => {
   const createdAt = "2026-10-03T01:00:00Z";
 
   it.each([
-    ["en", 60_000],
-    ["ko", 75_000],
-    ["ja", 90_000],
-  ])("무료 %s 사용자는 그날만 무료 한도 1.5배와 개인 일기를 받는다", (language, limit) => {
+    ["en", 43_750],
+    ["ko", 50_000],
+    ["ja", 56_250],
+  ])("무료 %s 사용자는 그날만 무료 한도 1.25배와 개인 일기를 받는다", (language, limit) => {
     const profile = { trial_ends_at: null, created_at: createdAt, timezone: "Asia/Seoul", language };
     const first = deriveEntitlement(profile, null, 0, CONFIG, new Date("2026-10-03T18:59:59.999Z"));
     const second = deriveEntitlement(profile, null, 0, CONFIG, new Date("2026-10-03T19:00:00Z"));
     expect(first.entitlement_source).toBe("free");
     expect(first.daily_token_limit).toBe(limit);
     expect(first.personal_diary_eligible).toBe(true);
-    expect(second.daily_token_limit).toBe((limit * 2) / 3);
+    expect(second.daily_token_limit).toBe((limit * 4) / 5);
     expect(second.personal_diary_eligible).toBe(false);
   });
 });
