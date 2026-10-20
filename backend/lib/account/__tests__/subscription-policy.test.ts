@@ -25,9 +25,9 @@ describe("subscription policy matches backend boundaries", () => {
     expect(deriveEntitlement(trial, null, 12_000, config, new Date(trialEnd)).entitlement_source).toBe("free");
   });
   it.each([
-    ["en", 40_000, 300_000], ["ko", 50_000, 400_000], ["ja", 60_000, 550_000],
-    ["ko-KR", 50_000, 400_000], ["ja-JP", 60_000, 550_000],
-    ["EN-us", 40_000, 300_000], [null, 40_000, 300_000], ["zh", 40_000, 300_000],
+    ["en", 35_000, 300_000], ["ko", 40_000, 400_000], ["ja", 45_000, 550_000],
+    ["ko-KR", 40_000, 400_000], ["ja-JP", 45_000, 550_000],
+    ["EN-us", 35_000, 300_000], [null, 35_000, 300_000], ["zh", 35_000, 300_000],
   ] as const)("uses persisted %s language across free, trial and paid plans", (language, free, paid) => {
     const p = { ...profile, language };
     const now = new Date(t);
@@ -46,8 +46,8 @@ describe("subscription policy matches backend boundaries", () => {
   });
   it("switching languages or losing subscription never resets usage", () => {
     const remaining = ["en", "ja", "ko", "en"].map(language =>
-      deriveEntitlement({ ...profile, language }, null, 45_000, config, new Date(t)).tokens_remaining);
-    expect(remaining).toEqual([0, 15_000, 5_000, 0]);
+      deriveEntitlement({ ...profile, language }, null, 40_000, config, new Date(t)).tokens_remaining);
+    expect(remaining).toEqual([0, 5_000, 0, 0]);
     expect(deriveEntitlement({ ...profile, language: "ja" }, { plan: "monthly" }, 70_000, config, new Date(t)).tokens_remaining).toBe(480_000);
     expect(deriveEntitlement({ ...profile, language: "ja" }, null, 70_000, config, new Date(t)).tokens_remaining).toBe(0);
   });
@@ -56,7 +56,7 @@ describe("subscription policy matches backend boundaries", () => {
     const after = deriveEntitlement(profile, null, 120_000, config, new Date(t));
     expect(before.daily_token_limit).toBe(150_000);
     expect(before.entitlement_source).toBe("launch");
-    expect(after.daily_token_limit).toBe(40_000);
+    expect(after.daily_token_limit).toBe(35_000);
     expect(after.entitlement_source).toBe("free");
     expect(after.personal_diary_eligible).toBe(false);
     expect(before.tokens_used).toBe(after.tokens_used);
@@ -65,7 +65,7 @@ describe("subscription policy matches backend boundaries", () => {
   it.each([-1, 0, 1])("cohort cutoff offset %s ms", (offset) => {
     const p = { trial_ends_at: new Date(t + 48 * 3600_000 + offset).toISOString() };
     const e = deriveEntitlement(p, null, 50_000, config, new Date(t + 3600_000));
-    expect(e.daily_token_limit).toBe(offset < 0 ? 40_000 : 300_000);
+    expect(e.daily_token_limit).toBe(offset < 0 ? 35_000 : 300_000);
   });
   it.each([-1, 0, 1])("48-hour expiry offset %s ms", (offset) => {
     const p = { trial_ends_at: new Date(t + 48 * 3600_000).toISOString() };
